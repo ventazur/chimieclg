@@ -1,0 +1,479 @@
+/* ====================================================================
+ *
+ * College Lionel-Groulx - Departement de chimie
+ *
+ * --------------------------------------------------------------------
+ *
+ * chimie.css
+ *
+ * ==================================================================== */
+
+/* --------------------------------------------------------------------
+ *
+ * general
+ *
+ * -------------------------------------------------------------------- */
+
+.space-h { height:  5px; }
+.space   { height: 10px; }
+.space-d { height: 20px; }
+.space-t { height: 30px; }
+.space-q { height: 40px; }
+.space-c { height: 50px; }
+
+.rougeclg { color: #d22630; }
+.grisfclg { color: #a9abad; }
+.grispclg { color: #dbdcdd; }
+
+.taright { text-align: right }
+.taleft  { text-align: left }
+
+.lato, .lato-l, .lato-b {
+    font-family: Lato, sans-serif;
+    font-weight: 300;
+}
+.lato-l {
+    font-weight: 100;
+}
+
+.labo-b {
+    font-weight: 400;
+}
+
+.db-error {
+    font-size: 1.2em;
+    text-align: center;
+}
+
+body {
+    background: #f8f9fa;
+	background: #000;
+    font-family: Montserrat;
+    font-weight: 300;
+	font-size: 0.9em;
+    color: #000;
+    overflow-y: scroll;
+}
+
+a {
+	color: #d22630;
+}
+
+a:hover {
+	color: #d22630;
+	font-weight: 400;
+}
+
+/* --------------------------------------------------------------------
+ *
+ * navs
+ *
+ * -------------------------------------------------------------------- */
+
+#header-nav {
+    background: #fff;
+    border-bottom: 1px solid #7986CB;
+    border-bottom: 0;
+}
+
+#header-nav li {
+    margin-right: 5px;
+	font-weight: 400;
+	font-family: Montserrat;
+	font-size: 0.95em;
+}
+
+#header-nav li .active {
+    background: inherit;
+    color: #3F51B5;
+    border-bottom: 1px solid #9FA8DA;
+	border-bottom: 3px solid #d22630;
+    font-weight: 400;
+}
+
+#header-nav li:hover {
+	background: #dbdcdd;
+    border-radius: 3px;
+}
+
+#header-nav li.nav-item.evaluations a {
+	color: #d22630;
+}
+
+#header-nav a.nav-link {
+	color: #222;
+	font-size: 1.1em;
+}
+
+/* --------------------------------------------------------------------
+ *
+ * navs > sous-menu
+ *
+ * -------------------------------------------------------------------- */
+
+#sous-menu-nav {
+	/* background: #DBDCDD; trop fonce */
+	background: #ebeced;
+	padding-top: 15px;
+	padding-bottom: 15px;
+}
+
+#sous-menu-nav .nav-item {
+	margin-right: 15px;
+}
+
+#sous-menu-nav a {
+    color: #000;
+	font-weight: 300;
+}
+
+#sous-menu-nav a:hover {
+	border-radius: 3px;
+	background: #a9abad;
+	color: #fff;
+}
+
+#sous-menu-nav a.active {
+	font-weight: 400;
+	border-bottom: 3px solid #d22630;
+}
+
+#sous-menu-nav li {
+}
+
+#sous-menu-nav li .active {
+    font-weight: 400;
+}
+
+/* --------------------------------------------------------------------
+ *
+ * page
+ *
+ * -------------------------------------------------------------------- */
+
+#home.page-contenu {
+	border-top: 1px solid #dbdcdd;
+}
+
+.page-contenu {
+    background: #fff;
+    padding-top: 30px;
+    padding-bottom: 30px;
+}
+
+.page-titre {
+    margin-bottom: 15px;
+    padding: 10px;
+	padding-left: 15px;
+	background: #d22630;
+    color: #fff;
+    /* text-align: center; */
+	font-weight: 600;
+    font-size: 1.4em;
+	border-radius: 3px;
+}
+
+.page-section {
+	color: #d22630;
+    font-size: 1.5em;
+    font-weight: 600;
+}
+
+/* --------------------------------------------------------------------
+ *
+ * home
+ *
+ * -------------------------------------------------------------------- */
+
+#home {
+    padding-top: 30px;
+    padding-bottom: 50px;
+}
+
+#home-carousel-wrap {
+	max-width: 600px;
+}
+
+#home-carousel {
+	border: 3px solid #d22630;
+}
+
+#home-contenu p {
+    font-size: 1.2em;
+}
+
+#messages-aux-etudiants {
+	margin-top: -5px;
+    margin-bottom: 30px;
+}
+
+.message-aux-etudiants {
+    background: #FFF9C4;
+	background: #FFF59D;
+    border-radius: 15px;
+    padding: 15px;
+}
+
+.message-aux-etudiants.alerte-rouge {
+	background: #d22630;
+	color: #fff;
+}
+
+.message-aux-etudiants.alerte-mauve {
+	background: #C5CAE9;
+	color: #1A237E;
+}
+
+/* --------------------------------------------------------------------
+ *
+ * cours
+ *
+ * -------------------------------------------------------------------- */
+
+#cours {
+}
+
+#cours a {
+    text-decoration: none;
+}
+
+table.cours-liste {
+    font-size: 1em;
+	background: #f8f9fa;
+	background: #fbfcfd;
+}
+
+table.cours-liste thead tr {
+	background: #a9abad;
+	color: #fff;
+}
+
+table.cours-liste thead th {
+    border: 0;
+    font-weight: 400;
+}
+
+table.cours-liste tbody tr:hover {
+	background: #ebeced;
+}
+
+
+table.cours-liste tbody td {
+    font-weight: 300;
+	font-size: 1.1em;
+}
+
+.cours-ressources .page-section {
+    font-size: 1.4em;
+    font-weight: 400;
+}
+
+.cours-ressources table {
+    font-size: 1.1em;
+}
+
+.cours-ressources .ressources-categorie {
+    background: #E8EAF6;
+	background: #e8e9ea;
+}
+
+.cours-ressources a {
+    text-decoration: none;
+}
+
+.cours-fiches {
+    width: 300px;
+	padding: 3px;
+    margin-right: 15px;
+    border: 1px solid #fff;
+}
+.cours-fiches:hover {
+    border: 1px solid #d22630;
+}
+
+.page-content p {
+    font-size: 18px;
+    line-height: 28px;
+    padding: 5px 0 5px 0;
+    text-align: justify;
+    font-weight: 300;
+}
+
+.cours-ressources-liste {
+    margin-left: 10px;
+    font-size: 0.85em;
+}
+
+.cours-ressources-liste a {
+    text-decoration: none;
+}
+
+/* --------------------------------------------------------------------
+ *
+ * enseignants & techniciennes
+ *
+ * -------------------------------------------------------------------- */
+
+#enseignants { }
+
+#techniciennes {
+    margin-top: -40px;
+}
+ 
+table.enseignants, table.techniciennes {
+    font-size: 1.1em;
+}
+
+table.enseignants thead tr, table.techniciennes thead tr {
+	background: #a9abad;
+}
+
+table.enseignants thead td, table.techniciennes thead td {
+    border: 0;
+	font-weight: 400;
+	color: #fff;
+}
+
+table.enseignants tbody tr:hover, table.techniciennes tbody tr:hover {
+    font-weight: 400;
+	background: #e9ebed;
+	cursor: default;
+}
+
+/* --------------------------------------------------------------------
+ *
+ * documents
+ *
+ * -------------------------------------------------------------------- */
+
+#documents { }
+
+#documents a {
+    text-decoration: none;
+}
+
+table.documents {
+    margin-top: -10px;
+    margin-bottom: 10px;
+    font-size: 1.1em;
+}
+
+table.documents thead tr {
+	background: #a9abad;
+}
+
+table.documents thead td {
+    border: 0;
+}
+
+table.documents tbody td {
+    border: 0;
+}
+
+/* --------------------------------------------------------------------
+ *
+ * videos
+ *
+ * -------------------------------------------------------------------- */
+
+#videos { }
+ 
+#videos .page-section {
+    padding: 10px 15px 10px 15px;
+    background: #E8EAF6;
+	background: #e8e9ea;
+    font-size: 1.3em;
+    font-weight: 400;
+	border: 1px solid #e8eaf6;
+    margin-bottom: 0;
+}
+
+#videos .videos-table {
+    border-top: 0;
+    padding: 25px;
+    margin-bottom: 25px;
+	background: #f8f9fa;
+}
+
+#videos .videos-table:last-child {
+    margin-bottom: 0;
+}
+
+video {
+    border: 1px solid #000;
+}
+
+table.videos {
+    font-size: 1em;
+}
+
+table.videos thead tr {
+    background: #E8EAF6;
+	background: #e8e9ea;
+}
+
+table.videos thead td {
+    border: 0;
+}
+
+/* --------------------------------------------------------------------
+ *
+ * decompte
+ *
+ * -------------------------------------------------------------------- */
+
+#annee {
+    color: #f8f9fa;
+    padding: 25px;
+    padding-top: 100px;
+    font-size: 4em;
+    font-family: Lato;
+    font-weight: 100;
+}
+
+#decompte-jour {
+    color: #555;
+    font-size: 0.5em;
+    font-weight: 100;
+    margin-top: 15px;
+    margin-bottom: -25px;
+}
+
+#decompte-heure {
+    color: #eee;
+    font-size: 2em;
+    font-family: "Share Tech Mono";
+    padding: 40px;
+}
+
+#decompte-temps-restant {
+    font-size: 0.9em;
+    font-family: "Share Tech Mono";
+    color: red;
+}
+
+#decompte-message {
+    font-size: 2em;
+    font-weight: 300;
+    color: red;
+}
+
+
+/* --------------------------------------------------------------------
+ *
+ * footer
+ *
+ * -------------------------------------------------------------------- */
+#footer-nav {
+    padding-top: 25px;
+    padding-bottom: 150px;
+    color: #fff;
+	font-family: Montserrat;
+	font-size: 0.9em;
+	background: inherit;
+}
+
+#footer-logo {
+	filter: invert(2) brightness(100);
+}
+
