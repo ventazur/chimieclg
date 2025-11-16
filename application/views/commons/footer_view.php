@@ -20,8 +20,11 @@
 			<br /><br />
             Outils : 
             <a href="<?= base_url() . 'horloge'; ?>" style="text-decoration: none">Horloge</a>,
-            <a href="<?= base_url() . 'codeqr'; ?>" style="text-decoration: none">CodeQR</a>
-            
+			<a href="<?= base_url() . 'codeqr'; ?>" style="text-decoration: none">CodeQR</a>
+
+			<div class="mt-2">
+				<i class="bi bi-github"></i> <a href="https://github.com/ventazur/chimieclg" target="_blank" style="font-weight: 300; text-decoration: none">GitHub</a>
+			</div>
         </div>
 
     </div>
