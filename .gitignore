@@ -1,0 +1,26 @@
+#
+# chimie .gitignore
+#
+
+*.swp       # vim swap files
+*~          # vim temp files
+
+.htaccess
+application/cache
+assets/docs
+
+# os generated files
+.DS_Store
+.DS_Store?
+Thumbs.db
+
+# packages
+*.7z
+*.dmg
+*.gz
+*.iso
+*.rar
+*.tar
+*.zip
+*.swp
+*.swo
