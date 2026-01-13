@@ -133,11 +133,10 @@ Class Cours extends MY_Controller
 						$categories = array_keys_swap($categories, 'code');
 					}
 
-					$this->data['categories'] = $categories;
-					$this->data['ressources'] = $ressources;
+					$this->data = $this->data + $this->Ressource_model->extraire_ressources_ordre($method);
 
 					//
-					// Utilisons le nouveau gabarit si la description du cours est dans la base de donnes.
+					// Utilisons le nouveau gabarit si la description du cours est dans la base de donnees.
 					//
 
                     if (array_key_exists('description', $this->data['cours']) && ! empty($this->data['cours']['description']))

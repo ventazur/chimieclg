@@ -15,40 +15,22 @@ Class Ressources extends MY_Controller
         $this->load->model('Ressource_model');
     } 
 
-	public function index()
-    {
-        $ressources = $this->Ressource_model->lister_ressources_generales();
-        $categories = $this->Ressource_model->lister_categories(array(), 1);
+	public function _remap()
+	{
+		//
+		// requete d'une categorie specifique
+		//
 
-        $categories = array_keys_swap($categories, 'code');
+		$req_cat = $this->uri->segment(2); 
 
-        // Extraire les categories utiles
+		if (empty($req_cat) || ! ctype_alnum($req_cat) || strlen($req_cat) > 25)
+		{
+			$req_cat = NULL;	
+		}
 
-        $categories_codes  = array_column($categories, 'code');
-        $categories_utiles = array();
+		$data = $this->Ressource_model->extraire_ressources_ordre($req_cat);
 
-        if ( ! empty($categories_codes))
-        {
-            foreach($categories_codes as $code)
-            {
-                foreach($ressources as $r)
-                {
-                    if ($r['category'] == $code)
-                    {
-                        $categories_utiles[] = $code;
-                        break;
-                    }
-                }
-            }
-        }
-
-        $this->data = array_merge($this->data, 
-            array(
-                'ressources' => $ressources,
-                'categories' => $categories,
-                'categories_utiles' => $categories_utiles
-            )
-        );
+		$this->data = array_merge($data, $this->data);
 
         $this->_display_view();
 	}
@@ -62,5 +44,5 @@ Class Ressources extends MY_Controller
     }
 }
 
-/* End of file documents.php */
-/* Location: ./application/controllers/documents.php */
+/* End of file ressources.php */
+/* Location: ./application/controllers/ressources.php */
