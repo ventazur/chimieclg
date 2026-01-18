@@ -35,13 +35,11 @@
 
         <?php else : ?>
 
-            <div class="space"></div>
-
-            <table class="table enseignants">
+			<table class="table enseignants mt-2">
                 <thead>
                     <tr>
-                        <td>Nom, Prénom</td>
-                        <td style="width: 120px; text-align: center">Bureau</td>
+                        <th>Nom, Prénom</th>
+                        <th style="width: 120px; text-align: center">Bureau</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -91,11 +89,11 @@
 
             <?php else : ?>
 
-            <table class="table techniciennes">
+            <table class="table techniciennes mt-2">
                 <thead>
                     <tr>
-                        <td>Nom, Prénom</td>
-                        <td style="width: 120px; text-align: center">Bureau</td>
+                        <th>Nom, Prénom</th>
+                        <th style="width: 120px; text-align: center">Bureau</th>
                     </tr>
                 </thead>
                 <tbody>
