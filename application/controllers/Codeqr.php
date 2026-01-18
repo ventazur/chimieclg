@@ -103,6 +103,18 @@ class Codeqr extends MY_Controller
 
             $options->svgDefs = '
                 <linearGradient id="gradient" x1="100%" y2="100%">
+                    <stop stop-color="#D22630" offset="0"/>
+                    <stop stop-color="#D22630" offset="0.5"/>
+                    <stop stop-color="#000000" offset="1"/>
+                </linearGradient>
+                <style><![CDATA[
+                    .dark{fill: url(#gradient);}
+                    .light{fill: #fff; }
+				]]></style>';
+
+			/*
+            $options->svgDefs = '
+                <linearGradient id="gradient" x1="100%" y2="100%">
                     <stop stop-color="#D70071" offset="0"/>
                     <stop stop-color="#9C4E97" offset="0.5"/>
                     <stop stop-color="#0035A9" offset="1"/>
@@ -110,7 +122,8 @@ class Codeqr extends MY_Controller
                 <style><![CDATA[
                     .dark{fill: url(#gradient);}
                     .light{fill: #fff; }
-                ]]></style>';
+				]]></style>';
+			 */
         }
 
         $qrcode->setOptions($options);
