@@ -156,7 +156,7 @@ $(document).ready(function()
 				},
 				plugins: {
 					legend: {
-						display: false, // Masquer la légende
+						display: false,
 					},
 					annotation: {
 						annotations: {
@@ -200,7 +200,7 @@ $(document).ready(function()
 		{
 			var lienTelechargement = document.createElement('a');
 			lienTelechargement.href = canvas.toDataURL('image/png');
-			lienTelechargement.download = 'ma_figure_' + dateheure() + '.png'; // Nom du fichier à télécharger
+			lienTelechargement.download = 'ma_figure_' + dateheure() + '.png';
 
 			lienTelechargement.click();
 	  	});
@@ -212,7 +212,7 @@ $(document).ready(function()
 		var date = new Date();
 
 		var annee = date.getFullYear();
-		var mois = (date.getMonth() + 1).toString().padStart(2, '0'); // Mois commence à 0, donc ajoutez 1
+		var mois = (date.getMonth() + 1).toString().padStart(2, '0');
 		var jour = date.getDate().toString().padStart(2, '0');
 		var heure = date.getHours().toString().padStart(2, '0');
 		var minutes = date.getMinutes().toString().padStart(2, '0');
