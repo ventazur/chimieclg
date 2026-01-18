@@ -105,7 +105,7 @@ class Codeqr extends MY_Controller
                 <linearGradient id="gradient" x1="100%" y2="100%">
                     <stop stop-color="#D22630" offset="0"/>
                     <stop stop-color="#D22630" offset="0.5"/>
-                    <stop stop-color="#000000" offset="1"/>
+                    <stop stop-color="#D22630" offset="1"/>
                 </linearGradient>
                 <style><![CDATA[
                     .dark{fill: url(#gradient);}
