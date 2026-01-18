@@ -35,7 +35,7 @@
                     <a class="nav-link <?= $this->uri->segment(1) == 'enseignants' ? 'active' : ''; ?>" href="<?= base_url() . 'enseignants'; ?>">Enseignants</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link <?= $this->uri->segment(1) == 'documents' ? 'active' : ''; ?>" href="<?= base_url() . 'documents'; ?>">Documents</a>
+                    <a class="nav-link <?= $this->uri->segment(1) == 'ressources' ? 'active' : ''; ?>" href="<?= base_url() . 'ressources'; ?>">Ressources</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link <?= $this->uri->segment(1) == 'videos' ? 'active' : ''; ?>" href="<?= base_url() . 'videos'; ?>">Vidéos</a>
