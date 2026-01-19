@@ -155,8 +155,7 @@ class Codeqr extends MY_Controller
 
 		if ($logo)
 		{
-			// $options->version = 7;
-			$options->quietzoneSize = 5;
+			$options->quietzoneSize = 3;
 			$options->addLogoSpace = TRUE;
 			$options->logoSpaceWidth = 12;
 			$options->logoSpaceHeight = 12;
