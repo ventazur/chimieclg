@@ -20,7 +20,19 @@ Class Documents extends MY_Controller
     } 
 
 	public function index()
-    {
+	{
+		//
+		// La page des documents est maintenant redirigee vers celle des ressources pour
+		// conserver la retro-compatibilite des liens.
+		//
+
+		redirect('ressources');
+		exit;	
+
+		//
+		// La version ancienne :
+		//
+
         $this->data['categories'] = $this->Document_model->lister_categories();
         $this->data['documents']  = $this->Document_model->lister_documents();
 
