@@ -98,12 +98,13 @@
 
 					if ( ! isset($ressources[$code_cat])) continue;
             ?>
-					<p class="page-section"><?= $c['nom']; ?></p>
+					<p class="page-section mt-4">
+						<?= $c['nom']; ?>
+					</p>
 
 					<? /* --- SANS sous categorie --- */ ?>
 
 					<? if (isset($ressources[$code_cat]['NOSCAT'])) : ?>
-
 						<? $data['ressources']['NOSCAT'] = $ressources[$code_cat]['NOSCAT']; ?>
 
 						<? $this->load->view($controller . '/_ressources_table', $data); ?>
