@@ -33,7 +33,7 @@
 
 			<?php endforeach; ?>
 
-            <p class="page-section">Sciences de la nature</p>
+            <p class="page-section mt-4 mb-1">Sciences de la nature</p>
 
             <?php $this->load->view($controller . '/_cours_liste_table', $data); ?>
 
@@ -44,7 +44,7 @@
              *
              * -------------------------------------------------------- */ ?> 
 
-            <p class="page-section">Sciences, lettres et arts</p>
+            <p class="page-section mt-4 mb-1">Sciences, lettres et arts</p>
 
             <?php $data['cours'] = ['701', 'je1']; ?>
 
@@ -57,7 +57,7 @@
              *
              * -------------------------------------------------------- */ ?> 
 
-            <p class="page-section">Technique de santé animale</p>
+            <p class="page-section mt-4 mb-1">Technique de santé animale</p>
 
             <?php $data['cours'] = ['sj1', 'sj2']; ?>
 
@@ -70,7 +70,7 @@
              *
              * -------------------------------------------------------- */ ?> 
 
-            <p class="page-section">
+            <p class="page-section mt-4 mb-1">
                 Soins infirmiers
             </p>
 
@@ -85,7 +85,7 @@
              *
              * -------------------------------------------------------- */ ?> 
 
-            <p class="page-section">Autres programmes</p>
+            <p class="page-section mt-4 mb-1">Autres programmes</p>
             
             <?php $data['cours'] = ['001', 'z20', 'va0', 'r56', 'sf1']; ?>
             
