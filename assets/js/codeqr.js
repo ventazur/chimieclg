@@ -9,17 +9,26 @@ $(document).ready(function()
     {
         var qrdata = $('#codeqr-data').val();
 
+		$('#generer-erreur').addClass('d-none');
+
         if (qrdata.length > 0)
         {
             $.post(base_url + 'codeqr/generer', { ci_csrf_token: cct, qrdata: qrdata },
             function(data)
             {   
-                $('#codeqr1-img').attr('src', data['qr_img1']);
-                $('#codeqr2-img').attr('src', data['qr_img2']);
-                $('#codeqr3-img').attr('src', data['qr_img3']);
-                $('#codeqr4-img').attr('src', data['qr_img4']);
+				if (data == false)
+				{
+					$('#generer-erreur').removeClass('d-none')
+				}
+				else
+				{
+					$('#codeqr1-img').attr('src', data['qr_img1']);
+					$('#codeqr2-img').attr('src', data['qr_img2']);
+					$('#codeqr3-img').attr('src', data['qr_img3']);
+					$('#codeqr4-img').attr('src', data['qr_img4']);
 
-                $('#codeqr').removeClass('d-none');
+					$('#codeqr').removeClass('d-none');
+				}
 
             }, 'json');
         }

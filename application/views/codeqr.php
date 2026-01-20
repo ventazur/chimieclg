@@ -69,7 +69,7 @@
 
 		<div style="font-size: 2em;">
 			<a href="<?= base_url(); ?>" style="text-decoration: none">
-				<img style="max-height: 36px; vertical-align: text-bottom;" src="<?= base_url() . 'assets/img/logoCLG_i.png'; ?>" />
+				<img style="max-width: 20px; vertical-align: text-bottom;" src="<?= base_url() . 'assets/img/logoCLG_i.png'; ?>" />
 			</a>
 			<span style="margin-left: 10px; font-weight: 400">CODE QR</span>
 		</div>
@@ -87,6 +87,11 @@
 				<div id="codeqr-generer" class="btn btn-outline-primary">Générer code QR</div>
 			</div>
 
+			<div id="generer-erreur" class="d-none mt-3" style="color: #d22630; font-weight: 400; text-align: center; padding: 8px; border: 1px solid #d22630; border-radius: 5px;">
+				<i class="bi bi-exclamation-circle" style="margin-right: 5px"></i>
+				URL trop long
+			</div>
+
         </div> <!-- #codeqr-form -->
 
 		<div class="mt-4 mb-2">
@@ -97,7 +102,7 @@
 			<button type="button" id="codeqr1-choix" class="codeqr-choix btn btn-primary">PNG logo</button>
 		 	<button type="button" id="codeqr2-choix" class="codeqr-choix btn btn-outline-primary">PNG</button>
 		  	<button type="button" id="codeqr3-choix" class="codeqr-choix btn btn-outline-primary">SVG</button>
-			<button type="button" id="codeqr4-choix" class="codeqr-choix btn btn-outline-primary">SVG couleurs</button>
+			<button type="button" id="codeqr4-choix" class="codeqr-choix btn btn-outline-primary">SVG rouge</button>
 		</div>
 
 	</div>
