@@ -158,7 +158,7 @@ class Codeqr extends MY_Controller
 			$options->quietzoneSize = 3;
 			$options->addLogoSpace = TRUE;
 			$options->logoSpaceWidth = 12;
-			$options->logoSpaceHeight = 12;
+			$options->logoSpaceHeight = 10;
 		}
 
 		$qrcode = new \chillerlan\QRCode\QRCode($options);
