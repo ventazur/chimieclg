@@ -21,10 +21,23 @@ class MY_Controller extends CI_Controller
 	    $this->logged_in = FALSE;
 
 		//
+		// CF Turnstile
+		//
+
+		if ( ! isset($_SESSION['est_humain']) || $_SESSION['est_humain'] !== TRUE)
+		{
+			$_SESSION['turnstile_redirect'] = current_url();
+
+			redirect('bot/challenge');
+			exit;
+		}
+
+		//
 		// Enregistrer l'activite du site
 		//
 
-		if ( ! $this->input->is_ajax_request()) {
+		if ( ! $this->input->is_ajax_request()) 
+		{
 			$this->Usager_model->log_activity();
 		}
     }
