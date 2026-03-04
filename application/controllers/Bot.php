@@ -29,7 +29,7 @@ class Bot extends CI_Controller
     // Cloudflare Turnstile - Verify
     //
     // ------------------------------------------------------------------------
-	public function verify_turnstile($encrypted_uri = NULL)
+	public function verify_turnstile()
 	{
 		$token  = $this->input->post('cf-turnstile-response');
 
