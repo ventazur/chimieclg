@@ -34,8 +34,9 @@
 
 			<div style="margin-auto: margin-top: 50px; text-align: center" 
 				 class="cf-turnstile" 
-				 data-sitekey="1x00000000000000000000AA"
-				 data-theme="light">
+				 data-sitekey="<?= $this->config->item('cf_turnstile_dev')['site_key_pass_v']; ?>"
+				 data-callback="onTurnstileSuccess"
+				 data-theme="auto">
 			</div>
 
 		<? else : ?>

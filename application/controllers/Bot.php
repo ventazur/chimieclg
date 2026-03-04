@@ -32,7 +32,15 @@ class Bot extends CI_Controller
 	public function verify_turnstile($encrypted_uri = NULL)
 	{
 		$token  = $this->input->post('cf-turnstile-response');
-		$secret = $this->config->item('cf_turnstile')['secret_key'];
+
+		if ($this->config->item('is_DEV'))
+		{
+			$secret = $this->config->item('cf_turnstile_dev')['secret_key'];
+		}
+		else
+		{
+			$secret = $this->config->item('cf_turnstile')['secret_key'];
+		}
 
 		$response = file_get_contents($this->config->item('cf_turnstile')['verify_url'], false, stream_context_create([
 			"http" => [
