@@ -131,8 +131,8 @@
 
             <div class="col-12 mb-5">
 
-				<h5 class="mb-3">
-					Paramètres
+                <h5 class="mb-3">
+                    Entrez vos valeurs :
 				</h5>
 
 				<form id="form-diagramme" style="border: 1px solid #ccc; border-radius: 3px; padding: 20px; background: #f8f9fa;">
@@ -154,7 +154,7 @@
 						</div>
 						<div class="form-group col-md-4">
 							<label for="unites">Unités</label>
-							<input type="text" class="form-control" id="unites" value="mL">
+							<input type="text" class="form-control" id="unites" value="">
 						</div>
 
 
