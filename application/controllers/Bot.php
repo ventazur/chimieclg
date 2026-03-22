@@ -12,6 +12,10 @@ class Bot extends CI_Controller
 	public function __construct()
 	{
 		parent::__construct();
+
+		$this->encryption->initialize(
+			$this->config->item('encryption_settings')
+		);
 	}
 
     // ------------------------------------------------------------------------
@@ -62,7 +66,29 @@ class Bot extends CI_Controller
 			// succes
 			//
 
+			$this->est_humain = TRUE;
 			$_SESSION['est_humain'] = TRUE;
+
+			//
+			// set cookie 'est_humain'
+			//
+
+			$cookie_data = [
+				'version'    => 1,
+				'expiration' => date('U') + 30*24*60*60
+			];
+
+			$cookie = [
+				'name' 	 => 'est_humain',
+				'value'  => $this->encryption->encrypt(json_encode($cookie_data)),
+				'expire' => 30*24*60*60
+			];
+
+			set_cookie($cookie);
+
+			//
+			// redirection
+			//
 
 			if (isset($_SESSION['turnstile_redirect']) && ! empty($_SESSION['turnstile_redirect']))
 			{

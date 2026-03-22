@@ -9,8 +9,12 @@ class MY_Controller extends CI_Controller
         //
         // Init
         //
+		
+		$this->encryption->initialize(
+			$this->config->item('encryption_settings')
+		);
 
-        $this->data['controller'] = ($this->uri->segment(1) ? $this->uri->segment(1) : 'home');
+		$this->data['controller'] = ($this->uri->segment(1) ? $this->uri->segment(1) : 'home');
 
 		$this->is_DEV = $this->config->item('is_DEV');
 
@@ -23,8 +27,38 @@ class MY_Controller extends CI_Controller
 		//
 		// CF Turnstile
 		//
+	
+		$this->est_humain = FALSE;
 
-		if ( ! isset($_SESSION['est_humain']) || $_SESSION['est_humain'] !== TRUE)
+		// Verifier par le cookie
+		// Le cookie sert a minimiser les demandes de verification de Turnstile par rapport a la session.
+
+		if ($this->input->cookie('est_humain'))
+		{
+			$cookie_data_enc = $this->input->cookie('est_humain');
+			$cookie_data = $this->encryption->decrypt($cookie_data_enc);
+			$cookie_data_arr = json_decode($cookie_data, TRUE);
+
+			if ($cookie_data_arr['version'] == 1 && $cookie_data_arr['expiration'] > date('U'))
+			{
+				$this->est_humain = TRUE;
+			}
+			else
+			{
+				delete_cookie('est_humain');
+			}
+		}
+
+		// Verifier par la session
+
+		if ( ! $this->est_humain && isset($_SESSION['est_humain']) && $_SESSION['est_humain'] == TRUE)
+		{
+			$this->est_humain = TRUE;
+		}
+
+		// Redirection si necessaire
+
+		if ( ! $this->est_humain)
 		{
 			$_SESSION['turnstile_redirect'] = current_url();
 
