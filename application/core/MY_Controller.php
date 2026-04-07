@@ -28,26 +28,7 @@ class MY_Controller extends CI_Controller
 		// CF Turnstile
 		//
 	
-		$this->est_humain = FALSE;
-
-		// Verifier par le cookie
-		// Le cookie sert a minimiser les demandes de verification de Turnstile par rapport a la session.
-
-		if ($this->input->cookie('est_humain'))
-		{
-			$cookie_data_enc = $this->input->cookie('est_humain');
-			$cookie_data = $this->encryption->decrypt($cookie_data_enc);
-			$cookie_data_arr = json_decode($cookie_data, TRUE);
-
-			if ($cookie_data_arr['version'] == 1 && $cookie_data_arr['expiration'] > date('U'))
-			{
-				$this->est_humain = TRUE;
-			}
-			else
-			{
-				delete_cookie('est_humain');
-			}
-		}
+		$this->est_humain = $this->Usager_model->verifier_ip_autorise();
 
 		// Verifier par la session
 

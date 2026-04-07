@@ -35,7 +35,7 @@ class Bot extends CI_Controller
     // ------------------------------------------------------------------------
 	public function verify_turnstile()
 	{
-		$token  = $this->input->post('cf-turnstile-response');
+		$token = $this->input->post('cf-turnstile-response');
 
 		if ($this->config->item('is_DEV'))
 		{
@@ -70,21 +70,10 @@ class Bot extends CI_Controller
 			$_SESSION['est_humain'] = TRUE;
 
 			//
-			// set cookie 'est_humain'
+			// Enregister l'ip comme autorisee
 			//
 
-			$cookie_data = [
-				'version'    => 1,
-				'expiration' => date('U') + 30*24*60*60
-			];
-
-			$cookie = [
-				'name' 	 => 'est_humain',
-				'value'  => $this->encryption->encrypt(json_encode($cookie_data)),
-				'expire' => 30*24*60*60
-			];
-
-			set_cookie($cookie);
+			$this->Usager_model->ajouter_ip_autorise();	
 
 			//
 			// redirection
