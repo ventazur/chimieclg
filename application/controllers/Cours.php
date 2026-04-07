@@ -70,7 +70,8 @@ Class Cours extends MY_Controller
             switch($method) 
             {
                 case 'index' :
-                    $this->data['ressources_cours'] = $this->Ressource_model->lister_ressources_cours();
+					// DESUET 2026-04
+					// $this->data['ressources_cours'] = $this->Ressource_model->lister_ressources_cours();
                     $this->_display_view('list');
                     break;
 
@@ -81,7 +82,6 @@ Class Cours extends MY_Controller
 				case 'choix' :
 					// version 1, page_max = 17
 					// version 2, page_max = 14 (H2024)
-
 					$this->data['choix_version']  = 2; 
                     $this->data['choix_page_max'] = 14;
                     $this->data['choix_page']     = $this->uri->segment(3) ?? 'page1';
@@ -113,6 +113,8 @@ Class Cours extends MY_Controller
 				default :
                     $this->data['cours'] = $this->data['cours_disponibles'][$method];
 
+					// DESUET 2026-04
+					/*
 					$ressources = $this->Ressource_model->lister_ressources($method);
 					$categories = array();
 
@@ -132,6 +134,7 @@ Class Cours extends MY_Controller
 						$categories = $this->Ressource_model->lister_categories($categories); 
 						$categories = array_keys_swap($categories, 'code');
 					}
+					*/
 
 					$this->data = $this->data + $this->Ressource_model->extraire_ressources_ordre($method);
 
