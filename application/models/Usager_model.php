@@ -72,9 +72,9 @@ class Usager_model extends CI_Model
 		$ip_client = $this->input->ip_address();
 
 		$data = array(
-			'adresse_ip'     => $ip_client,
-			'date'           => date_humanize(date('U'), TRUE),
-			'epoch'          => date('U')
+			'adresse_ip' => $ip_client,
+			'date'       => date_humanize(date('U'), TRUE),
+			'epoch'      => date('U')
 		);
 
 		$ip_safe = $this->db->escape($ip_client);

@@ -70,7 +70,7 @@ class Bot extends CI_Controller
 			$_SESSION['est_humain'] = TRUE;
 
 			//
-			// Enregister l'ip comme autorisee
+			// enregister l'ip comme autorisee
 			//
 
 			$this->Usager_model->ajouter_ip_autorise();	

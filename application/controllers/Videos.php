@@ -15,16 +15,11 @@ Class Videos extends MY_Controller
 
 	public function index()
     {
-        $this->_display_view();
-	}
-
-    public function _display_view($page = '')
-    {
         $this->load->view('commons/header_view', $this->data);
         $this->load->view('commons/nav_view', $this->data);
         $this->load->view('videos/videos_view', $this->data);
         $this->load->view('commons/footer_view');
-    }
+	}
 }
 
 /* End of file videos.php */

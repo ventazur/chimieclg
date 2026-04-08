@@ -80,5 +80,5 @@ class Horloge extends MY_Controller
     }
 }
 
-/* End of file home.php */
-/* Location: ./application/controllers/home.php */
+/* End of file horloge.php */
+/* Location: ./application/controllers/horloge.php */

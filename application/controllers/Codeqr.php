@@ -16,14 +16,6 @@ class Codeqr extends MY_Controller
 	public function __construct()
 	{
 		parent::__construct();
-
-		/*
-		if (strpos($this->config->item('domain'), 'chimieclg.ca') === FALSE)
-		{
-			redirect(base_url());
-			exit;
-		}
-		*/
 	}
 
 	/* -------------------------------------------------------------------
@@ -111,19 +103,6 @@ class Codeqr extends MY_Controller
                     .dark{fill: url(#gradient);}
                     .light{fill: #fff; }
 				]]></style>';
-
-			/*
-            $options->svgDefs = '
-                <linearGradient id="gradient" x1="100%" y2="100%">
-                    <stop stop-color="#D70071" offset="0"/>
-                    <stop stop-color="#9C4E97" offset="0.5"/>
-                    <stop stop-color="#0035A9" offset="1"/>
-                </linearGradient>
-                <style><![CDATA[
-                    .dark{fill: url(#gradient);}
-                    .light{fill: #fff; }
-				]]></style>';
-			 */
         }
 
         $qrcode->setOptions($options);
