@@ -4,320 +4,169 @@
  *
  * --------------------------------------------------------------------
  *
- * v2: avec effet "morph" sur HH:MM:SS)
+ * v2	avec effet "morph" sur HH:MM:SS)
+ * v2.1	ameliorer la robustesse et la rapidite
  *
  * ==================================================================== */
 
-$(document).ready(function ()
+$(document).ready(function () 
 {
-	const regex = /:/i;
-	const regex2 = / /i;
+	const regex = /:/g;
 
-    let pingInterval = 30e3;
-    let secondeInterval = 1e3;
-
-	let police_defaut = 'Rubik';
-	let police_defaut_width = '0.65em';
-
-	//
-	// Ajuster l'heure limite selon la preference actuelle
-	//
-
-    if (docCookies.hasItem('heure_limite')) 
-	{
-        var heure_limite = docCookies.getItem('heure_limite');
-		var heure_limite_safe = heure_limite.replace(regex, 'h');
-
-		$('#parametres-heure').val(heure_limite);
-        $('#horloge-heure-fin-exact').html(heure_limite_safe);
-    } 
-	else 
-	{
-		var heure_limite = '18:00';
-		var heure_limite_safe = '18h00';
-
-		$('#parametres-heure').val(heure_limite);
-        $('#horloge-heure-fin-exact').html(heure_limite_safe);
-    }
-
-	//
-	// Ajuster la police selon la preference actuelle
-	//
-
-	if (docCookies.getItem('police_actuelle') != null)
-	{
-		var police_actuelle = docCookies.getItem('police_actuelle');
-		var police_actuelle_id = police_actuelle.replace(regex, '-');
-
-		$('#horloge-heure').css('font-family', police_actuelle);
-
-		$('#select-police').val(police_actuelle);
-	}
-	else
-	{
-		var police_actuelle = police_defaut;
-		$('#horloge-heure').css('font-family', police_actuelle);
-	}
-
-    //
-    // Fonctions pour l’horloge “morph” (roulement des chiffres)
-    //
-
-    // Construire l’affichage HH:MM:SS avec 6 chiffres + 2 colonnes, en partant d’une valeur initiale
+	// Configuration
 	
-    function buildClock($el, initialStr) 
-	{
-        $el.addClass('morph');
-        const parts = ['h1', 'h2', 'colon', 'm1', 'm2', 'colon', 's1', 's2'];
-        const nodes = [];
+	const CONFIG = {
+		pingInterval: 30000,
+		secondeInterval: 1000,
+		policeDefaut: 'Rubik',
+		cookieExpire: 60 * 60 * 6 // 6 heures
+	};
 
-        for (const p of parts) 
-		{
-            if (p === 'colon') {
-                nodes.push($('<div class="colon">:</div>'));
-            } 
-			else 
-			{
-                const $d = $('<div class="digit"><div class="stack"></div></div>');
-                const $stack = $d.find('.stack');
-                for (let i = 0; i <= 9; i++) $stack.append($('<span>').text(i));
-                nodes.push($d);
+	// Initialisation
+
+	let heureLimite = docCookies.getItem('heure_limite') || '18:00';
+	let policeActuelle = docCookies.getItem('police_actuelle') || CONFIG.policeDefaut;
+
+	// Mise à jour de l'interface initiale
+	$('#parametres-heure').val(heureLimite);
+	$('#horloge-heure-fin-exact').text(heureLimite.replace(':', 'h'));
+	$('#horloge-heure').css('font-family', policeActuelle);
+	$('#select-police').val(policeActuelle);
+
+	// Morph
+
+	function buildClock($el, initialStr) 
+	{
+		$el.addClass('morph');
+		const parts = ['h1', 'h2', 'colon', 'm1', 'm2', 'colon', 's1', 's2'];
+		const $fragment = $(document.createDocumentFragment());
+
+		parts.forEach(p => {
+			if (p === 'colon') {
+				$fragment.append($('<div class="colon">:</div>'));
+			} else {
+				const $d = $('<div class="digit"><div class="stack"></div></div>');
+				const $stack = $d.find('.stack');
+				for (let i = 0; i <= 9; i++) $stack.append($('<span>').text(i));
+				$fragment.append($d);
 			}
-        }
+		});
 
-        $el.empty().append(nodes);
+		$el.empty().append($fragment);
+		if (initialStr) setClock(initialStr);
+	}
 
-        // Positionner selon l’heure initiale
-        if (typeof initialStr === 'string') {
-            setClock(initialStr);
-        }
-    }
-
-    // Faire rouler un chiffre vers la valeur souhaitee (0..9)
-	
-    function setDigit($digit, value) 
+	function setClock(timeStr) 
 	{
-        const h = $digit.height(); // hauteur d’un chiffre en px
-        $digit.find('.stack').css('transform', 'translateY(' + (-value * h) + 'px)');
-    }
+		const digits = timeStr.replace(regex, '').split('').map(Number);
+		const $digits = $('#horloge-heure .digit');
 
-    // Appliquer "HH:MM:SS" à l’affichage roulant
-	
-    function setClock(timeStr) 
+		$digits.each(function(i) {
+			const $digit = $(this);
+			const val = digits[i];
+			const h = $digit.height(); 
+			// On utilise translate3d pour forcer l'acceleration matérielle (GPU)
+			$(this).find('.stack').css('transform', `translate3d(0, ${-(val * h)}px, 0)`);
+		});
+	}
+
+	// Calcul de la duree
+
+	function calculerDureeRestante() 
 	{
-        // "12:34:56" -> [1,2,3,4,5,6]
-        const digits = timeStr.replace(/:/g, '').split('').map(d => parseInt(d, 10));
-        const $digits = $('#horloge-heure .digit');
+		// Formatage ISO robuste pour la date du jour
+		const ajdStr = new Date().toISOString().split('T')[0];
+		const limiteEpoch = Date.parse(`${ajdStr}T${heureLimite}:00`) / 1000;
+		let maintenantEpoch = Number($('#maintenant-epoch').text());
 
-        for (let i = 0; i < digits.length; i++) {
-            setDigit($digits.eq(i), digits[i]);
-        }
+		let diff = limiteEpoch - maintenantEpoch;
 
-        // Clignotement des “:”
-        // $('#horloge-heure .colon').toggleClass('off');
-    }
+		// Si l'heure est passée, on ne descend pas sous 0
+		let minutes = Math.max(0, Math.ceil(diff / 60));
 
-    //
-    // Ce jour-ci
-    //
+		$('#horloge-temps-minutes').text(minutes);
+		$('#horloge-temps-minutes-pluriel').text(minutes > 1 ? 's' : '');
+	}
 
-    let ajd = new Date();
-    let ajd_str;
-
-    let ajd_y = ajd.getFullYear();
-    let ajd_mo = ajd.getMonth();
-    let ajd_d = ajd.getDate();
-
-    // La numerotation commence à 0, donc 0 = janvier.
-
-    ajd_mo = ajd_mo + 1;
-
-    if (ajd_mo < 10) {
-        ajd_mo = '0' + ajd_mo;
-    }
-
-    if (ajd_d < 10) {
-        ajd_d = '0' + ajd_d;
-    }
-
-    ajd_str = ajd_y + '-' + ajd_mo + '-' + ajd_d;
-
-    //
-    // Construire l’horloge morph avec la valeur initiale
-    //
-
-    buildClock($('#horloge-heure'), $('#horloge-heure').text().trim());
-
-    //
-    // Déterminer la durée (temps) restante.
-    //
-
-    function Duree() 
+	function rafraichirTemps() 
 	{
-        let heure_limite_epoch = Date.parse(ajd_str + 'T' + heure_limite + ':00') / 1000;
+		const maintenantEpoch = Number($('#maintenant-epoch').text());
+		const d = new Date(maintenantEpoch * 1000);
 
-        let temps_maintenant = Number($('#maintenant-epoch').html());
+		// Formatage rapide HH:MM:SS
+		const timeStr = d.toTimeString().split(' ')[0];
 
-        let temps_diff = heure_limite_epoch - temps_maintenant;
+		setClock(timeStr);
+		$('#maintenant-epoch').text(maintenantEpoch + 1);
 
-        temps_diff = temps_diff + 60;
+		calculerDureeRestante();
+		setTimeout(rafraichirTemps, CONFIG.secondeInterval);
+	}
 
-        if (temps_diff <= 0) 
+	function pingServeur() 
+	{
+		$.post(`${base_url}horloge/ping`, { ci_csrf_token: cct }, 
+		function (data)
 		{
-            if (heure_limite == '00:00') 
+			if (data?.epoch) 
 			{
-                heure_limite_epoch = Date.parse(ajd_str + ' ' + '23:59:59') / 1000;
-                heure_limite_epoch = heure_limite_epoch + 1;
+				// On ajoute +1 pour compenser la latence réseau moyenne
+				$('#maintenant-epoch').text(Number(data.epoch) + 1);
+			}
+		}, 'json').always(() => {
+			setTimeout(pingServeur, CONFIG.pingInterval);
+		});
+	}
 
-                temps_diff = heure_limite_epoch - temps_maintenant;
-                temps_diff = temps_diff + 60;
-            } 
-			else 
-			{
-                $('#horloge-temps-minutes').html(0);
-                $('#horloge-temps-minutes-pluriel').html('');
+	// Evenements
 
-                return;
-            }
-        }
+	$('#parametres').on('click', () => $('#horloge-modal').modal('show'));
 
-        // Enlever les secondes, conserver les minutes
-        let minutes = Math.floor(temps_diff / 60);
-
-        minutes = Math.round(minutes);
-
-        $('#horloge-temps-minutes').html(minutes);
-
-        if (minutes > 1) 
-		{
-            $('#horloge-temps-minutes-pluriel').html('s');
-        } 
-		else 
-		{
-            $('#horloge-temps-minutes-pluriel').html('');
-        }
-    }
-
-    Duree();
-
-    //
-    // Modal
-    //
-
-    $('#parametres').click(function () 
+	$('#select-police').on('change', function() 
 	{
-		var heure_limite_actuelle = docCookies.getItem('heure_limite');		
-
-        if (heure_limite_actuelle == null)
-		{
-			$('#parametres-heure').val('18:00');
-		}
-		else
-		{
-			$('#paremetres-heure').val(heure_limite_actuelle);
-		}
-
-        $('#horloge-modal').modal('show');
-    });
-
-    $('.modal .close').click(function () {
-        $('#horloge-modal').modal('hide')
-    });
-
-	$('#select-police').change(function()
-	{
-		var police = $(this).val();
-
+		const police = $(this).val();
 		$('#horloge-heure').css('font-family', police);
-
-		docCookies.setItem('police_actuelle', police, 60 * 60 * 6);
+		docCookies.setItem('police_actuelle', police, CONFIG.cookieExpire);
 	});
 
-    $('#parametres-sauvegarder').click(function () 
+	$('#parametres-sauvegarder').on('click', function () 
 	{
-		heure_limite_actuelle = docCookies.getItem('heure_limite');
-        heure_limite_parametres = $('#parametres-heure').val();
-
-		if (heure_limite_parametres == null || heure_limite_parametres == '')
-		{
-			$('#horloge-modal').modal('hide');
-			return;
+		const nouvelleHeure = $('#parametres-heure').val();
+		if (nouvelleHeure) {
+			heureLimite = nouvelleHeure;
+			$('#horloge-heure-fin-exact').text(heureLimite.replace(':', 'h'));
+			docCookies.setItem('heure_limite', heureLimite, CONFIG.cookieExpire);
+			calculerDureeRestante();
 		}
-
-		heure_limite = heure_limite_parametres;
-		heure_limite_safe = heure_limite.replace(regex, 'h');
-
-		$('#horloge-heure-fin-exact').html(heure_limite_safe);
-
-		docCookies.setItem('heure_limite', heure_limite, 60 * 60 * 6);
-
-		Duree();
-
 		$('#horloge-modal').modal('hide');
-    });
+	});
 
-    //
-    // Rafraichir l’horloge à chaque seconde, puis verifier la duree
-    //
+	// Plein ecran
 
-    function rafraichirTemps() 
-	{
-        let temps_maintenant = Number($('#maintenant-epoch').html());
+	$('#fullscreen-btn').on('click', function() {
+		if (!document.fullscreenElement) {
+			// On demande le plein écran sur le document entier
+			document.documentElement.requestFullscreen().catch(err => {
+				console.error(`Erreur lors du passage en plein écran: ${err.message}`);
+			});
+		} else {
+			// On quitte le plein écran
+			document.exitFullscreen();
+		}
+	});
 
-        let temps_maintenant_nouv = new Date(temps_maintenant * 1e3);
+	// Optionnel : Changer l'icône ou le style si on change d'état via la touche Echap
+	document.addEventListener('fullscreenchange', () => {
+		if (document.fullscreenElement) {
+			$('#fullscreen-btn').addClass('is-active').css('opacity', '0.2');
+		} else {
+			$('#fullscreen-btn').removeClass('is-active').css('opacity', '1');
+		}
+	});
 
-        let h = temps_maintenant_nouv.getHours();
-        let m = temps_maintenant_nouv.getMinutes();
-        let s = temps_maintenant_nouv.getSeconds();
+	// Lancement
 
-        if (h < 10) {
-            h = '0' + h;
-        }
-
-        if (m < 10) {
-            m = '0' + m;
-        }
-
-        if (s < 10) {
-            s = '0' + s;
-        }
-
-        let server_time_str = h + ':' + m + ':' + s;
-
-        setClock(server_time_str);
-
-        $('#maintenant-epoch').html(temps_maintenant + 1);
-
-        Duree();
-
-        tempsHandler = setTimeout(rafraichirTemps, secondeInterval);
-    }
-
-    rafraichirTemps();
-
-    //
-    // Synchroniser l'heure avec celle du serveur à un intervalle precis
-    //
-
-    function pingHorloge() 
-	{
-        $.post(base_url + 'horloge/ping', { ci_csrf_token: cct },
-            function (data) 
-			{
-                if (typeof data == 'object' && 'heure' in data) {
-                    setClock(data['heure']);
-                }
-
-                if (typeof data == 'object' && 'epoch' in data) {
-                    let temps_maintenant = Number(data['epoch']) + 1; // Il y a une seconde de retard.
-                    $('#maintenant-epoch').html(temps_maintenant);
-                }
-
-            }, 'json');
-
-        pingHandler = setTimeout(pingHorloge, pingInterval);
-    }
-
-    pingHorloge();
-
+	buildClock($('#horloge-heure'), $('#horloge-heure').text().trim());
+	rafraichirTemps();
+	pingServeur();
 });

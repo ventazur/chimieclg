@@ -38,13 +38,17 @@ class Horloge extends MY_Controller
     }
 
     public function ping()
-    {
-        echo json_encode(
-            array(
-                'epoch' => date('U'),
-                'heure' => date('H:i:s')
-            )
-        );
+	{
+		return $this->output
+            ->set_content_type('application/json')
+			->set_output(json_encode(['epoch' => date('U'), 'heure' => date('H:i:s')]));
+
+        // echo json_encode(
+        //     array(
+        //         'epoch' => date('U'),
+        //         'heure' => date('H:i:s')
+        //     )
+        // );
     }
 
 	/* ---------------------------------------------------------------------------

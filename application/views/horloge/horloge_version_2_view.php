@@ -1,227 +1,208 @@
-<!doctype html>
 
 <?
 /* --------------------------------------------------------------------
  *
- * Horloge2 - version 2
+ * Horloge2 - version 2.1
  *
  * -------------------------------------------------------------------- */ ?>
 
-<style>
-
-body {
-	background: #000;
-}
-
-#horloge {
-	font-family: Montserrat;
-}
-
-#horloge-settings {
-}
-
-#horloge-contenu {
-    font-size: 4em;
-    text-align: center;
-	font-weight: 300;
-}
-
-#horloge-heure {
-	margin-top: 60px;
-	margin-bottom: 45px;
-    color: #fff;
-	font-size: 3em;
-	font-weight: 600;
-	font-family: "Gugi";
-}
-
-#horloge-temps-restant {
-	border: 1px solid #777;
-	border: 0;
-	padding: 30px;
-	border-radius: 60px;
-	font-size: 0.75em;
-	font-family: "Manrope";
-	font-weight: 200;
-	color: #fff;
-}
-
-#horloge-temps-minutes {
-	font-weight: 400;
-	color: #d22620;
-	color: crimson;
-}
-
-#horloge-heure-fin {
-}
-
-#horloge-heure-fin-exact {
-	font-weight: 400;
-}
-
-#clg-logo { 
-	margin-top: 70px;
-	filter: invert(1) brightness(100);
-}
-
-/* --- Clock morphing --- */
-#horloge-heure.morph {
- 	display: inline-flex;
-  	align-items: center; /* centré verticalement au lieu de baseline */
-  	gap: 0.25rem;
-  	font-variant-numeric: tabular-nums;
-  	font-feature-settings: "tnum" 1;
-  	line-height: 1;
-}
-
-#horloge-heure .digit {
-  	position: relative;
-  	width: 0.65em;
-  	height: 1em;
-  	overflow: hidden;
-}
-
-#horloge-heure .digit .stack {
-  	position: absolute;
-  	left: 0;
-  	top: 0;
-  	transition: transform 320ms cubic-bezier(.2,.7,.2,1);
-  	will-change: transform;
-}
-
-#horloge-heure .digit .stack span {
-  	display: block;
-  	height: 1em;
-  	line-height: 1em;
-}
-
-/* Correction du positionnement et suppression du clignotement */
-#horloge-heure .colon {
-  	width: 0.35em;
-  	text-align: center;
-  	opacity: 0.9;
-  	transform: translateY(-0.05em); /* remonte légèrement les deux-points */
-}
-
-/* Pas d’effet de clignotement */
-#horloge-heure .colon.off {
-  	opacity: 0.9; /* même opacité */
-}
-
-@media (prefers-reduced-motion: reduce) {
-  	#horloge-heure .digit .stack { transition: none; }
-}
-
-</style>
-
-<script src="<?= base_url() . '/assets/js/horloge.js?v=' . date('U'); ?>"></script>
-
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Barrio&family=Francois+One&family=Gugi&family=K2D:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800&family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&family=Manrope:wght@200..800&family=Petit+Formal+Script&family=Roboto:ital,wght@0,100..900;1,100..900&family=Rubik:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
-
 <body>
 
-<div id="maintenant-epoch" class="d-none"><?= date('U'); ?></div>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Gugi&family=Manrope:wght@200;400&family=Montserrat:wght@300;600&family=Rubik:wght@300..900&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
 
-	<div id="horloge">
+    <style>
+        :root {
+            --bg-color: #000;
+            --text-color: #fff;
+            --accent-color: crimson;
+            --border-color: #777;
+        }
 
-		<div class="row">
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Montserrat', sans-serif;
+            margin: 0;
+            overflow: hidden; /* Évite les scrolls inutiles en fullscreen */
+        }
 
-			<div class="col" style="text-align: right">
+        #horloge {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
 
-				<div id="horloge-settings">
+        #horloge-settings {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+        }
 
-					<div id="parametres" class="btn">
-						<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#fff" class="bi bi-sliders" viewBox="0 0 16 16" style="margin-left: 10px">
-							<path fill-rule="evenodd" d="M11.5 2a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zM9.05 3a2.5 2.5 0 0 1 4.9 0H16v1h-2.05a2.5 2.5 0 0 1-4.9 0H0V3h9.05zM4.5 7a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zM2.05 8a2.5 2.5 0 0 1 4.9 0H16v1H6.95a2.5 2.5 0 0 1-4.9 0H0V8h2.05zm9.45 4a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zm-2.45 1a2.5 2.5 0 0 1 4.9 0H16v1h-2.05a2.5 2.5 0 0 1-4.9 0H0v-1h9.05z"/>
-						</svg>
-					</div>
+        #horloge-contenu {
+            text-align: center;
+        }
 
-				</div>
+        #horloge-heure {
+            font-size: 12rem; /* Plus réactif que 4em pour un grand écran */
+            font-weight: 600;
+            font-family: "Gugi", sans-serif;
+            margin-bottom: 20px;
+        }
 
-			</div> <!-- .col -->
+        #horloge-temps-restant {
+            display: inline-block;
+            padding: 20px 40px;
+            border-radius: 60px;
+            font-size: 2.5rem;
+            font-family: "Manrope", sans-serif;
+            font-weight: 200;
+        }
 
-		</div> <!-- .row -->
+        #horloge-temps-minutes {
+            font-weight: bold;
+            color: var(--accent-color);
+		}
 
+		#horloge-heure-fin-exact {
+			font-weight: bold;
+            color: var(--accent-color);
+		}
 
-		<div id="horloge-contenu">
+        #clg-logo { 
+			margin-top: 50px;
+			width: 250px;
+            max-width: 250px;
+			filter: brightness(0) invert(1);
+        }
 
-			<div class="row">
-				<div class="col">
-					<div id="horloge-heure"><?= date('H:i:s'); ?></div>
-				</div> <!-- .col -->
+        .btn-ui {
+            background: none;
+            border: none;
+            color: var(--text-color);
+            cursor: pointer;
+            opacity: 0.5;
+            transition: opacity 0.3s;
+        }
 
-			</div> <!-- .row -->
+        .btn-ui:hover { opacity: 1; }
 
-			<div class="row">
+        /* --- Morphing Logic --- */
+        #horloge-heure.morph {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.15rem;
+            font-variant-numeric: tabular-nums;
+            line-height: 1;
+        }
 
-				<div class="col">
+        .digit {
+            position: relative;
+            width: 0.65em;
+            height: 1em;
+            overflow: hidden;
+        }
 
-					<span id="horloge-temps-restant">
-						Il reste 
-						<span id="horloge-temps-minutes">0</span> 
-						minute<span id="horloge-temps-minutes-pluriel"></span>
-						avant 
-						<span id="horloge-heure-fin-exact"></span>
-					</span>
+        .stack {
+            position: absolute;
+            left: 0;
+            top: 0;
+            transition: transform 320ms cubic-bezier(.2,.7,.2,1);
+            will-change: transform;
+        }
 
-				</div> <!-- .col -->
+        .stack span {
+            display: block;
+            height: 1em;
+            line-height: 1em;
+        }
 
-			</div> <!-- .row -->
+        .colon {
+            width: 0.3em;
+            text-align: center;
+            opacity: 0.8;
+            transform: translateY(-0.05em);
+        }
 
-			<div class="row">
-				<div class="col">
-					<img id="clg-logo" src="<?= base_url() . 'assets/img/logoCLG_2019.svg'; ?>" />
-				</div>
-			</div>
+        @media (prefers-reduced-motion: reduce) {
+            .stack { transition: none; }
+        }
 
-		</div>
+        /* Fullscreen specific */
+        :fullscreen { background-color: #000; }
+    </style>
 
-	</div> <!-- #horloge -->
+    <script src="<?= base_url('assets/js/horloge.js?v=' . date('U')); ?>"></script>
 
-<!-- Modal -->
+    <div id="maintenant-epoch" class="d-none"><?= date('U'); ?></div>
 
-<div id="horloge-modal" class="modal fade" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-
-            <div class="modal-header">
-                <h5 class="modal-title">Paramètres</h5>
-            </div>
+    <main id="horloge" class="container-fluid">
         
-            <div class="modal-body">
+        <!-- Controls -->
+		<div id="horloge-settings">
+            <button id="fullscreen-btn" class="btn-ui" title="Plein écran">
+				<i class="bi bi-fullscreen" style="font-size: 1.5rem;"></i>
+            </button>
 
-                <div class="row align-items-center">
-                    <div class="col-auto">
-                        <label for="parametres-heure" class="col-form-label">Heure de fin</label>
-                    </div>
-                    <div class="col-auto">
-                        <input id="parametres-heure" type="time" class="form-control" style="width: 200px" max="23:59" required>
-                    </div>
-				</div>
+			<button id="parametres" class="btn-ui" title="Paramètres">
+				<i class="bi bi-sliders2" style="font-size: 1.8rem;"></i>
+            </button>
+        </div>
 
-                <div class="mt-3 mb-2">
-                    <label for="select-police" class="form-label">Choisissez une police :</label>
-                    <select id="select-police" class="form-select">
-                        <option id="Barrio" value="Barrio">Barrio</option>
-                        <option id="Francois-One" value="Francois One">Francois One</option>
-                        <option id="Gugi" value="Gugi" selected>Gugi</option>
-                        <option id="K2D" value="K2D" data-width="0.95em">K2D</option>
-                        <option id="Manrope" value="Manrope">Manrope</option>
-                        <option id="Rubik"value="Rubik">Rubik</option>
-                        <option id="Roboto" value="Roboto">Roboto</option>
-                    </select>
+        <!-- Main Display -->
+        <div id="horloge-contenu">
+            <time id="horloge-heure"><?= date('H:i:s'); ?></time>
+
+            <div>
+                <span id="horloge-temps-restant">
+                    Il reste 
+                    <span id="horloge-temps-minutes">0</span> 
+                    minute<span id="horloge-temps-minutes-pluriel"></span> 
+                    avant 
+                    <span id="horloge-heure-fin-exact"></span>
+                </span>
+            </div>
+
+            <img id="clg-logo" src="<?= base_url('assets/img/logoCLG_2019.svg'); ?>" alt="Logo Collège">
+        </div>
+
+    </main>
+
+    <!-- Modal Paramètres -->
+    <div id="horloge-modal" class="modal fade" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Paramètres de l'horloge</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-4">
+                        <label for="parametres-heure" class="form-label">Heure de fin de l'activité</label>
+                        <input id="parametres-heure" type="time" class="form-control form-control-lg">
+                    </div>
+                    <div class="mb-2">
+                        <label for="select-police" class="form-label">Style de police</label>
+                        <select id="select-police" class="form-select">
+                            <option value="Gugi" selected>Gugi (Futuriste)</option>
+                            <option value="Rubik">Rubik (Moderne)</option>
+                            <option value="Manrope">Manrope (Minimaliste)</option>
+                            <option value="Montserrat">Montserrat (Classique)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+					<button type="button" class="btn btn-link text-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button id="parametres-sauvegarder" type="button" class="btn btn-primary px-4">Appliquer</button>
                 </div>
             </div>
-
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary close" data-dismiss="modal">Fermer</button>
-                <button id="parametres-sauvegarder" type="button" class="btn btn-primary">Sauvegarder</button>
-            </div>
-
         </div>
     </div>
-</div>
 
 </body>
