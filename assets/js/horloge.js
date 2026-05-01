@@ -74,14 +74,27 @@ $(document).ready(function ()
 
 	function calculerDureeRestante() 
 	{
-		// Formatage ISO robuste pour la date du jour
-		const ajdStr = new Date().toISOString().split('T')[0];
-		const limiteEpoch = Date.parse(`${ajdStr}T${heureLimite}:00`) / 1000;
+		// 1. Récupérer l'heure et les minutes de la limite
+		const [h, m] = heureLimite.split(':');
+
+		// 2. Créer un objet Date pour aujourd'hui avec cette heure (en local)
+		const dateLimite = new Date();
+		dateLimite.setHours(parseInt(h), parseInt(m), 0, 0);
+
+		// 3. Obtenir l'epoch en secondes
+		const limiteEpoch = dateLimite.getTime() / 1000;
+
 		let maintenantEpoch = Number($('#maintenant-epoch').text());
 
 		let diff = limiteEpoch - maintenantEpoch;
 
-		// Si l'heure est passée, on ne descend pas sous 0
+		// 4. Si la différence est négative, c'est que l'heure visée est demain
+		// (Optionnel : retire ce bloc si tu veux que ça reste à 0 une fois l'heure passée)
+		if (diff < -60) { // On laisse une marge d'une minute
+			diff += 24 * 3600; 
+		}
+
+		// 5. Calcul des minutes restantes
 		let minutes = Math.max(0, Math.ceil(diff / 60));
 
 		$('#horloge-temps-minutes').text(minutes);
