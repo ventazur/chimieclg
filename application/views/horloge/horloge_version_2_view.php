@@ -11,7 +11,6 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Gugi&family=Manrope:wght@200;400&family=Montserrat:wght@300;600&family=Rubik:wght@300..900&display=swap" rel="stylesheet">
     
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
@@ -94,19 +93,21 @@
 
         .btn-ui:hover { opacity: 1; }
 
-        /* --- Morphing Logic --- */
+		/* --- Morphing Logic --- */
+
         #horloge-heure.morph {
             display: inline-flex;
             align-items: center;
-            gap: 0.15rem;
+            gap: 0.1rem; /* Léger espacement entre les groupes */
             font-variant-numeric: tabular-nums;
-            line-height: 1;
         }
 
         .digit {
             position: relative;
-            width: 0.65em;
-            height: 1em;
+            /* 1ch s'ajuste dynamiquement à la vraie largeur du chiffre selon la police */
+            width: 1ch; 
+            /* 1.2em au lieu de 1em donne une marge respiratoire pour éviter de tronquer */
+            height: 1.2em; 
             overflow: hidden;
         }
 
@@ -120,15 +121,19 @@
 
         .stack span {
             display: block;
-            height: 1em;
-            line-height: 1em;
+            height: 1.2em; /* Doit être identique au conteneur .digit */
+            line-height: 1.2em; /* Assure le centrage vertical parfait du chiffre */
+            text-align: center;
         }
 
         .colon {
-            width: 0.3em;
+            /* On laisse la police dicter la taille naturelle des deux-points */
+            display: inline-block;
+            padding: 0 0.05em;
             text-align: center;
             opacity: 0.8;
-            transform: translateY(-0.05em);
+            line-height: 1.2em;
+            /* Le transform: translateY a été retiré pour ne pas forcer de décalage */
         }
 
         @media (prefers-reduced-motion: reduce) {
@@ -186,16 +191,18 @@
                     <div class="mb-4">
                         <label for="parametres-heure" class="form-label">Heure de fin de l'activité</label>
                         <input id="parametres-heure" type="time" class="form-control form-control-lg">
-                    </div>
-                    <div class="mb-2">
-                        <label for="select-police" class="form-label">Style de police</label>
-                        <select id="select-police" class="form-select">
-                            <option value="Gugi" selected>Gugi (Futuriste)</option>
-                            <option value="Rubik">Rubik (Moderne)</option>
-                            <option value="Manrope">Manrope (Minimaliste)</option>
-                            <option value="Montserrat">Montserrat (Classique)</option>
-                        </select>
-                    </div>
+					</div>
+					<div class="mb-2">
+						<label for="select-police" class="form-label">Style de police</label>
+						<select id="select-police" class="form-select"></select>
+					</div>
+					<div class="mt-4 mb-2">
+						<label for="range-taille" class="form-label">
+							Taille de l'horloge — <span id="label-taille">12</span>rem
+						</label>
+						<input id="range-taille" type="range" class="form-range"
+							   min="10" max="20" step="1" value="12">
+					</div>
                 </div>
                 <div class="modal-footer">
 					<button type="button" class="btn btn-link text-secondary" data-bs-dismiss="modal">Annuler</button>

@@ -6,141 +6,180 @@
  *
  * v2	avec effet "morph" sur HH:MM:SS)
  * v2.1	ameliorer la robustesse et la rapidite
- * v2.2 pecision accrue
+ * v2.2 precision accrue
+ * v2.3 precision accrue+
+ * v2.4 ajout de polices dans une liste dynamique
+ * v2.5 ajuster la taille de la police de l'horloge
  *
  * ==================================================================== */
 
 $(document).ready(function () 
 {
-    const regex = /:/g;
+    // -- Gestion des polices ---
+    const POLICES_DISPONIBLES = [
+        { nom: "Gugi",            googleQuery: "Gugi",                        label: "Futuriste"  },
+        { nom: "Rubik",           googleQuery: "Rubik:wght@300..900",         label: "Moderne"    },
+        { nom: "Manrope",         googleQuery: "Manrope:wght@200;400;600",    label: "Minimaliste"},
+        { nom: "Montserrat",      googleQuery: "Montserrat:wght@300;600",     label: "Classique"  },
+        { nom: "Space Mono",      googleQuery: "Space+Mono:wght@400;700",     label: "Rétro-code" },
+        { nom: "Oswald",          googleQuery: "Oswald:wght@400;600",         label: "Condensée"  },
+        { nom: "Fira Code",       googleQuery: "Fira+Code:wght@300..700",     label: "Technique"  },
+        { nom: "Bebas Neue",      googleQuery: "Bebas+Neue",                  label: "Impact"     },
+        { nom: "Share Tech Mono", googleQuery: "Share+Tech+Mono",             label: "Terminal"   },
+        { nom: "Oxanium",         googleQuery: "Oxanium:wght@300..800",       label: "Sci-Fi"     },
+        { nom: "Nunito",          googleQuery: "Nunito:wght@300;600;800",     label: "Arrondie"   },
+        { nom: "Quicksand",       googleQuery: "Quicksand:wght@400;600",      label: "Douce"      },
+        { nom: "Comfortaa",       googleQuery: "Comfortaa:wght@400;700",      label: "Friendly"   },
+    ];
 
-    // Configuration
+    // Chargement dynamique depuis Google Fonts
+    const fontFamilies = POLICES_DISPONIBLES.map(p => `family=${p.googleQuery}`).join('&');
+    $('head').append(`<link href="https://fonts.googleapis.com/css2?${fontFamilies}&display=swap" rel="stylesheet">`);
+
+    // --- Configuration ---
     const CONFIG = {
-        pingInterval: 30000,
-        secondeInterval: 1000,
-        policeDefaut: 'Rubik',
-        cookieExpire: 60 * 60 * 6 // 6 heures
+        pingInterval:  30000,
+        policeDefaut:  'Rubik',
+        tailleDefaut:  12,
+        cookieExpire:  60 * 60 * 6
     };
 
-    // Initialisation
-    let heureLimite = docCookies.getItem('heure_limite') || '18:00';
-    let policeActuelle = docCookies.getItem('police_actuelle') || CONFIG.policeDefaut;
+    const regex = /:/g;
+    let decalageServeurLocal = 0;
 
-    // Mise à jour de l'interface initiale
+    // --- État initial ---
+    let heureLimite   = docCookies.getItem('heure_limite')    || '18:00';
+    let policeActuelle = docCookies.getItem('police_actuelle') || CONFIG.policeDefaut;
+    let tailleActuelle = Number(docCookies.getItem('taille_actuelle')) || CONFIG.tailleDefaut;
+
+    // Compensation du décalage serveur/local
+    const epochInitial = Number($('#maintenant-epoch').text());
+    if (epochInitial) {
+        decalageServeurLocal = ((epochInitial * 1000) + 500) - Date.now();
+    }
+
+    // --- Construction du menu des polices ---
+    const $selectPolice = $('#select-police').empty();
+    POLICES_DISPONIBLES.forEach(police => {
+        $selectPolice.append(
+            $('<option>', {
+                value:    police.nom,
+                text:     `${police.nom} (${police.label})`,
+                selected: police.nom === policeActuelle
+            })
+        );
+    });
+
+    // --- Initialisation de l'interface ---
     $('#parametres-heure').val(heureLimite);
     $('#horloge-heure-fin-exact').text(heureLimite.replace(':', 'h'));
-    $('#horloge-heure').css('font-family', policeActuelle);
-    $('#select-police').val(policeActuelle);
+    $('#horloge-heure').css({
+        'font-family': policeActuelle,
+        'font-size':   `${tailleActuelle}rem`
+    });
+    $('#range-taille').val(tailleActuelle);
+    $('#label-taille').text(tailleActuelle);
 
     // --- Morph Logic ---
-
-    function buildClock($el, initialStr) 
+    function buildClock($el, initialStr)
     {
-        $el.addClass('morph');
-        const parts = ['h1', 'h2', 'colon', 'm1', 'm2', 'colon', 's1', 's2'];
-        const $fragment = $(document.createDocumentFragment());
+        $el.addClass('morph').empty();
 
-        parts.forEach(p => {
+        ['h1', 'h2', 'colon', 'm1', 'm2', 'colon', 's1', 's2'].forEach(p => {
             if (p === 'colon') {
-                $fragment.append($('<div class="colon">:</div>'));
+                $el.append('<div class="colon">:</div>');
             } else {
-                const $d = $('<div class="digit"><div class="stack"></div></div>');
-                const $stack = $d.find('.stack');
+                const $stack = $('<div class="stack">');
                 for (let i = 0; i <= 9; i++) $stack.append($('<span>').text(i));
-                $fragment.append($d);
+                $el.append($('<div class="digit">').append($stack));
             }
         });
 
-        $el.empty().append($fragment);
-        if (initialStr) setClock(initialStr);
+        // Attend le prochain frame pour que le navigateur calcule les dimensions
+        requestAnimationFrame(() => {
+            if (initialStr) setClock(initialStr);
+        });
     }
 
-    function setClock(timeStr) 
+    function setClock(timeStr)
     {
         const digits = timeStr.replace(regex, '').split('').map(Number);
-        const $digits = $('#horloge-heure .digit');
 
-        $digits.each(function(i) {
-            const $digit = $(this);
-            const val = digits[i];
-            const h = $digit.height(); 
-            // translate3d force l'accélération matérielle (GPU)
-            $(this).find('.stack').css('transform', `translate3d(0, ${-(val * h)}px, 0)`);
+        $('#horloge-heure .digit').each(function (i) {
+            const h = this.getBoundingClientRect().height;
+            $(this).find('.stack').css('transform', `translate3d(0, ${-(digits[i] * h)}px, 0)`);
         });
     }
 
     // --- Calculs de temps ---
-
-    function calculerDureeRestante() 
+    function obtenirTempsServeurActuel()
     {
-        const [h, m] = heureLimite.split(':');
+        return Date.now() + decalageServeurLocal;
+    }
+
+    function calculerDureeRestante()
+    {
+        const [h, m]    = heureLimite.split(':');
         const dateLimite = new Date();
         dateLimite.setHours(parseInt(h), parseInt(m), 0, 0);
 
-        const limiteEpoch = dateLimite.getTime() / 1000;
-        let maintenantEpoch = Number($('#maintenant-epoch').text());
-        let diff = limiteEpoch - maintenantEpoch;
+        let diffMs = dateLimite.getTime() - obtenirTempsServeurActuel();
+        if (diffMs < -60000) diffMs += 24 * 3600 * 1000;
 
-        if (diff < -60) { 
-            diff += 24 * 3600; 
-        }
-
-        let minutes = Math.max(0, Math.ceil(diff / 60));
-
+        const minutes = Math.max(0, Math.floor((diffMs + 59999) / 60000));
         $('#horloge-temps-minutes').text(minutes);
         $('#horloge-temps-minutes-pluriel').text(minutes > 1 ? 's' : '');
     }
 
-    function rafraichirTemps() 
+    function rafraichirTemps()
     {
-        const maintenantEpoch = Number($('#maintenant-epoch').text());
-        const d = new Date(maintenantEpoch * 1000);
-
-        // Formatage HH:MM:SS
-        const timeStr = d.toTimeString().split(' ')[0];
+        const maintenantMs  = obtenirTempsServeurActuel();
+        const tempsAfficheMs = maintenantMs + 50;
+        const timeStr        = new Date(tempsAfficheMs).toTimeString().split(' ')[0];
 
         setClock(timeStr);
-        $('#maintenant-epoch').text(maintenantEpoch + 1);
-
+        $('#maintenant-epoch').text(Math.floor(maintenantMs / 1000));
         calculerDureeRestante();
 
-        // Optimisation : On recalcule le délai pour tomber pile sur la milliseconde 0 de la prochaine seconde
-        // Cela évite que l'horloge ne décale progressivement par rapport au système.
-        const delaiCorrection = 1000 - (Date.now() % 1000);
-        setTimeout(rafraichirTemps, delaiCorrection);
+        // Aligne le prochain tick sur la milliseconde 0 du temps serveur
+        setTimeout(rafraichirTemps, 1000 - (maintenantMs % 1000));
     }
 
-    function pingServeur() 
+    function pingServeur()
     {
-        const tempsDepart = Date.now(); // Début de la requête
+        const tempsDepart = Date.now();
 
-        $.post(`${base_url}horloge/ping`, { ci_csrf_token: cct }, 
-        function (data)
-        {
-            if (data?.epoch) 
-            {
-                // Calcul de la latence aller-retour (RTT) convertie en secondes / 2
-                // On estime que le serveur est à mi-chemin du temps total de la requête.
-                const latence = (Date.now() - tempsDepart) / 2000;
-                $('#maintenant-epoch').text(Number(data.epoch) + latence);
+        $.post(`${base_url}horloge/ping`, { ci_csrf_token: cct }, function (data) {
+            if (data?.epoch) {
+                const latenceMs          = (Date.now() - tempsDepart) / 2;
+                const tempsServeurEstime = (Number(data.epoch) * 1000 + 500) + latenceMs;
+                decalageServeurLocal     = tempsServeurEstime - Date.now();
             }
-        }, 'json').always(() => {
-            setTimeout(pingServeur, CONFIG.pingInterval);
-        });
+        }, 'json').always(() => setTimeout(pingServeur, CONFIG.pingInterval));
     }
 
     // --- Événements UI ---
-
     $('#parametres').on('click', () => $('#horloge-modal').modal('show'));
 
-    $('#select-police').on('change', function() 
+    $('#select-police').on('change', function ()
     {
-        const police = $(this).val();
-        $('#horloge-heure').css('font-family', police);
-        docCookies.setItem('police_actuelle', police, CONFIG.cookieExpire);
+        policeActuelle = $(this).val();
+        $('#horloge-heure').css('font-family', policeActuelle);
+        docCookies.setItem('police_actuelle', policeActuelle, CONFIG.cookieExpire);
     });
 
-    $('#parametres-sauvegarder').on('click', function () 
+    $('#range-taille').on('input', function ()
+    {
+        tailleActuelle = Number($(this).val());
+        $('#label-taille').text(tailleActuelle);
+        $('#horloge-heure').css('font-size', `${tailleActuelle}rem`);
+        docCookies.setItem('taille_actuelle', tailleActuelle, CONFIG.cookieExpire);
+
+        // Reconstruction pour recalibrer la hauteur des .digit
+        buildClock($('#horloge-heure'), '');
+    });
+
+    $('#parametres-sauvegarder').on('click', function ()
     {
         const nouvelleHeure = $('#parametres-heure').val();
         if (nouvelleHeure) {
@@ -152,11 +191,11 @@ $(document).ready(function ()
         $('#horloge-modal').modal('hide');
     });
 
-    // Plein écran
-    $('#fullscreen-btn').on('click', function() {
+    $('#fullscreen-btn').on('click', function ()
+    {
         if (!document.fullscreenElement) {
             document.documentElement.requestFullscreen().catch(err => {
-                console.error(`Erreur: ${err.message}`);
+                console.error(`Erreur plein écran : ${err.message}`);
             });
         } else {
             document.exitFullscreen();
@@ -164,16 +203,12 @@ $(document).ready(function ()
     });
 
     document.addEventListener('fullscreenchange', () => {
-        if (document.fullscreenElement) {
-            $('#fullscreen-btn').addClass('is-active').css('opacity', '0.2');
-        } else {
-            $('#fullscreen-btn').removeClass('is-active').css('opacity', '1');
-        }
+        const isFullscreen = !!document.fullscreenElement;
+        $('#fullscreen-btn').toggleClass('is-active', isFullscreen).css('opacity', isFullscreen ? '0.2' : '1');
     });
 
     // --- Lancement ---
-
-    buildClock($('#horloge-heure'), $('#horloge-heure').text().trim());
+    buildClock($('#horloge-heure'), new Date(obtenirTempsServeurActuel() + 50).toTimeString().split(' ')[0]);
     rafraichirTemps();
     pingServeur();
 });
