@@ -66,12 +66,14 @@
         }
 
         #horloge-temps-minutes {
-            font-weight: bold;
+			font-weight: bold;
+			font-size: 1.5em;
             color: var(--accent-color);
 		}
 
 		#horloge-heure-fin-exact {
 			font-weight: bold;
+			font-size: 1.5em;
             color: var(--accent-color);
 		}
 
@@ -167,9 +169,9 @@
 
             <div>
                 <span id="horloge-temps-restant">
-                    Il reste 
                     <span id="horloge-temps-minutes">0</span> 
-                    minute<span id="horloge-temps-minutes-pluriel"></span> 
+					minute<span class="horloge-temps-minutes-pluriel"></span> 
+					restante<span class="horloge-temps-minutes-pluriel"></span> 
                     avant 
                     <span id="horloge-heure-fin-exact"></span>
                 </span>

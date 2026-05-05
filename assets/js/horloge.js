@@ -128,7 +128,7 @@ $(document).ready(function ()
 
         const minutes = Math.max(0, Math.floor((diffMs + 59999) / 60000));
         $('#horloge-temps-minutes').text(minutes);
-        $('#horloge-temps-minutes-pluriel').text(minutes > 1 ? 's' : '');
+        $('.horloge-temps-minutes-pluriel').text(minutes > 1 ? 's' : '');
     }
 
     function rafraichirTemps()
