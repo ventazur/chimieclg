@@ -46,20 +46,7 @@
 
             <p class="page-section mt-4 mb-1">Sciences, lettres et arts</p>
 
-            <?php $data['cours'] = ['701', 'je1']; ?>
-
-            <?php $this->load->view($controller . '/_cours_liste_table', $data); ?>
-
-            <?
-            /* --------------------------------------------------------
-             *
-             * Technique de sante animale
-             *
-             * -------------------------------------------------------- */ ?> 
-
-            <p class="page-section mt-4 mb-1">Technique de santé animale</p>
-
-            <?php $data['cours'] = ['sj1', 'sj2']; ?>
+            <?php $data['cours'] = ['jb1', 'jb2']; ?>
 
             <?php $this->load->view($controller . '/_cours_liste_table', $data); ?>
 
