@@ -426,7 +426,7 @@ if ($config['is_DEV'])
 }
 else
 {
-    $config['sess_save_path'] = '/var/www/chimieclg.ca/main/sessions';
+    $config['sess_save_path'] = '/var/www/chimieclg.ca/sessions';
 }
 
 $config['sess_cookie_name'] = 'ci_session';
