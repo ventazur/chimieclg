@@ -429,7 +429,7 @@ else
     $config['sess_save_path'] = '/var/www/chimieclg.ca/sessions';
 }
 
-$config['sess_cookie_name'] = 'ci_session';
+$config['sess_cookie_name'] = 'clgchimie_';
 $config['sess_expiration'] = 7200;
 $config['sess_match_ip'] = FALSE;
 $config['sess_time_to_update'] = 300;
