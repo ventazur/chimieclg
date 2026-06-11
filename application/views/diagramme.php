@@ -43,13 +43,12 @@
 
     <?
     /* ----------------------------------------------------------------------------
-     *	
+     *
      * Les scripts (externes)
      *
      * ---------------------------------------------------------------------------- */ ?>
 
-    <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-Fy6S3B9q64WdZWQUiU+q4/2Lc9npb8tCaSX9FK7E8HnRr0Jz8D6OP9dO5Vg3Q9ct" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
 
 	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
@@ -73,7 +72,7 @@
      *
      * ------------------------------------------------------------------------ */ ?>
 
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 
@@ -137,22 +136,20 @@
 
 				<form id="form-diagramme" style="border: 1px solid #ccc; border-radius: 3px; padding: 20px; background: #f8f9fa;">
 
-					<div class="form-row">
+					<div class="row g-3">
 
-						<div class="form-group col-md-4">
+						<div class="col-md-4 mb-3">
 							<label for="vexp">V expérimentale</label>
 							<input type="number" step="0.01" class="form-control" id="vexp" value="6">
 						</div>
-						<div class="form-group col-md-4">
+						<div class="col-md-4 mb-3">
 							<label for="dvexp">△V expérimentale</label>
 							<div class="input-group">
-								<div class="input-group-prepend">
-									<span class="input-group-text" id="basic-addon1">±</span>
-								</div>
+								<span class="input-group-text">±</span>
 								<input type="number" step="0.01" class="form-control" id="dvexp" value="1">
 							</div>
 						</div>
-						<div class="form-group col-md-4">
+						<div class="col-md-4 mb-3">
 							<label for="unites">Unités</label>
 							<input type="text" class="form-control" id="unites" value="">
 						</div>
@@ -160,36 +157,34 @@
 
 					</div> <!-- .form-row -->
 
-					<div class="form-row">
+					<div class="row g-3">
 
-						<div class="form-group col-md-4">
+						<div class="col-md-4 mb-3">
 							<label for="vadm">V admise</label>
 							<input type="number" step="0.01" class="form-control" id="vadm" value="5">
 						</div>
-						<div class="form-group col-md-4">
+						<div class="col-md-4 mb-3">
 							<label for="dvadm">△V admise</label>
 							<div class="input-group">
-								<div class="input-group-prepend">
-									<span class="input-group-text" id="basic-addon1">±</span>
-								</div>
+								<span class="input-group-text">±</span>
 								<input type="number" step="0.01" class="form-control" id="dvadm" value="1">
 							</div>
 						</div>
 					</div>
 				
-					<div class="form-row">
+					<div class="row g-3">
 
-						<div class="form-group col-md-4">
+						<div class="col-md-4 mb-3">
 							<label for="xmin">Axe X minimum</label>
 							<input type="number" class="form-control" id="xmin">
 						</div>
 
-						<div class="form-group col-md-4">
+						<div class="col-md-4 mb-3">
 							<label for="xmax">Axe X maximum</label>
 							<input type="number" class="form-control" id="xmax">
 						</div>
 
-						<div class="form-group col-md-4">
+						<div class="col-md-4 mb-3">
 							<label for="decaxe">Axe X décimales</label>
 							<input type="number" class="form-control" id="decaxe" value="2">
 						</div>
