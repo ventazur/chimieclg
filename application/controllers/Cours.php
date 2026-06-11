@@ -70,8 +70,6 @@ Class Cours extends MY_Controller
             switch($method) 
             {
                 case 'index' :
-					// DESUET 2026-04
-					// $this->data['ressources_cours'] = $this->Ressource_model->lister_ressources_cours();
                     $this->_display_view('list');
                     break;
 
@@ -112,29 +110,6 @@ Class Cours extends MY_Controller
 
 				default :
                     $this->data['cours'] = $this->data['cours_disponibles'][$method];
-
-					// DESUET 2026-04
-					/*
-					$ressources = $this->Ressource_model->lister_ressources($method);
-					$categories = array();
-
-					if ($ressources)
-					{
-					   $ordre = array_column($ressources, 'ordre');
-					   array_multisort($ressources, SORT_DESC, $ordre); 
-
-						foreach($ressources as $r)
-						{
-							if ( ! in_array($r['category'], $categories))
-							{
-								$categories[] = $r['category'];
-							}
-						}
-
-						$categories = $this->Ressource_model->lister_categories($categories); 
-						$categories = array_keys_swap($categories, 'code');
-					}
-					*/
 
 					$this->data = $this->data + $this->Ressource_model->extraire_ressources_ordre($method);
 

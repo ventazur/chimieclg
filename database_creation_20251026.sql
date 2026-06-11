@@ -68,26 +68,3 @@ CREATE TABLE `personnes` (
   `courriel` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=46 DEFAULT CHARSET=latin1;
-
--- Create syntax for TABLE 'ressources'
-CREATE TABLE `ressources` (
-  `id` int unsigned NOT NULL AUTO_INCREMENT,
-  `nom` varchar(100) NOT NULL DEFAULT '',
-  `url` varchar(500) NOT NULL DEFAULT '',
-  `code_cours` varchar(3) NOT NULL DEFAULT '',
-  `category` varchar(10) DEFAULT '',
-  `ordre` float NOT NULL DEFAULT '100',
-  `actif` tinyint(1) NOT NULL DEFAULT '1',
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb3;
-
--- Create syntax for TABLE 'ressources_categories'
-CREATE TABLE `ressources_categories` (
-  `id` int unsigned NOT NULL AUTO_INCREMENT,
-  `nom` varchar(100) NOT NULL DEFAULT '',
-  `code` varchar(10) NOT NULL DEFAULT '',
-  `generale` tinyint(1) NOT NULL DEFAULT '0',
-  `ordre` float NOT NULL DEFAULT '100',
-  `actif` tinyint(1) NOT NULL DEFAULT '1',
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb3;
