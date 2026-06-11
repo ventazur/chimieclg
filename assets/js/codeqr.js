@@ -9,6 +9,62 @@ $(document).ready(function()
     var cache       = {};  // { url: { 1: img1, 2: img2, ... } }
     var debounceTimer;
 
+    function verifierQR(imgEl, expected)
+    {
+        var canvas = document.getElementById('qr-decode-canvas');
+        var ctx    = canvas.getContext('2d');
+        var el     = $('#qr-verify-result');
+
+        function decode()
+        {
+            var size      = Math.max(imgEl.naturalWidth || 0, imgEl.naturalHeight || 0, 500);
+            canvas.width  = size;
+            canvas.height = size;
+            ctx.drawImage(imgEl, 0, 0, size, size);
+
+            var imageData;
+
+            try
+            {
+                imageData = ctx.getImageData(0, 0, size, size);
+            }
+            catch (e)
+            {
+                el.html('<i class="bi bi-x-circle-fill" style="color:#d22630; margin-right:5px"></i>Erreur canvas : ' + e.message).removeClass('d-none');
+                return;
+            }
+
+            // Convertir en noir et blanc pur (utile pour les QR colorés)
+            var pixels = imageData.data;
+            for (var i = 0; i < pixels.length; i += 4)
+            {
+                var lum = 0.2126 * pixels[i] + 0.7152 * pixels[i+1] + 0.0722 * pixels[i+2];
+                var bw  = lum < 128 ? 0 : 255;
+                pixels[i] = pixels[i+1] = pixels[i+2] = bw;
+            }
+
+            var code = jsQR(imageData.data, imageData.width, imageData.height);
+
+            if (code && code.data === expected)
+            {
+                el.html('<i class="bi bi-check-circle-fill" style="color:#198754; margin-right:5px"></i>URL vérifié').removeClass('d-none');
+            }
+            else if (code)
+            {
+                el.html('<i class="bi bi-x-circle-fill" style="color:#d22630; margin-right:5px"></i>Contenu inattendu : ' + code.data).removeClass('d-none');
+            }
+            else
+            {
+                el.html('<i class="bi bi-x-circle-fill" style="color:#d22630; margin-right:5px"></i>Impossible de décoder').removeClass('d-none');
+            }
+        }
+
+        if (imgEl.complete && imgEl.naturalWidth > 0)
+            decode();
+        else
+            imgEl.onload = decode;
+    }
+
     function spinnerShow()
     {
         $('#codeqr-check').addClass('d-none');
@@ -40,10 +96,19 @@ $(document).ready(function()
             if ( ! cache[qrdata]) cache[qrdata] = {};
             $.extend(cache[qrdata], data);
 
-            if (data['qr_img1']) $('#codeqr1-img').attr('src', data['qr_img1']);
-            if (data['qr_img2']) $('#codeqr2-img').attr('src', data['qr_img2']);
-            if (data['qr_img3']) $('#codeqr3-img').attr('src', data['qr_img3']);
-            if (data['qr_img4']) $('#codeqr4-img').attr('src', data['qr_img4']);
+            var updatedSrc = null;
+
+            var updatedEl = null;
+
+            if (data['qr_img1']) { $('#codeqr1-img').attr('src', data['qr_img1']); updatedEl = document.getElementById('codeqr1-img'); }
+            if (data['qr_img2']) { $('#codeqr2-img').attr('src', data['qr_img2']); updatedEl = document.getElementById('codeqr2-img'); }
+            if (data['qr_img3']) { $('#codeqr3-img').attr('src', data['qr_img3']); updatedEl = document.getElementById('codeqr3-img'); }
+            if (data['qr_img4']) { $('#codeqr4-img').attr('src', data['qr_img4']); updatedEl = document.getElementById('codeqr4-img'); }
+
+            // Le type 4 (SVG rouge circulaire) n'est pas décodable par jsQR — on vérifie via le type 3 (SVG standard, même contenu)
+            var verifyEl = (type == 4) ? document.getElementById('codeqr3-img') : updatedEl;
+
+            if (verifyEl) verifierQR(verifyEl, qrdata);
 
             if (callback) callback();
 
@@ -69,7 +134,8 @@ $(document).ready(function()
     $('#codeqr-data').on('input', function()
     {
         var qrdata = $(this).val().trim();
-        cache = {};  // invalider le cache quand l'URL change
+        cache = {};
+        $('#qr-verify-result').addClass('d-none');
 
         clearTimeout(debounceTimer);
 

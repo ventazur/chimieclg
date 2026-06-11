@@ -30,6 +30,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
 
      <script src="<?= base_url(); ?>assets/js/codeqr.js?<?= date('U'); ?>"></script>
 
@@ -173,10 +174,14 @@
             </a>
 		</div>
 
+		<div id="qr-verify-result" class="d-none mt-3 text-center" style="font-size: 0.9em"></div>
+
 		<div class="mt-2 mt-md-3" style="text-align: center; background: #fff; padding: 15px;">
 			<i class="bi bi-exclamation-circle" style="color: crimson; margin-right: 5px"></i>
 			Cliquez sur le code QR pour le télécharger
 		</div>
+
+		<canvas id="qr-decode-canvas" style="display:none"></canvas>
 
     </div> <!-- .col-5 -->
 
