@@ -84,7 +84,12 @@
 
 			<div class="input-group">
 				<input style="font-size: 1.1em;" class="form-control" id="codeqr-data" rows="3" value="https://chimieclg.ca" placeholder="Entrez les données ou URL" />
-				<div id="codeqr-generer" class="btn btn-outline-primary">Générer code QR</div>
+				<span id="codeqr-spinner" class="input-group-text d-none">
+					<span class="spinner-border spinner-border-sm text-primary" role="status"></span>
+				</span>
+				<span id="codeqr-check" class="input-group-text d-none" style="color: #198754">
+					<i class="bi bi-check-lg"></i>
+				</span>
 			</div>
 
 			<div id="generer-erreur" class="d-none mt-3" style="color: #d22630; font-weight: 400; text-align: center; padding: 8px; border: 1px solid #d22630; border-radius: 5px;">

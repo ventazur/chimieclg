@@ -57,14 +57,22 @@ class Codeqr extends MY_Controller
             return;
         }
 
-		echo json_encode(
-			array(
-				'qr_img1' => $this->_generer_codeqr_png($data),
-				'qr_img2' => $this->_generer_codeqr_png($data, FALSE),
-				'qr_img3' => $this->_generer_codeqr_svg($data),
-				'qr_img4' => $this->_generer_codeqr_svg($data, 2)
-			)
-		);
+		$type = $post_data['type'] ?? 'all';
+
+		switch ($type)
+		{
+			case '1': echo json_encode(['qr_img1' => $this->_generer_codeqr_png($data)]); break;
+			case '2': echo json_encode(['qr_img2' => $this->_generer_codeqr_png($data, FALSE)]); break;
+			case '3': echo json_encode(['qr_img3' => $this->_generer_codeqr_svg($data)]); break;
+			case '4': echo json_encode(['qr_img4' => $this->_generer_codeqr_svg($data, 2)]); break;
+			default:
+				echo json_encode(array(
+					'qr_img1' => $this->_generer_codeqr_png($data),
+					'qr_img2' => $this->_generer_codeqr_png($data, FALSE),
+					'qr_img3' => $this->_generer_codeqr_svg($data),
+					'qr_img4' => $this->_generer_codeqr_svg($data, 2)
+				));
+		}
         return;
 	}
 
