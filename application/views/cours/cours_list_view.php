@@ -14,70 +14,26 @@
 
             <div class="page-titre">Les cours de chimie offerts au Collège Lionel-Groulx</div>
 
-            <?
-            /* --------------------------------------------------------
-             *
-             * Sciences de la nature
-             *
-             * -------------------------------------------------------- */ ?> 
+            <?php foreach($programmes as $prog) : ?>
 
-			<?php $data['cours'] = array(); ?>
+                <?php $data['cours'] = []; ?>
 
-			<?php foreach($cours_disponibles as $sigle => $c) : ?>
+                <?php foreach($cours_disponibles as $sigle => $c) : ?>
+                    <?php if ($c['programme_id'] == $prog['programme_id']) : ?>
+                        <?php $data['cours'][] = $sigle; ?>
+                    <?php endif; ?>
+                <?php endforeach; ?>
 
-				<?php if ($c['programme'] == 'NAT') : ?>
+                <?php if ( ! empty($data['cours'])) : ?>
 
-					<?php $data['cours'][] = $sigle; ?>
+                    <p class="page-section mt-4 mb-1"><?= $prog['nom']; ?></p>
 
-				<?php endif; ?>
+                    <?php $this->load->view($controller . '/_cours_liste_table', $data); ?>
 
-			<?php endforeach; ?>
+                <?php endif; ?>
 
-            <p class="page-section mt-4 mb-1">Sciences de la nature</p>
+            <?php endforeach; ?>
 
-            <?php $this->load->view($controller . '/_cours_liste_table', $data); ?>
-
-            <?
-            /* --------------------------------------------------------
-             *
-             * Sciences, lettres et arts
-             *
-             * -------------------------------------------------------- */ ?> 
-
-            <p class="page-section mt-4 mb-1">Sciences, lettres et arts</p>
-
-            <?php $data['cours'] = ['jb1', 'jb2']; ?>
-
-            <?php $this->load->view($controller . '/_cours_liste_table', $data); ?>
-
-            <?
-            /* --------------------------------------------------------
-             *
-             * Technique de soins infirmiers
-             *
-             * -------------------------------------------------------- */ ?> 
-
-            <p class="page-section mt-4 mb-1">
-                Soins infirmiers
-            </p>
-
-            <?php $data['cours'] = ['3a3', '4a3']; ?>
-
-            <?php $this->load->view($controller . '/_cours_liste_table', $data); ?>
-
-            <?
-            /* --------------------------------------------------------
-             *
-             * Autres programmes
-             *
-             * -------------------------------------------------------- */ ?> 
-
-            <p class="page-section mt-4 mb-1">Autres programmes</p>
-            
-            <?php $data['cours'] = ['001', 'z20', 'va0', 'r56', 'sf1']; ?>
-            
-            <?php $this->load->view($controller . '/_cours_liste_table', $data); ?>
-
-        </div>  
+        </div>
     </div>
 </div>

@@ -59,6 +59,7 @@ Class Cours extends MY_Controller
 
 		$this->data['cours_disponibles'] = $cours_disponibles;
         $this->data['prealables'] = $prealables;
+        $this->data['programmes'] = $this->Cours_model->lister_programmes();
 
         if ( ! in_array($method, $valid_methods) && ! array_key_exists($method, $this->data['cours_disponibles']))
         {
@@ -155,8 +156,8 @@ Class Cours extends MY_Controller
         }
 
         $this->data['cours_disponibles'] = $cours_disponibles;
-
         $this->data['prealables'] = $prealables;
+        $this->data['programmes'] = $this->Cours_model->lister_programmes();
 
         $this->_display_view('list');
     }
