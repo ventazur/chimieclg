@@ -202,15 +202,12 @@ class Codeqr extends MY_Controller
 				$targetW, $targetH, $origW, $origH
 			);
 			
-			imagedestroy($logoResource);
 		}
 
 		ob_start();
 		imagepng($qrResource);
 		$imageData = ob_get_contents();
 		ob_end_clean();
-
-		imagedestroy($qrResource);
 
 		$image = 'data:image/png;base64,' . base64_encode($imageData);
 
