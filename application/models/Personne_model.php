@@ -15,13 +15,13 @@ class Personne_model extends CI_Model
 
     // ------------------------------------------------------------------------
     //
-    // Enseignant(e)s
+    // Le personnel enseignant
     //
     // ------------------------------------------------------------------------
 
 	/* ------------------------------------------------------------------------
 	 *
-	 * Lister les enseignants
+	 * Lister les enseignants et enseignants
 	 *
      *------------------------------------------------------------------------- */
 	function lister_enseignants()
@@ -79,13 +79,13 @@ class Personne_model extends CI_Model
 
     // ------------------------------------------------------------------------
     //
-    // Technicien(ne)s
+    // Le personel technicien
     //
     // ------------------------------------------------------------------------
     
 	/* ------------------------------------------------------------------------
 	 *
-	 * Lister les techniciens.ennes
+	 * Lister les techniciens et techniciennes
 	 *
      *------------------------------------------------------------------------- */
 	function lister_techniciens()

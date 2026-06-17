@@ -130,7 +130,6 @@ class Codeqr extends MY_Controller
 		$options = new \chillerlan\QRCode\QROptions([
 			'version'			  => \chillerlan\QRCode\Common\Version::AUTO,
 			'versionMin'   		  => 4,
-			// 'versionMin'		  => 5,	
 			'eccLevel'            => \chillerlan\QRCode\Common\EccLevel::H,
 			'addQuietzone'    	  => true,
 			'quietzoneSize'       => 3,

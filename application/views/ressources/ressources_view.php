@@ -46,11 +46,15 @@
 <nav id="sous-menu-nav" class="navbar navbar-expand-lg">
     <div class="container">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-            <li class="nav-item">
-                <a class="nav-link" href="<?= base_url() . 'assets/docs/Guide_de_redaction_A2021.pdf'; ?>">Guide de réaction A2021</a>
+			<li class="nav-item">
+				<a class="nav-link" href="<?= base_url() . 'assets/docs/tp.png'; ?>">
+					Tableau périodique
+				</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="<?= base_url() . 'assets/docs/tp.png'; ?>">Tableau périodique</a>
+				<a class="nav-link" href="<?= base_url() . 'assets/docs/Guide_de_redaction_A2021.pdf'; ?>">
+					Guide de réaction A2021
+				</a>
             </li>
         </ul>
     </div>

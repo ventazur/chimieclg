@@ -33,8 +33,7 @@ class Usager_model extends CI_Model
             'epoch'      => date('U')
         ); 
 
-        $this->db->insert('activity_log', $data);
-        return;
+        return $this->db->insert('activity_log', $data);
 	}
 
     /* --------------------------------------------------------------------------------------------

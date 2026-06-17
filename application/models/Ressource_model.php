@@ -130,7 +130,7 @@ class Ressource_model extends CI_Model
 		$opt = array_merge(
 			[
 				'generale' => FALSE, // TRUE = les ressources qui vont sur la page des ressources, FALSE = toutes les ressources
-				'cats'	   => []	// tableau des categories a extraire
+				'cats'	   => []	 // tableau des categories a extraire
 			],
 			$opt
 		);

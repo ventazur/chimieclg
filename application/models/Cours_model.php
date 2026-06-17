@@ -32,6 +32,11 @@ class Cours_model extends CI_Model
         return $query->result_array();
     }
 
+	/* ------------------------------------------------------------------------
+	 *
+     * Recuperer tous les programmes
+	 *
+     *------------------------------------------------------------------------- */
 	function lister_programmes()
     {
         $this->db->from     ('programmes');
