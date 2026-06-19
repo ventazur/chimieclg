@@ -150,10 +150,10 @@ $(document).ready(function ()
     {
         var $card = $('<div class="mini-flap" data-value="">');
         $card.append(
-            $('<div class="flap-half flap-top">').append('<span>0</span>'),
-            $('<div class="flap-half flap-bottom">').append('<span>0</span>'),
-            $('<div class="flap-flip flap-flip-top">').append('<span>0</span>'),
-            $('<div class="flap-flip flap-flip-bottom">').append('<span>0</span>')
+            $('<div class="flap-half flap-top">').append('<span> </span>'),
+            $('<div class="flap-half flap-bottom">').append('<span> </span>'),
+            $('<div class="flap-flip flap-flip-top">').append('<span> </span>'),
+            $('<div class="flap-flip flap-flip-bottom">').append('<span> </span>')
         );
         return $card;
     }
@@ -165,15 +165,19 @@ $(document).ready(function ()
 
         $card.attr('data-value', newVal);
 
+        var display = newVal === '' ? ' ' : newVal;
+
         if (oldVal === '') {
-            $card.find('span').text(newVal);
+            $card.find('span').text(display);
             return;
         }
 
-        $card.find('.flap-top span').text(newVal);
-        $card.find('.flap-flip-top span').text(oldVal);
+        var oldDisplay = oldVal === '' ? ' ' : oldVal;
+
+        $card.find('.flap-top span').text(display);
+        $card.find('.flap-flip-top span').text(oldDisplay);
         $card.find('.flap-flip-top').css('transform', 'rotateX(0deg)');
-        $card.find('.flap-flip-bottom span').text(newVal);
+        $card.find('.flap-flip-bottom span').text(display);
         $card.find('.flap-flip-bottom').css('transform', 'rotateX(90deg)');
 
         $card.removeClass('flipping');
@@ -182,7 +186,7 @@ $(document).ready(function ()
 
         setTimeout(function () {
             $card.removeClass('flipping');
-            $card.find('span').text(newVal);
+            $card.find('span').text(display);
             $card.find('.flap-flip-top').css('transform', 'rotateX(0deg)');
             $card.find('.flap-flip-bottom').css('transform', 'rotateX(0deg)');
         }, CONFIG.flipDuration);
@@ -198,19 +202,19 @@ $(document).ready(function ()
         if (diffMs < -60000) diffMs += 24 * 3600 * 1000;
 
         var minutes = Math.max(0, Math.floor((diffMs + 59999) / 60000));
-        var digits = String(minutes).split('');
+        var padded = String(minutes).padStart(4, ' ').split('');
         var $container = $('#horloge-temps-minutes');
 
-        if (digits.length !== dernierNbCartes) {
+        if (dernierNbCartes !== 4) {
             $container.empty();
-            for (var i = 0; i < digits.length; i++) {
+            for (var i = 0; i < 4; i++) {
                 $container.append(buildMiniCard());
             }
-            dernierNbCartes = digits.length;
+            dernierNbCartes = 4;
         }
 
         $container.find('.mini-flap').each(function (i) {
-            setMiniDigit($(this), digits[i]);
+            setMiniDigit($(this), padded[i] === ' ' ? '' : padded[i]);
         });
 
         $('.horloge-temps-minutes-pluriel').text(minutes > 1 ? 's' : '');
