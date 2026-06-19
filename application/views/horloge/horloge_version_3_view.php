@@ -441,7 +441,7 @@
         }
 
         #clg-logo {
-            margin-top: 50px;
+            margin-top: 65px;
             width: 200px;
             max-width: 200px;
             filter: brightness(0) invert(1);
