@@ -64,7 +64,7 @@
             display: inline-flex;
             align-items: center;
             gap: var(--card-gap);
-            margin-bottom: 70px;
+            margin-bottom: 50px;
         }
 
         .flap-colon {
@@ -116,8 +116,8 @@
             left: 0;
             top: 50%;
             width: 100%;
-            height: 2px;
-            background: rgba(0,0,0,0.7);
+            height: 1px;
+            background: rgba(0,0,0,0.4);
             z-index: 10;
             pointer-events: none;
         }
@@ -127,10 +127,10 @@
             position: absolute;
             top: 50%;
             transform: translateY(-50%);
-            left: -5px;
-            right: -5px;
-            height: 6px;
-            background: #444;
+            left: -4px;
+            right: -4px;
+            height: 4px;
+            background: #333;
             border-radius: 3px;
             z-index: 5;
             pointer-events: none;
@@ -248,8 +248,8 @@
             left: 0;
             top: 50%;
             width: 100%;
-            height: 2px;
-            background: rgba(0,0,0,0.7);
+            height: 1px;
+            background: rgba(0,0,0,0.4);
             z-index: 10;
             pointer-events: none;
         }
@@ -260,10 +260,10 @@
             position: absolute;
             top: 50%;
             transform: translateY(-50%);
-            left: -5px;
-            right: -5px;
-            height: 6px;
-            background: #444;
+            left: -4px;
+            right: -4px;
+            height: 4px;
+            background: #333;
             border-radius: 3px;
             z-index: 5;
             pointer-events: none;
@@ -441,7 +441,7 @@
         }
 
         #clg-logo {
-            margin-top: 80px;
+            margin-top: 50px;
             width: 200px;
             max-width: 200px;
             filter: brightness(0) invert(1);
