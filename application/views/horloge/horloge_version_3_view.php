@@ -11,7 +11,7 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400&family=Oswald:wght@600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400&family=Oswald:wght@600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
@@ -27,7 +27,7 @@
             --card-ratio: 1.40;
             --digit-height: calc(var(--digit-width) * var(--card-ratio));
             --font-size: calc(var(--digit-width) * 1);
-            --mini-width: 3.5vw;
+            --mini-width: 4.2vw;
             --mini-height: calc(var(--mini-width) * var(--card-ratio));
             --mini-font: calc(var(--mini-width) * 1);
         }
@@ -272,15 +272,29 @@
         /* --- Countdown --- */
 
         #horloge-temps-restant {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 1.8rem;
-            font-family: 'Manrope', sans-serif;
-            font-weight: 300;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 130px;
         }
 
-        #horloge-temps-minutes {
+        .countdown-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .countdown-label {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: #fff;
+            margin-bottom: 12px;
+        }
+
+        #horloge-temps-minutes,
+        #horloge-heure-fin-exact {
             display: inline-flex;
             gap: 4px;
         }
@@ -371,7 +385,6 @@
         #horloge-heure-fin-exact {
             display: inline-flex;
             gap: 4px;
-            vertical-align: middle;
         }
 
         .mini-flap-colon {
@@ -428,7 +441,7 @@
         }
 
         #clg-logo {
-            margin-top: 60px;
+            margin-top: 80px;
             width: 200px;
             max-width: 200px;
             filter: brightness(0) invert(1);
@@ -480,14 +493,15 @@
         <div id="horloge-contenu">
             <div id="horloge-heure"></div>
 
-            <div>
-                <span id="horloge-temps-restant">
+            <div id="horloge-temps-restant">
+                <div class="countdown-group">
+                    <span class="countdown-label">minute<span class="horloge-temps-minutes-pluriel"></span> restante<span class="horloge-temps-minutes-pluriel"></span></span>
                     <span id="horloge-temps-minutes"></span>
-                    <span>minute<span class="horloge-temps-minutes-pluriel"></span>
-                    restante<span class="horloge-temps-minutes-pluriel"></span>
-                    avant</span>
+                </div>
+                <div class="countdown-group">
+                    <span class="countdown-label">heure limite</span>
                     <span id="horloge-heure-fin-exact"></span>
-                </span>
+                </div>
             </div>
 
             <img id="clg-logo" src="<?= base_url('assets/img/logoCLG_2019.svg'); ?>" alt="Logo Collège">
