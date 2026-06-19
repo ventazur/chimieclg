@@ -19,7 +19,7 @@
 			&copy; <?= date('Y'); ?>, Collège Lionel-Groulx. Tous droits réservés.
 			<br /><br />
             Outils : 
-            <a href="<?= base_url() . 'horloge/v/2'; ?>" style="text-decoration: none">Horloge</a>,
+            <a href="<?= base_url() . 'horloge'; ?>" style="text-decoration: none">Horloge</a>,
 			<a href="<?= base_url() . 'codeqr'; ?>" style="text-decoration: none">CodeQR</a>
 
 			<div class="mt-2">

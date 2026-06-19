@@ -28,7 +28,8 @@ class MY_Controller extends CI_Controller
 		// CF Turnstile
 		//
 	
-		$this->est_humain = $this->Usager_model->verifier_ip_autorise();
+		$this->est_humain = ($this->is_DEV ? TRUE : $this->Usager_model->verifier_ip_autorise());
+		// $this->est_humain = $this->Usager_model->verifier_ip_autorise();
 
 		// Verifier par la session
 
