@@ -41,7 +41,11 @@ class Horloge extends MY_Controller
 	{
 		return $this->output
             ->set_content_type('application/json')
-			->set_output(json_encode(['epoch' => date('U'), 'heure' => date('H:i:s')]));
+			->set_output(json_encode([
+				'epoch'    => date('U'),
+				'epoch_ms' => round(microtime(true) * 1000),
+				'heure'    => date('H:i:s'),
+			]));
 
         // echo json_encode(
         //     array(

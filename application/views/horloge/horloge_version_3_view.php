@@ -474,7 +474,7 @@
 
     <script src="<?= base_url('assets/js/horloge_v3.js?v=' . date('U')); ?>"></script>
 
-    <div id="maintenant-epoch" class="d-none"><?= date('U'); ?></div>
+    <div id="maintenant-epoch" class="d-none" data-epoch-ms="<?= round(microtime(true) * 1000); ?>"><?= date('U'); ?></div>
 
     <main id="horloge" class="container-fluid">
 

@@ -13,13 +13,15 @@ $(document).ready(function ()
     };
 
     let decalageServeurLocal = 0;
+    let decalageCible        = 0;
     let heureLimite   = docCookies.getItem('heure_limite') || '18:00';
     let dernierTemps  = '';
     let dernierNbCartes = -1;
 
-    const epochInitial = Number($('#maintenant-epoch').text());
-    if (epochInitial) {
-        decalageServeurLocal = ((epochInitial * 1000) + 500) - Date.now();
+    const epochMsInitial = Number($('#maintenant-epoch').attr('data-epoch-ms'));
+    if (epochMsInitial) {
+        decalageServeurLocal = epochMsInitial - Date.now();
+        decalageCible        = decalageServeurLocal;
     }
 
     $('#parametres-heure').val(heureLimite);
@@ -133,6 +135,17 @@ $(document).ready(function ()
         return Date.now() + decalageServeurLocal;
     }
 
+    // Applique un nouveau décalage : snap si la désynchro est forte (onglet en
+    // veille, etc.), sinon vise une cible que rafraichirTemps() rejoint en douceur.
+    function appliquerNouveauDecalage(nouveau)
+    {
+        if (Math.abs(nouveau - decalageServeurLocal) > 1500) {
+            decalageServeurLocal = decalageCible = nouveau;
+        } else {
+            decalageCible = nouveau;
+        }
+    }
+
     function buildMiniCard()
     {
         var $card = $('<div class="mini-flap" data-value="">');
@@ -205,6 +218,13 @@ $(document).ready(function ()
 
     function rafraichirTemps()
     {
+        // Lissage : on rapproche le décalage de sa cible d'au plus 100 ms par tick,
+        // pour résorber une correction sans saut brutal du split-flap.
+        var ecart = decalageCible - decalageServeurLocal;
+        if (ecart !== 0) {
+            decalageServeurLocal += Math.max(-100, Math.min(100, ecart));
+        }
+
         var maintenantMs   = obtenirTempsServeurActuel();
         var tempsAfficheMs = maintenantMs + 50;
         var timeStr        = new Date(tempsAfficheMs).toTimeString().split(' ')[0];
@@ -220,10 +240,10 @@ $(document).ready(function ()
         var tempsDepart = Date.now();
 
         $.post(base_url + 'horloge/ping', { ci_csrf_token: cct }, function (data) {
-            if (data && data.epoch) {
+            if (data && data.epoch_ms) {
                 var latenceMs          = (Date.now() - tempsDepart) / 2;
-                var tempsServeurEstime = (Number(data.epoch) * 1000 + 500) + latenceMs;
-                decalageServeurLocal   = tempsServeurEstime - Date.now();
+                var tempsServeurEstime = Number(data.epoch_ms) + latenceMs;
+                appliquerNouveauDecalage(tempsServeurEstime - Date.now());
             }
         }, 'json').always(function () {
             setTimeout(pingServeur, CONFIG.pingInterval);
