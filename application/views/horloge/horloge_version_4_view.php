@@ -131,22 +131,31 @@
         }
 
         .countdown-value {
-            font-family: 'Caveat', cursive;
-            font-size: 5vw;
-            font-weight: 700;
-            color: var(--accent-color);
-            text-shadow:
-                0 0 2px rgba(240,208,96,0.4),
-                0 0 8px rgba(240,208,96,0.08);
-            filter: url(#chalk-texture-mini);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.3vw;
             margin-top: 8px;
         }
 
-        #horloge-temps-minutes {
+        .chalk-mini {
+            height: var(--mini-height);
+            width: calc(var(--mini-height) * 40 / 70);
+            color: var(--accent-color);
+            filter: url(#chalk-texture-mini);
+            overflow: visible;
+        }
+
+        .chalk-colon-mini {
+            height: var(--mini-height);
+            width: calc(var(--mini-height) * 20 / 70);
+            color: var(--accent-color);
+            filter: url(#chalk-texture-mini);
+            overflow: visible;
+        }
+
+        #horloge-temps-minutes .chalk-mini {
             color: #e85050;
-            text-shadow:
-                0 0 2px rgba(232,80,80,0.4),
-                0 0 8px rgba(232,80,80,0.08);
         }
 
         /* --- Logo --- */
@@ -227,11 +236,11 @@
             <div id="horloge-temps-restant">
                 <div class="countdown-group">
                     <div class="countdown-label">minute<span class="horloge-temps-minutes-pluriel"></span> restante<span class="horloge-temps-minutes-pluriel"></span></div>
-                    <div class="countdown-value" id="horloge-temps-minutes"></div>
+                    <div class="countdown-value" id="horloge-temps-minutes"><!-- SVG digits built by JS --></div>
                 </div>
                 <div class="countdown-group">
                     <div class="countdown-label">heure limite</div>
-                    <div class="countdown-value" id="horloge-heure-fin-exact"></div>
+                    <div class="countdown-value" id="horloge-heure-fin-exact"><!-- SVG digits built by JS --></div>
                 </div>
             </div>
             </div>

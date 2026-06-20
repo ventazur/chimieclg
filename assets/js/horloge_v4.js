@@ -185,11 +185,57 @@ $(document).ready(function ()
         }
     }
 
-    // --- Heure limite ---
+    // --- Heure limite (SVG) ---
 
     function buildHeureFin()
     {
-        document.getElementById('horloge-heure-fin-exact').textContent = heureLimite;
+        var el = document.getElementById('horloge-heure-fin-exact');
+        el.innerHTML = '';
+
+        var chars = heureLimite.split('');
+        chars.forEach(function (c) {
+            if (c === ':') {
+                el.appendChild(createColonSVG('chalk-colon-mini'));
+            } else {
+                var svg = createDigitSVG('chalk-mini');
+                writeDigit(svg, c, 0);
+                svg.setAttribute('data-value', c);
+                el.appendChild(svg);
+            }
+        });
+    }
+
+    var dernierMinutes = '';
+
+    function buildMinutes(minutesStr)
+    {
+        if (minutesStr === dernierMinutes) return;
+        dernierMinutes = minutesStr;
+
+        var el = document.getElementById('horloge-temps-minutes');
+        var oldSvgs = el.querySelectorAll('.chalk-mini');
+        var oldDigits = [];
+        for (var i = 0; i < oldSvgs.length; i++) {
+            oldDigits.push(oldSvgs[i].getAttribute('data-value') || '');
+        }
+
+        var newDigits = minutesStr.split('');
+
+        if (oldDigits.length !== newDigits.length) {
+            el.innerHTML = '';
+            newDigits.forEach(function (d) {
+                var svg = createDigitSVG('chalk-mini');
+                writeDigit(svg, d, oldDigits.length === 0 ? 0 : CONFIG.writeDuration);
+                svg.setAttribute('data-value', d);
+                el.appendChild(svg);
+            });
+            return;
+        }
+
+        var svgs = el.querySelectorAll('.chalk-mini');
+        for (var i = 0; i < svgs.length; i++) {
+            setDigit(svgs[i], newDigits[i]);
+        }
     }
 
     buildHeureFin();
@@ -223,7 +269,7 @@ $(document).ready(function ()
 
         var minutes = Math.max(0, Math.floor((diffMs + 59999) / 60000));
 
-        document.getElementById('horloge-temps-minutes').textContent = minutes;
+        buildMinutes(String(minutes));
         $('.horloge-temps-minutes-pluriel').text(minutes > 1 ? 's' : '');
     }
 
