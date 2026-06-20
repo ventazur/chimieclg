@@ -125,22 +125,8 @@
             top: 50%;
             width: 100%;
             height: 1px;
-            background: rgba(0,0,0,0.4);
+            background: rgba(0,0,0,0.7);
             z-index: 10;
-            pointer-events: none;
-        }
-
-        .flap-colon::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            left: -4px;
-            right: -4px;
-            height: 4px;
-            background: #333;
-            border-radius: 3px;
-            z-index: 5;
             pointer-events: none;
         }
 
@@ -257,23 +243,8 @@
             top: 50%;
             width: 100%;
             height: 1px;
-            background: rgba(0,0,0,0.4);
+            background: rgba(0,0,0,0.7);
             z-index: 10;
-            pointer-events: none;
-        }
-
-        /* Rivets/axe décoratif */
-        .flap-card::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            left: -4px;
-            right: -4px;
-            height: 4px;
-            background: #333;
-            border-radius: 3px;
-            z-index: 5;
             pointer-events: none;
         }
 
