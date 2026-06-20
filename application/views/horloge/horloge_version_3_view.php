@@ -27,7 +27,7 @@
             --card-ratio: 1.40;
             --digit-height: calc(var(--digit-width) * var(--card-ratio));
             --font-size: calc(var(--digit-width) * 1);
-            --mini-width: 4.2vw;
+            --mini-width: 4.5vw;
             --mini-height: calc(var(--mini-width) * var(--card-ratio));
             --mini-font: calc(var(--mini-width) * 1);
         }
@@ -55,13 +55,21 @@
         }
 
         #horloge-contenu {
-            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #horloge-clock-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
         }
 
         /* --- Split-Flap Display --- */
 
         #horloge-heure {
-            display: inline-flex;
+            display: flex;
             align-items: center;
             gap: var(--card-gap);
             margin-bottom: 50px;
@@ -273,9 +281,8 @@
 
         #horloge-temps-restant {
             display: flex;
-            justify-content: center;
+            justify-content: space-around;
             align-items: flex-start;
-            gap: 130px;
         }
 
         .countdown-group {
@@ -444,7 +451,7 @@
             margin-top: 65px;
             width: 200px;
             max-width: 200px;
-            filter: brightness(0) invert(1);
+            filter: brightness(0) invert(1) opacity(0.4);
         }
 
         .btn-ui {
@@ -491,6 +498,7 @@
 
         <!-- Main Display -->
         <div id="horloge-contenu">
+            <div id="horloge-clock-wrapper">
             <div id="horloge-heure"></div>
 
             <div id="horloge-temps-restant">
@@ -502,6 +510,7 @@
                     <span class="countdown-label">heure limite</span>
                     <span id="horloge-heure-fin-exact"></span>
                 </div>
+            </div>
             </div>
 
             <img id="clg-logo" src="<?= base_url('assets/img/logoCLG_2019.svg'); ?>" alt="Logo Collège">
