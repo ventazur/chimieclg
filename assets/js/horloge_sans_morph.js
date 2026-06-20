@@ -48,11 +48,10 @@ $(document).ready(function()
 
     if (docCookies.hasItem('heure_limite'))
     {
-        heure_limite_safe = docCookies.getItem('heure_limite');
+        var cookie_val = docCookies.getItem('heure_limite');
+        heure_limite = cookie_val.replace(/h/i, ':');
+        heure_limite_safe = heure_limite.replace(/:/, 'h');
 
-        const regex = /h/i;
-        heure_limite = heure_limite_safe.replace(regex, ':');
-        
         $('#horloge-heure-fin-exact').html(heure_limite_safe);
     }
     else
@@ -136,7 +135,7 @@ $(document).ready(function()
 
         $('#horloge-heure-fin-exact').html(heure_limite_safe);
 
-        docCookies.setItem('heure_limite', heure_limite_safe, 60*60*6);
+        docCookies.setItem('heure_limite', heure_limite, 60*60*6);
 
         Duree();
 

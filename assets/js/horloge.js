@@ -48,7 +48,8 @@ $(document).ready(function ()
     let decalageServeurLocal = 0;
 
     // --- État initial ---
-    let heureLimite   = docCookies.getItem('heure_limite')    || '18:00';
+    let heureLimite   = docCookies.getItem('heure_limite');
+    if (!heureLimite || !/^\d{1,2}:\d{2}$/.test(heureLimite)) heureLimite = '18:00';
     let policeActuelle = docCookies.getItem('police_actuelle') || CONFIG.policeDefaut;
     let tailleActuelle = Number(docCookies.getItem('taille_actuelle')) || CONFIG.tailleDefaut;
 

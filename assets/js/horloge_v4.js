@@ -31,7 +31,8 @@ $(document).ready(function ()
 
     var decalageServeurLocal = 0;
     var decalageCible        = 0;
-    var heureLimite   = docCookies.getItem('heure_limite') || '18:00';
+    var heureLimite   = docCookies.getItem('heure_limite');
+    if (!heureLimite || !/^\d{1,2}:\d{2}$/.test(heureLimite)) heureLimite = '18:00';
     var dernierTemps  = '';
 
     var epochMsInitial = Number($('#maintenant-epoch').attr('data-epoch-ms'));

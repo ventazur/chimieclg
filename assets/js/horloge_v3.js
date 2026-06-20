@@ -14,7 +14,8 @@ $(document).ready(function ()
 
     let decalageServeurLocal = 0;
     let decalageCible        = 0;
-    let heureLimite   = docCookies.getItem('heure_limite') || '18:00';
+    let heureLimite   = docCookies.getItem('heure_limite');
+    if (!heureLimite || !/^\d{1,2}:\d{2}$/.test(heureLimite)) heureLimite = '18:00';
     let dernierTemps  = '';
     let dernierNbCartes = -1;
 
