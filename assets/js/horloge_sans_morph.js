@@ -59,6 +59,8 @@ $(document).ready(function()
         $('#horloge-heure-fin-exact').html(heure_limite_safe);
     }
 
+    $('#parametres-heure').val(heure_limite);
+
     //
     // Determiner la duree (temps) restante
     //

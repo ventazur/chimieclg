@@ -365,6 +365,11 @@
             gap: 4px;
         }
 
+        #horloge-heure-fin-exact .mini-flap,
+        #horloge-heure-fin-exact .mini-flap-colon {
+            color: #ff9f00;
+        }
+
         .mini-flap-colon {
             position: relative;
             width: var(--mini-width);
