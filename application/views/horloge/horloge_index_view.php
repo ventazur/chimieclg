@@ -23,7 +23,7 @@
             <li><a href="<?= base_url() . $this->current_controller . '/v/1'; ?>">version 1</a> (original)</li>
             <li><a href="<?= base_url() . $this->current_controller . '/v/2'; ?>">version 2</a> (sombre)</li>
             <li><a href="<?= base_url() . $this->current_controller . '/v/3'; ?>">version 3</a> (aéroport)</li>
-            <li><a href="<?= base_url() . $this->current_controller . '/v/4'; ?>">version 4</a> (tableau)</li>
+            <li><a href="<?= base_url() . $this->current_controller . '/v/4'; ?>">version 4</a> (tableau craie)</li>
         </ul>
     </div>
 

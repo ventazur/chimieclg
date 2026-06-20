@@ -121,7 +121,7 @@
 
         .countdown-label {
             font-family: 'Caveat', cursive;
-            font-size: 1.8rem;
+            font-size: 2.4rem;
             font-weight: 500;
             color: rgba(255,255,255,0.45);
             text-shadow:
