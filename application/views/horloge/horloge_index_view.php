@@ -65,13 +65,13 @@
 
     <div class="page-titre">Horloges</div>
 
-    <div id="horloge-items" class="mt-4">
+    <div id="horloge-items" class="mt-4 mb-3">
 
         <a class="horloge-item" href="<?= base_url() . $this->current_controller . '/v/1'; ?>" style="border-left-color: #d22630">
             <div class="horloge-item-dot" style="background: #d22630"></div>
             <div class="horloge-item-texte">
                 <div class="horloge-item-nom">Version 1 — Originale</div>
-                <div class="horloge-item-desc">Fond gris clair, affichage simple avec Roboto Mono</div>
+                <div class="horloge-item-desc">Fond gris clair, affichage simple et sobre</div>
             </div>
             <i class="bi bi-chevron-right horloge-item-fleche"></i>
         </a>
@@ -80,7 +80,7 @@
             <div class="horloge-item-dot" style="background: #222"></div>
             <div class="horloge-item-texte">
                 <div class="horloge-item-nom">Version 2 — Sombre</div>
-                <div class="horloge-item-desc">Fond noir, grandes digits avec animation de morphing</div>
+                <div class="horloge-item-desc">Fond noir, grands chiffres avec animation de morphing</div>
             </div>
             <i class="bi bi-chevron-right horloge-item-fleche"></i>
         </a>
@@ -89,7 +89,7 @@
             <div class="horloge-item-dot" style="background: #555"></div>
             <div class="horloge-item-texte">
                 <div class="horloge-item-nom">Version 3 — Aéroport</div>
-                <div class="horloge-item-desc">Volets mécaniques animés (split-flap), style tableau de départs</div>
+                <div class="horloge-item-desc">Volets mécaniques animés, style tableau de départs d'un aéroport</div>
             </div>
             <i class="bi bi-chevron-right horloge-item-fleche"></i>
         </a>
