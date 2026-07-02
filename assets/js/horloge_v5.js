@@ -111,7 +111,7 @@ $(document).ready(function ()
         }
 
         var maintenantMs = obtenirTempsServeurActuel();
-        var timeStr = new Date(maintenantMs + 50).toTimeString().split(' ')[0];
+        var timeStr = new Date(maintenantMs + 50).toTimeString().split(' ')[0].slice(0, 5);
 
         rendreChiffresFixes($('#horloge-heure'), timeStr);
         calculerDureeRestante();

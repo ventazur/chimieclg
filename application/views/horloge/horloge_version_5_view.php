@@ -186,7 +186,7 @@
             <div id="horloge-bas">
                 <div class="horloge-bas-bloc">
                     <div class="titre">heure actuelle</div>
-                    <span class="valeur" id="horloge-heure">--:--:--</span>
+                    <span class="valeur" id="horloge-heure">--:--</span>
                 </div>
                 <div class="horloge-bas-bloc">
                     <div class="titre">heure limite</div>
