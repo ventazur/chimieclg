@@ -153,6 +153,11 @@
         #horloge-bas .horloge-digit { width: 0.6em; }
         #horloge-bas .horloge-colon { width: 0.3em; }
 
+        #horloge-heure.horloge-secondes-clignote .horloge-colon {
+            opacity: 0.15;
+            transition: opacity 0.15s ease;
+        }
+
         #clg-logo {
             width: clamp(60px, 9vw, 150px);
             margin-top: 4vw;

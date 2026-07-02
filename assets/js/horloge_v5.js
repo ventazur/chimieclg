@@ -124,9 +124,16 @@ $(document).ready(function ()
         }
 
         var maintenantMs = obtenirTempsServeurActuel();
-        var timeStr = new Date(maintenantMs + 50).toTimeString().split(' ')[0].slice(0, 5);
+        var dateActuelle = new Date(maintenantMs + 50);
+        var timeStr = dateActuelle.toTimeString().split(' ')[0].slice(0, 5);
 
         rendreChiffresFixes($('#horloge-heure'), timeStr);
+
+        $('#horloge-heure').toggleClass(
+            'horloge-secondes-clignote',
+            modeCalme && (dateActuelle.getSeconds() % 2 === 0)
+        );
+
         calculerDureeRestante();
 
         setTimeout(rafraichirTemps, 1000 - (maintenantMs % 1000));
