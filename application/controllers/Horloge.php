@@ -26,7 +26,7 @@ class Horloge extends MY_Controller
 
     public function v($v)
     {
-        $versions_acceptees = [1, 2, 3, 4];
+        $versions_acceptees = [1, 2, 3, 4, 5];
 
         if ( ! in_array($v, $versions_acceptees))
         {

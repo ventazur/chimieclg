@@ -103,6 +103,15 @@
             <i class="bi bi-chevron-right horloge-item-fleche"></i>
         </a>
 
+        <a class="horloge-item" href="<?= base_url() . $this->current_controller . '/v/5'; ?>" style="border-left-color: #6f9e82">
+            <div class="horloge-item-dot" style="background: #6f9e82"></div>
+            <div class="horloge-item-texte">
+                <div class="horloge-item-nom">Version 5 — Décompte</div>
+                <div class="horloge-item-desc">Grand compte à rebours avec alerte de couleur, pour les périodes d'examen</div>
+            </div>
+            <i class="bi bi-chevron-right horloge-item-fleche"></i>
+        </a>
+
     </div>
 
 </div> <!-- .container -->
