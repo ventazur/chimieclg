@@ -59,31 +59,44 @@
         }
 
         #horloge-temps-restant {
-            display: inline-block;
-            margin-top: 16px;
-            padding: 20px 40px;
-            font-size: 2.5rem;
+            display: flex;
+            justify-content: center;
+            gap: 140px;
+            margin-top: 32px;
             font-family: "Manrope", sans-serif;
-            font-weight: 200;
-            opacity: 0.85;
+        }
+
+        .countdown-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .countdown-label {
+            font-size: 1.4rem;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            opacity: 0.6;
+            margin-bottom: -10px;
         }
 
         #horloge-temps-minutes {
-			font-weight: bold;
-			font-size: 1.5em;
+			font-weight: 600;
+			font-size: 4.8rem;
             color: var(--accent-color);
 		}
 
 		#horloge-heure-fin-exact {
-			font-weight: bold;
-			font-size: 1.5em;
+			font-weight: 600;
+			font-size: 4.8rem;
             color: var(--accent-color);
 		}
 
-        #clg-logo { 
+        #clg-logo {
 			margin-top: 50px;
-			width: 250px;
-            max-width: 250px;
+			width: 150px;
+            max-width: 150px;
 			filter: brightness(0) invert(1);
 			opacity: 0.18;
         }
@@ -185,14 +198,15 @@
         <div id="horloge-contenu">
             <time id="horloge-heure"><?= date('H:i:s'); ?></time>
 
-            <div>
-                <span id="horloge-temps-restant">
-                    <span id="horloge-temps-minutes">0</span> 
-					minute<span class="horloge-temps-minutes-pluriel"></span> 
-					restante<span class="horloge-temps-minutes-pluriel"></span> 
-                    avant 
+            <div id="horloge-temps-restant">
+                <div class="countdown-group">
+                    <span class="countdown-label">minute<span class="horloge-temps-minutes-pluriel"></span> restante<span class="horloge-temps-minutes-pluriel"></span></span>
+                    <span id="horloge-temps-minutes">0</span>
+                </div>
+                <div class="countdown-group">
+                    <span class="countdown-label">heure limite</span>
                     <span id="horloge-heure-fin-exact"></span>
-                </span>
+                </div>
             </div>
 
             <img id="clg-logo" src="<?= base_url('assets/img/logoCLG_2019.svg'); ?>" alt="Logo Collège">

@@ -73,11 +73,12 @@ $(document).ready(function ()
 
     // --- Initialisation de l'interface ---
     $('#parametres-heure').val(heureLimite);
-    $('#horloge-heure-fin-exact').text(heureLimite.replace(':', 'h'));
+    $('#horloge-heure-fin-exact').text(heureLimite);
     $('#horloge-heure').css({
         'font-family': policeActuelle,
         'font-size':   `${tailleActuelle}rem`
     });
+    $('#horloge-temps-minutes, #horloge-heure-fin-exact').css('font-family', policeActuelle);
     $('#range-taille').val(tailleActuelle);
     $('#label-taille').text(tailleActuelle);
 
@@ -166,6 +167,7 @@ $(document).ready(function ()
     {
         policeActuelle = $(this).val();
         $('#horloge-heure').css('font-family', policeActuelle);
+        $('#horloge-temps-minutes, #horloge-heure-fin-exact').css('font-family', policeActuelle);
         docCookies.setItem('police_actuelle', policeActuelle, CONFIG.cookieExpire);
     });
 
@@ -185,7 +187,7 @@ $(document).ready(function ()
         const nouvelleHeure = $('#parametres-heure').val();
         if (nouvelleHeure) {
             heureLimite = nouvelleHeure;
-            $('#horloge-heure-fin-exact').text(heureLimite.replace(':', 'h'));
+            $('#horloge-heure-fin-exact').text(heureLimite);
             docCookies.setItem('heure_limite', heureLimite, CONFIG.cookieExpire);
             calculerDureeRestante();
         }
