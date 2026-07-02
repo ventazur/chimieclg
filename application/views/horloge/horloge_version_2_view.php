@@ -40,9 +40,11 @@
 
         #horloge-settings {
             position: absolute;
-            top: 20px;
-            right: 20px;
+            top: 24px;
+            right: 24px;
             z-index: 100;
+            display: flex;
+            gap: 8px;
         }
 
         #horloge-contenu {
@@ -58,11 +60,12 @@
 
         #horloge-temps-restant {
             display: inline-block;
+            margin-top: 16px;
             padding: 20px 40px;
-            border-radius: 60px;
             font-size: 2.5rem;
             font-family: "Manrope", sans-serif;
             font-weight: 200;
+            opacity: 0.85;
         }
 
         #horloge-temps-minutes {
@@ -82,18 +85,33 @@
 			width: 250px;
             max-width: 250px;
 			filter: brightness(0) invert(1);
+			opacity: 0.18;
         }
 
         .btn-ui {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
             background: none;
             border: none;
+            border-radius: 50%;
             color: var(--text-color);
             cursor: pointer;
-            opacity: 0.5;
-            transition: opacity 0.3s;
+            opacity: 0.55;
+            transition: opacity 0.2s ease, background 0.2s ease;
         }
 
-        .btn-ui:hover { opacity: 1; }
+        .btn-ui:hover {
+            opacity: 1;
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .btn-ui.is-active {
+            opacity: 1;
+            color: var(--accent-color);
+        }
 
 		/* --- Morphing Logic --- */
 
