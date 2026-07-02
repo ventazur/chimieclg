@@ -211,6 +211,10 @@
                         <label for="parametres-heure" class="form-label">Heure de fin de l'examen</label>
                         <input id="parametres-heure" type="time" class="form-control">
                     </div>
+                    <div class="form-check mt-3">
+                        <input id="parametres-mode-calme" type="checkbox" class="form-check-input">
+                        <label for="parametres-mode-calme" class="form-check-label">Mode calme (masquer les secondes au-delà de 5 minutes)</label>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>

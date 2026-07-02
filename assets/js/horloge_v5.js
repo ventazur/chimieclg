@@ -18,6 +18,8 @@ $(document).ready(function ()
     var heureLimite = docCookies.getItem('heure_limite');
     if (!heureLimite || !/^\d{1,2}:\d{2}$/.test(heureLimite)) heureLimite = '18:00';
 
+    var modeCalme = docCookies.getItem('mode_calme') === '1';
+
     var epochMsInitial = Number($('#maintenant-epoch').attr('data-epoch-ms'));
     if (epochMsInitial) {
         decalageServeurLocal = epochMsInitial - Date.now();
@@ -25,7 +27,9 @@ $(document).ready(function ()
     }
 
     $('#parametres-heure').val(heureLimite);
+    $('#parametres-mode-calme').prop('checked', modeCalme);
     rendreChiffresFixes($('#horloge-heure-fin-exact'), heureLimite);
+    rafraichirLabelTemps();
 
     // --- Temps serveur ---
 
@@ -66,6 +70,11 @@ $(document).ready(function ()
 
     // --- Countdown ---
 
+    function rafraichirLabelTemps()
+    {
+        $('#horloge-temps-label').text(modeCalme ? 'minutes restantes' : 'temps restant');
+    }
+
     function appliquerEtatAlerte(diffMs)
     {
         var body = document.body;
@@ -98,7 +107,11 @@ $(document).ready(function ()
         var minutes = Math.floor(totalSecondes / 60);
         var secondes = totalSecondes % 60;
 
-        rendreChiffresFixes($('#horloge-temps-minutes'), deuxChiffres(minutes) + ':' + deuxChiffres(secondes));
+        var texte = (modeCalme && diffMs >= CONFIG.seuilRougeMs)
+            ? String(minutes)
+            : String(minutes) + ':' + deuxChiffres(secondes);
+
+        rendreChiffresFixes($('#horloge-temps-minutes'), texte);
 
         appliquerEtatAlerte(diffMs);
     }
@@ -147,8 +160,13 @@ $(document).ready(function ()
             heureLimite = nouvelleHeure;
             rendreChiffresFixes($('#horloge-heure-fin-exact'), heureLimite);
             docCookies.setItem('heure_limite', heureLimite, CONFIG.cookieExpire);
-            calculerDureeRestante();
         }
+
+        modeCalme = $('#parametres-mode-calme').is(':checked');
+        docCookies.setItem('mode_calme', modeCalme ? '1' : '0', CONFIG.cookieExpire);
+        rafraichirLabelTemps();
+
+        calculerDureeRestante();
         $('#horloge-modal').modal('hide');
     });
 
