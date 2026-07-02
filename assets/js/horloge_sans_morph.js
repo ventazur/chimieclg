@@ -114,6 +114,31 @@ $(document).ready(function()
     Duree();
 
     //
+    // Plein ecran
+    //
+
+    $('#fullscreen-btn').on('click', function()
+    {
+        if (!document.fullscreenElement)
+        {
+            document.documentElement.requestFullscreen().catch(function(err)
+            {
+                console.error(err);
+            });
+        }
+        else
+        {
+            document.exitFullscreen();
+        }
+    });
+
+    document.addEventListener('fullscreenchange', function()
+    {
+        var isFullscreen = !!document.fullscreenElement;
+        $('#horloge-fullscreen-btn').toggleClass('is-active', isFullscreen);
+    });
+
+    //
     // Modal
     //
 

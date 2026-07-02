@@ -13,45 +13,71 @@
 	font-family: Montserrat;
 }
 
-#horloge-settings {
+.horloge-icon-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 44px;
+	height: 44px;
+	margin-top: 20px;
+	border-radius: 50%;
+	color: #8a9099;
+	background: transparent;
+	transition: background 0.15s ease, color 0.15s ease;
+	cursor: pointer;
+}
+
+.horloge-icon-btn:hover {
+	color: #d22630;
+	background: rgba(210, 38, 48, 0.08);
+}
+
+.horloge-icon-btn.is-active {
+	color: #d22630;
 }
 
 #horloge-contenu {
     font-size: 4em;
     text-align: center;
 	font-weight: 300;
-	margin-top: 50px;
-    /*
-    font-size: 4em;
-    display: flex;
-    position: fixed;
-    top: 45%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    */
+	margin-top: 80px;
 }
 
 #horloge-heure-titre {
 	color: #fff;
 	background: #d22630;
 	text-align: left;
-	padding: 6px 12px 4px 12px;
-	font-size: 0.3em;
-	font-weight: 300;
+	padding: 8px 16px 6px 16px;
+	font-size: 0.28em;
+	font-weight: 500;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+	border-radius: 6px 6px 0 0;
 }
 
 #horloge-heure {
     color: #222;
     font-size: 1.6em;
     font-family: "Roboto Mono";
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.02em;
     border: 2px solid #d22630;
-    padding: 0 50px 10px 50px;
+    border-top: none;
+    border-radius: 0 0 6px 6px;
+    padding: 8px 50px 18px 50px;
     background: #fff;
+    box-shadow: 0 18px 40px -18px rgba(20, 22, 25, 0.35);
 }
 
 #horloge-temps-restant {
-    margin-top: 30px;
+    display: inline-block;
+    margin-top: 70px;
     margin-bottom: -20px;
+    padding: 22px 48px;
+    border-radius: 999px;
+    background: #fff;
+    box-shadow: 0 8px 20px -12px rgba(20, 22, 25, 0.25);
+    color: #4a4f57;
     font-weight: 300;
     font-size: 0.4em;
 }
@@ -59,7 +85,7 @@
 #horloge-temps-minutes {
     font-size: 1.5em;
     font-family: "Roboto Mono";
-	font-weight: 400;
+	font-weight: 500;
     color: #d22620;
 }
 
@@ -70,7 +96,8 @@
 #horloge-heure-fin-exact {
     font-size: 1.5em;
     font-family: "Roboto Mono";
-	font-weight: 400;
+	font-weight: 500;
+    color: #d22620;
 }
 
 </style>
@@ -84,7 +111,13 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@300;400&family=Share+Tech+Mono&display=swap">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;500;600&family=Zilla+Slab:wght@300;400;600&display=swap">
 
-<body style="background: #e9ebed">
+<body style="
+	background-color: #e9ebed;
+	background-image:
+		linear-gradient(rgba(20, 22, 25, 0.035) 1px, transparent 1px),
+		linear-gradient(90deg, rgba(20, 22, 25, 0.035) 1px, transparent 1px);
+	background-size: 32px 32px;
+">
 
 <div id="maintenant-epoch" class="d-none"><?= date('U'); ?></div>
 
@@ -106,10 +139,18 @@
 
             <div id="horloge-settings">
 
-                <div id="parametres" class="btn">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-sliders" viewBox="0 0 16 16" style="margin-left: 10px">
-                        <path fill-rule="evenodd" d="M11.5 2a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zM9.05 3a2.5 2.5 0 0 1 4.9 0H16v1h-2.05a2.5 2.5 0 0 1-4.9 0H0V3h9.05zM4.5 7a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zM2.05 8a2.5 2.5 0 0 1 4.9 0H16v1H6.95a2.5 2.5 0 0 1-4.9 0H0V8h2.05zm9.45 4a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zm-2.45 1a2.5 2.5 0 0 1 4.9 0H16v1h-2.05a2.5 2.5 0 0 1-4.9 0H0v-1h9.05z"/>
-                    </svg>
+                <button id="fullscreen-btn" class="btn" style="padding: 0; border: none; background: none" title="Plein écran">
+                    <span id="horloge-fullscreen-btn" class="horloge-icon-btn">
+                        <i class="bi bi-fullscreen" style="font-size: 22px"></i>
+                    </span>
+                </button>
+
+                <div id="parametres" class="btn" style="padding: 0">
+                    <span id="horloge-settings-btn" class="horloge-icon-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" class="bi bi-sliders" viewBox="0 0 16 16">
+                            <path fill-rule="evenodd" d="M11.5 2a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zM9.05 3a2.5 2.5 0 0 1 4.9 0H16v1h-2.05a2.5 2.5 0 0 1-4.9 0H0V3h9.05zM4.5 7a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zM2.05 8a2.5 2.5 0 0 1 4.9 0H16v1H6.95a2.5 2.5 0 0 1-4.9 0H0V8h2.05zm9.45 4a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zm-2.45 1a2.5 2.5 0 0 1 4.9 0H16v1h-2.05a2.5 2.5 0 0 1-4.9 0H0v-1h9.05z"/>
+                        </svg>
+                    </span>
                 </div>
 
 			</div>
