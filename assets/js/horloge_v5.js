@@ -18,7 +18,8 @@ $(document).ready(function ()
     var heureLimite = docCookies.getItem('heure_limite');
     if (!heureLimite || !/^\d{1,2}:\d{2}$/.test(heureLimite)) heureLimite = '18:00';
 
-    var modeCalme = docCookies.getItem('mode_calme') === '1';
+    var modeCalmeCookie = docCookies.getItem('mode_calme');
+    var modeCalme = modeCalmeCookie === null ? true : modeCalmeCookie === '1';
 
     var epochMsInitial = Number($('#maintenant-epoch').attr('data-epoch-ms'));
     if (epochMsInitial) {
