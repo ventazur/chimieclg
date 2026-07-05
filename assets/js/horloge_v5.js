@@ -21,6 +21,25 @@ $(document).ready(function ()
     var modeCalmeCookie = docCookies.getItem('mode_calme');
     var modeCalme = modeCalmeCookie === null ? true : modeCalmeCookie === '1';
 
+    var POLICES = {
+        fraunces: { famille: "'Fraunces', serif",     poidsHaut: 340, poidsBas: 440 },
+        jost:     { famille: "'Jost', sans-serif",     poidsHaut: 400, poidsBas: 500 },
+        bebas:    { famille: "'Bebas Neue', sans-serif", poidsHaut: 400, poidsBas: 400 },
+        archivo:  { famille: "'Archivo', sans-serif",  poidsHaut: 600, poidsBas: 500 }
+    };
+
+    var police = docCookies.getItem('police');
+    if (!POLICES[police]) police = 'fraunces';
+
+    function appliquerPolice(nomPolice)
+    {
+        var config = POLICES[nomPolice] || POLICES.fraunces;
+        var racine = document.documentElement.style;
+        racine.setProperty('--font-digits', config.famille);
+        racine.setProperty('--font-digits-weight', config.poidsHaut);
+        racine.setProperty('--font-digits-weight-bas', config.poidsBas);
+    }
+
     var epochMsInitial = Number($('#maintenant-epoch').attr('data-epoch-ms'));
     if (epochMsInitial) {
         decalageServeurLocal = epochMsInitial - Date.now();
@@ -29,8 +48,9 @@ $(document).ready(function ()
 
     $('#parametres-heure').val(heureLimite);
     $('#parametres-mode-calme').prop('checked', modeCalme);
+    $('#parametres-police').val(police);
+    appliquerPolice(police);
     rendreChiffresFixes($('#horloge-heure-fin-exact'), heureLimite);
-    rafraichirLabelTemps();
 
     // --- Temps serveur ---
 
@@ -71,9 +91,9 @@ $(document).ready(function ()
 
     // --- Countdown ---
 
-    function rafraichirLabelTemps()
+    function rafraichirLabelTemps(minutes)
     {
-        $('#horloge-temps-label').text(modeCalme ? 'minutes restantes' : 'temps restant');
+        $('#horloge-temps-label').text(minutes < 2 ? 'minute restante' : 'minutes restantes');
     }
 
     function appliquerEtatAlerte(diffMs)
@@ -113,6 +133,7 @@ $(document).ready(function ()
             : String(minutes) + ':' + deuxChiffres(secondes);
 
         rendreChiffresFixes($('#horloge-temps-minutes'), texte);
+        rafraichirLabelTemps(minutes);
 
         appliquerEtatAlerte(diffMs);
     }
@@ -173,6 +194,10 @@ $(document).ready(function ()
         modeCalme = $('#parametres-mode-calme').is(':checked');
         docCookies.setItem('mode_calme', modeCalme ? '1' : '0', CONFIG.cookieExpire);
         rafraichirLabelTemps();
+
+        police = $('#parametres-police').val();
+        docCookies.setItem('police', police, CONFIG.cookieExpire);
+        appliquerPolice(police);
 
         calculerDureeRestante();
         $('#horloge-modal').modal('hide');

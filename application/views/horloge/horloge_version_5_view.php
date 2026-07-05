@@ -10,7 +10,7 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,340;9..144,440;9..144,560&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,340;9..144,440;9..144,560&family=Jost:wght@300;400;500&family=Bebas+Neue&family=Archivo:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
 
     <style>
@@ -89,9 +89,9 @@
         }
 
         #horloge-temps-minutes {
-            font-family: 'Fraunces', serif;
+            font-family: var(--font-digits, 'Fraunces', serif);
             font-optical-sizing: auto;
-            font-weight: 340;
+            font-weight: var(--font-digits-weight, 340);
             font-size: 15vw;
             line-height: 1;
             letter-spacing: -0.01em;
@@ -143,8 +143,8 @@
         }
 
         #horloge-bas .valeur {
-            font-family: 'Fraunces', serif;
-            font-weight: 440;
+            font-family: var(--font-digits, 'Fraunces', serif);
+            font-weight: var(--font-digits-weight-bas, 440);
             font-size: 3vw;
             display: inline-flex;
             opacity: 0.9;
@@ -219,6 +219,15 @@
                     <div class="form-check mt-3">
                         <input id="parametres-mode-calme" type="checkbox" class="form-check-input">
                         <label for="parametres-mode-calme" class="form-check-label">Mode calme (masquer les secondes au-delà de 5 minutes)</label>
+                    </div>
+                    <div class="mt-3">
+                        <label for="parametres-police" class="form-label">Police des chiffres</label>
+                        <select id="parametres-police" class="form-select">
+                            <option value="fraunces">Fraunces (élégante)</option>
+                            <option value="jost">Jost (épurée)</option>
+                            <option value="bebas">Bebas Neue (impact)</option>
+                            <option value="archivo">Archivo (moderne)</option>
+                        </select>
                     </div>
                 </div>
                 <div class="modal-footer">
