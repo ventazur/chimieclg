@@ -771,6 +771,687 @@ function etats_ajouter_spin(array $base, bool $ms_inclus): array
 
 /* ----------------------------------------------------------------------------
  *
+ * cases_subcouches_ordre()
+ *
+ * ----------------------------------------------------------------------------
+ *
+ * Ordre de remplissage (Aufbau) des sous-couches pour les elements Z = 1 a
+ * 38 (H a Sr), avec leur capacite maximale (2 electrons par orbitale).
+ * Utilise a la fois pour construire une configuration neutre et pour ajouter
+ * des electrons a un anion.
+ *
+ * ---------------------------------------------------------------------------- */
+function cases_subcouches_ordre(): array
+{
+    return array(
+        array('n' => 1, 'l' => 0, 'capacite' => 2),  // 1s
+        array('n' => 2, 'l' => 0, 'capacite' => 2),  // 2s
+        array('n' => 2, 'l' => 1, 'capacite' => 6),  // 2p
+        array('n' => 3, 'l' => 0, 'capacite' => 2),  // 3s
+        array('n' => 3, 'l' => 1, 'capacite' => 6),  // 3p
+        array('n' => 4, 'l' => 0, 'capacite' => 2),  // 4s
+        array('n' => 3, 'l' => 2, 'capacite' => 10), // 3d
+        array('n' => 4, 'l' => 1, 'capacite' => 6),  // 4p
+        array('n' => 5, 'l' => 0, 'capacite' => 2),  // 5s
+    );
+}
+
+/* ----------------------------------------------------------------------------
+ *
+ * cases_symboles() / cases_noms()
+ *
+ * ----------------------------------------------------------------------------
+ *
+ * Symboles et noms francais des elements Z = 1 (H) a Z = 38 (Sr).
+ *
+ * ---------------------------------------------------------------------------- */
+function cases_symboles(): array
+{
+    return array(
+        1 => 'H',  2 => 'He', 3 => 'Li', 4 => 'Be', 5 => 'B',  6 => 'C',
+        7 => 'N',  8 => 'O',  9 => 'F',  10 => 'Ne', 11 => 'Na', 12 => 'Mg',
+        13 => 'Al', 14 => 'Si', 15 => 'P', 16 => 'S', 17 => 'Cl', 18 => 'Ar',
+        19 => 'K', 20 => 'Ca', 21 => 'Sc', 22 => 'Ti', 23 => 'V', 24 => 'Cr',
+        25 => 'Mn', 26 => 'Fe', 27 => 'Co', 28 => 'Ni', 29 => 'Cu', 30 => 'Zn',
+        31 => 'Ga', 32 => 'Ge', 33 => 'As', 34 => 'Se', 35 => 'Br', 36 => 'Kr',
+        37 => 'Rb', 38 => 'Sr',
+    );
+}
+
+function cases_noms(): array
+{
+    return array(
+        1 => 'Hydrogène',  2 => 'Hélium',    3 => 'Lithium',   4 => 'Béryllium',
+        5 => 'Bore',       6 => 'Carbone',   7 => 'Azote',     8 => 'Oxygène',
+        9 => 'Fluor',      10 => 'Néon',     11 => 'Sodium',   12 => 'Magnésium',
+        13 => 'Aluminium', 14 => 'Silicium', 15 => 'Phosphore', 16 => 'Soufre',
+        17 => 'Chlore',    18 => 'Argon',    19 => 'Potassium', 20 => 'Calcium',
+        21 => 'Scandium',  22 => 'Titane',   23 => 'Vanadium', 24 => 'Chrome',
+        25 => 'Manganèse', 26 => 'Fer',      27 => 'Cobalt',   28 => 'Nickel',
+        29 => 'Cuivre',    30 => 'Zinc',     31 => 'Gallium',  32 => 'Germanium',
+        33 => 'Arsenic',   34 => 'Sélénium', 35 => 'Brome',    36 => 'Krypton',
+        37 => 'Rubidium',  38 => 'Strontium',
+    );
+}
+
+/* ----------------------------------------------------------------------------
+ *
+ * cases_charges_reelles()
+ *
+ * ----------------------------------------------------------------------------
+ *
+ * Charges d'ions monoatomiques courants (et realistes) par element, Z = 1 a
+ * 38. Un element absent (ou associe a un tableau vide) n'a pas d'ion
+ * monoatomique usuel : les gaz nobles (He, Ne, Ar, Kr) et quelques elements a
+ * caractere surtout covalent (C, Si, Ge, As) en font partie.
+ *
+ * ---------------------------------------------------------------------------- */
+function cases_charges_reelles(): array
+{
+    return array(
+        1  => array(-1),        // H-
+        3  => array(1),         // Li+
+        4  => array(2),         // Be2+
+        5  => array(3),         // B3+
+        7  => array(-3),        // N3-
+        8  => array(-2),        // O2-
+        9  => array(-1),        // F-
+        11 => array(1),         // Na+
+        12 => array(2),         // Mg2+
+        13 => array(3),         // Al3+
+        15 => array(-3),        // P3-
+        16 => array(-2),        // S2-
+        17 => array(-1),        // Cl-
+        19 => array(1),         // K+
+        20 => array(2),         // Ca2+
+        21 => array(3),         // Sc3+
+        22 => array(4),         // Ti4+
+        23 => array(3),         // V3+
+        24 => array(2, 3),      // Cr2+, Cr3+
+        25 => array(2),         // Mn2+
+        26 => array(2, 3),      // Fe2+, Fe3+
+        27 => array(2, 3),      // Co2+, Co3+
+        28 => array(2),         // Ni2+
+        29 => array(1, 2),      // Cu+, Cu2+
+        30 => array(2),         // Zn2+
+        31 => array(3),         // Ga3+
+        34 => array(-2),        // Se2-
+        35 => array(-1),        // Br-
+        37 => array(1),         // Rb+
+        38 => array(2),         // Sr2+
+    );
+}
+
+/* ----------------------------------------------------------------------------
+ *
+ * cases_lettre_l() / cases_exposant_charge()
+ *
+ * ---------------------------------------------------------------------------- */
+function cases_lettre_l(int $l): string
+{
+    $lettres = array(0 => 's', 1 => 'p', 2 => 'd', 3 => 'f');
+
+    return $lettres[$l] ?? '?';
+}
+
+function cases_exposant_charge(int $charge): string
+{
+    // Balise <sup> (plutot que des caracteres unicode en exposant, dont la
+    // taille est figee par la police) pour pouvoir agrandir la charge en CSS.
+    $signe = ($charge > 0) ? '+' : '−';
+    $valeur_absolue = abs($charge);
+    $texte = ($valeur_absolue === 1) ? $signe : ($valeur_absolue . $signe);
+
+    return '<sup class="quiz-cases-charge">' . $texte . '</sup>';
+}
+
+/* ----------------------------------------------------------------------------
+ *
+ * cases_config_neutre()
+ *
+ * ----------------------------------------------------------------------------
+ *
+ * Construit la configuration electronique (par sous-couches) de l'atome
+ * neutre de numero atomique $z, en remplissant les sous-couches dans l'ordre
+ * d'Aufbau. Applique ensuite les deux exceptions d'Aufbau presentes dans
+ * cette plage : Cr (Z=24) = [Ar] 3d5 4s1 et Cu (Z=29) = [Ar] 3d10 4s1.
+ *
+ * Retourne une liste ordonnee de sous-couches array('n', 'l', 'k') (k =
+ * nombre d'electrons dans la sous-couche), dans l'ordre de remplissage.
+ *
+ * ---------------------------------------------------------------------------- */
+function cases_config_neutre(int $z): array
+{
+    $restant = $z;
+    $config  = array();
+
+    foreach (cases_subcouches_ordre() as $sous_couche)
+    {
+        if ($restant <= 0) break;
+
+        $k = min($restant, $sous_couche['capacite']);
+
+        $config[] = array('n' => $sous_couche['n'], 'l' => $sous_couche['l'], 'k' => $k);
+
+        $restant -= $k;
+    }
+
+    if ($z === 24 || $z === 29)
+    {
+        $k_4s = ($z === 24) ? 1 : 1;
+        $k_3d = ($z === 24) ? 5 : 10;
+
+        foreach ($config as &$sous_couche)
+        {
+            if ($sous_couche['n'] === 4 && $sous_couche['l'] === 0) $sous_couche['k'] = $k_4s;
+            if ($sous_couche['n'] === 3 && $sous_couche['l'] === 2) $sous_couche['k'] = $k_3d;
+        }
+        unset($sous_couche);
+    }
+
+    return $config;
+}
+
+/* ----------------------------------------------------------------------------
+ *
+ * cases_appliquer_ion()
+ *
+ * ----------------------------------------------------------------------------
+ *
+ * Applique une charge a une configuration electronique neutre :
+ *
+ *   - cation (charge > 0) : retire les electrons un a un en commencant par la
+ *     sous-couche de n le plus eleve (puis de l le plus eleve a n egal). Pour
+ *     les metaux de transition, cela retire les electrons ns avant les
+ *     electrons (n-1)d, conformement a la convention des manuels.
+ *   - anion (charge < 0) : ajoute les electrons en suivant l'ordre d'Aufbau,
+ *     en completant d'abord la sous-couche la plus externe deja entamee.
+ *
+ * ---------------------------------------------------------------------------- */
+function cases_appliquer_ion(array $config, int $charge): array
+{
+    $ordre   = cases_subcouches_ordre();
+    $comptes = array();
+
+    foreach ($config as $sous_couche)
+    {
+        $comptes[$sous_couche['n'] . '_' . $sous_couche['l']] = $sous_couche['k'];
+    }
+
+    if ($charge > 0)
+    {
+        for ($i = 0; $i < $charge; $i++)
+        {
+            $meilleure_cle = null;
+            $meilleur_n    = -1;
+            $meilleur_l    = -1;
+
+            foreach ($comptes as $cle => $k)
+            {
+                if ($k <= 0) continue;
+
+                list($n, $l) = array_map('intval', explode('_', $cle));
+
+                if ($n > $meilleur_n || ($n === $meilleur_n && $l > $meilleur_l))
+                {
+                    $meilleur_n    = $n;
+                    $meilleur_l    = $l;
+                    $meilleure_cle = $cle;
+                }
+            }
+
+            if ($meilleure_cle === null) break; // plus d'electron a retirer
+
+            $comptes[$meilleure_cle]--;
+        }
+    }
+    elseif ($charge < 0)
+    {
+        $restant = -$charge;
+
+        foreach ($ordre as $sous_couche)
+        {
+            if ($restant <= 0) break;
+
+            $cle     = $sous_couche['n'] . '_' . $sous_couche['l'];
+            $present = $comptes[$cle] ?? 0;
+            $espace  = $sous_couche['capacite'] - $present;
+
+            if ($espace <= 0) continue;
+
+            $ajout = min($espace, $restant);
+
+            $comptes[$cle] = $present + $ajout;
+            $restant -= $ajout;
+        }
+    }
+
+    $resultat = array();
+
+    foreach ($ordre as $sous_couche)
+    {
+        $cle = $sous_couche['n'] . '_' . $sous_couche['l'];
+        $k   = $comptes[$cle] ?? 0;
+
+        if ($k > 0)
+        {
+            $resultat[] = array('n' => $sous_couche['n'], 'l' => $sous_couche['l'], 'k' => $k);
+        }
+    }
+
+    return $resultat;
+}
+
+/* ----------------------------------------------------------------------------
+ *
+ * cases_hund_boxes()
+ *
+ * ----------------------------------------------------------------------------
+ *
+ * Repartit k electrons dans les 2l+1 cases quantiques (orbitales) d'une
+ * sous-couche selon la regle de Hund : chaque case recoit un premier
+ * electron (de gauche a droite), puis les cases sont appariees (toujours de
+ * gauche a droite) une fois que toutes en contiennent un.
+ *
+ * Convention : la case d'indice 0 correspond a mₗ = -l, la derniere a
+ * mₗ = +l.
+ *
+ * Retourne un tableau de $2l+1$ chaines : '' (vide), '↑' (celibataire) ou
+ * '↑↓' (appariee).
+ *
+ * ---------------------------------------------------------------------------- */
+function cases_hund_boxes(int $n, int $l, int $k): array
+{
+    $nb_cases = 2 * $l + 1;
+    $cases    = array_fill(0, $nb_cases, 0);
+    $restant  = $k;
+
+    for ($i = 0; $i < $nb_cases && $restant > 0; $i++)
+    {
+        $cases[$i] = 1;
+        $restant--;
+    }
+
+    for ($i = 0; $i < $nb_cases && $restant > 0; $i++)
+    {
+        if ($cases[$i] === 1)
+        {
+            $cases[$i] = 2;
+            $restant--;
+        }
+    }
+
+    return array_map(function ($nb_electrons)
+    {
+        if ($nb_electrons === 2) return '↑↓';
+        if ($nb_electrons === 1) return '↑';
+        return '';
+    }, $cases);
+}
+
+/* ----------------------------------------------------------------------------
+ *
+ * cases_valence_coeur()
+ *
+ * ----------------------------------------------------------------------------
+ *
+ * Compte les electrons de valence et de coeur d'un atome NEUTRE (la notion de
+ * valence n'est pas demandee pour un ion, voir cases_generer_question()).
+ *
+ * Convention : valence = electrons de la couche n la plus elevee (ns, np) ;
+ * pour les metaux de transition (Sc a Zn, Z=21 a 30), les electrons (n-1)d
+ * sont egalement comptes comme electrons de valence.
+ *
+ * ---------------------------------------------------------------------------- */
+function cases_valence_coeur(array $config, int $z): array
+{
+    $n_max           = max(array_column($config, 'n'));
+    $est_transition  = ($z >= 21 && $z <= 30);
+    $valence         = 0;
+    $coeur           = 0;
+
+    foreach ($config as $sous_couche)
+    {
+        $est_valence = ($sous_couche['n'] === $n_max)
+            || ($est_transition && $sous_couche['l'] === 2 && $sous_couche['n'] === $n_max - 1);
+
+        if ($est_valence)
+        {
+            $valence += $sous_couche['k'];
+        }
+        else
+        {
+            $coeur += $sous_couche['k'];
+        }
+    }
+
+    return array('valence' => $valence, 'coeur' => $coeur);
+}
+
+/* ----------------------------------------------------------------------------
+ *
+ * cases_compter_ml() / cases_compter_l() / cases_orbitales_occupees() /
+ * cases_non_apparies() / cases_ml_plus_haute_energie()
+ *
+ * ----------------------------------------------------------------------------
+ *
+ * Comptes derives d'une configuration electronique (atome neutre ou ion).
+ *
+ * ---------------------------------------------------------------------------- */
+function cases_compter_ml(array $config, int $ml): int
+{
+    $total = 0;
+
+    foreach ($config as $sous_couche)
+    {
+        if (abs($ml) > $sous_couche['l']) continue;
+
+        $boites = cases_hund_boxes($sous_couche['n'], $sous_couche['l'], $sous_couche['k']);
+        $indice = $ml + $sous_couche['l'];
+        $boite  = $boites[$indice];
+
+        $total += ($boite === '↑↓') ? 2 : (($boite === '↑') ? 1 : 0);
+    }
+
+    return $total;
+}
+
+function cases_compter_l(array $config, int $l): int
+{
+    $total = 0;
+
+    foreach ($config as $sous_couche)
+    {
+        if ($sous_couche['l'] === $l) $total += $sous_couche['k'];
+    }
+
+    return $total;
+}
+
+function cases_orbitales_occupees(array $config): int
+{
+    $total = 0;
+
+    foreach ($config as $sous_couche)
+    {
+        $total += min($sous_couche['k'], 2 * $sous_couche['l'] + 1);
+    }
+
+    return $total;
+}
+
+function cases_non_apparies(array $config): int
+{
+    $total = 0;
+
+    foreach ($config as $sous_couche)
+    {
+        $nb_cases = 2 * $sous_couche['l'] + 1;
+        $k        = $sous_couche['k'];
+
+        $total += ($k <= $nb_cases) ? $k : (2 * $nb_cases - $k);
+    }
+
+    return $total;
+}
+
+function cases_ml_plus_haute_energie(array $config): int
+{
+    $sous_couche = end($config); // derniere sous-couche remplie = la plus haute en energie
+
+    $l = $sous_couche['l'];
+    $k = $sous_couche['k'];
+    $nb_cases = 2 * $l + 1;
+
+    return ($k <= $nb_cases) ? (-$l + ($k - 1)) : ($k - 3 * $l - 2);
+}
+
+/* ----------------------------------------------------------------------------
+ *
+ * cases_rendre_diagramme()
+ *
+ * ----------------------------------------------------------------------------
+ *
+ * Prepare une configuration electronique pour l'affichage sous forme de
+ * cases quantiques (une entree par sous-couche, dans l'ordre de remplissage).
+ *
+ * ---------------------------------------------------------------------------- */
+function cases_rendre_diagramme(array $config): array
+{
+    $diagramme = array();
+
+    foreach ($config as $sous_couche)
+    {
+        $diagramme[] = array(
+            'etiquette' => $sous_couche['n'] . cases_lettre_l($sous_couche['l']),
+            'n'         => $sous_couche['n'],
+            'l'         => $sous_couche['l'],
+            'boites'    => cases_hund_boxes($sous_couche['n'], $sous_couche['l'], $sous_couche['k']),
+        );
+    }
+
+    return $diagramme;
+}
+
+/* ----------------------------------------------------------------------------
+ *
+ * cases_generer_question()
+ *
+ * ----------------------------------------------------------------------------
+ *
+ * Genere une instance complete du quiz "Cases quantiques" : un element tire
+ * au hasard (Z = 1 a 38), sa configuration electronique par cases quantiques
+ * (atome neutre uniquement - c'est a l'etudiant de deriver l'ion), et 5
+ * questions numeriques tirees parmi 6 types possibles, portant sur l'atome
+ * neutre et/ou sur un de ses ions (charge realiste, si l'element en a une).
+ *
+ * Types de question :
+ *   'valence_coeur' : electrons de valence OU de coeur (atome neutre seul)
+ *   'ml'             : electrons dont mₗ = X
+ *   'l'              : electrons dont l = Y (orbitales s/p/d)
+ *   'orbitales'      : nombre d'orbitales occupees
+ *   'non_apparies'   : nombre d'electrons non-apparies
+ *   'ml_max'         : mₗ de l'electron de plus haute energie
+ *
+ * Retourne :
+ *
+ * [
+ *   'element'   => array('z', 'symbole', 'nom'),
+ *   'cases'     => array,              // diagramme de l'atome NEUTRE
+ *   'ion'       => array('charge','symbole') | null,
+ *   'questions' => [ array('enonce', 'contexte', 'valeur', 'explication') x5 ]
+ * ]
+ *
+ * ---------------------------------------------------------------------------- */
+function cases_generer_question(): array
+{
+    $z        = random_int(1, 38);
+    $symboles = cases_symboles();
+    $noms     = cases_noms();
+    $charges  = cases_charges_reelles();
+
+    $config_neutre = cases_config_neutre($z);
+
+    $ion = null;
+    $config_ion = null;
+
+    if ( ! empty($charges[$z]))
+    {
+        $charge_choisie = $charges[$z][random_int(0, count($charges[$z]) - 1)];
+
+        $config_ion = cases_appliquer_ion($config_neutre, $charge_choisie);
+        $ion = array(
+            'charge'  => $charge_choisie,
+            'symbole' => '<span class="quiz-cases-symbole">' . $symboles[$z] . '</span>' . cases_exposant_charge($charge_choisie),
+        );
+    }
+
+    $types_disponibles = array('valence_coeur', 'ml', 'l', 'orbitales', 'non_apparies', 'ml_max');
+    shuffle($types_disponibles);
+    $types_choisis = array_slice($types_disponibles, 0, 5);
+
+    // Contexte ('neutre' ou 'ion') choisi pour chaque type retenu. Suivi a
+    // part (plutot que relu depuis le texte affiche) pour rester fiable.
+    $contextes_choisis = array();
+
+    foreach ($types_choisis as $type)
+    {
+        if ($type === 'valence_coeur')
+        {
+            $contextes_choisis[] = 'neutre';
+        }
+        else
+        {
+            $contextes_choisis[] = ($ion !== null && random_int(0, 1) === 0) ? 'ion' : 'neutre';
+        }
+    }
+
+    // Garantit au moins une question sur l'atome neutre et, si un ion existe,
+    // au moins une question sur cet ion. Les deux forcages ne doivent jamais
+    // se marcher dessus : chacun evite l'indice deja fixe par l'autre.
+    if ($ion !== null)
+    {
+        $indice_force_ion = null;
+
+        if ( ! in_array('ion', $contextes_choisis, true))
+        {
+            foreach ($types_choisis as $i => $type)
+            {
+                if ($type !== 'valence_coeur')
+                {
+                    $contextes_choisis[$i] = 'ion';
+                    $indice_force_ion = $i;
+                    break;
+                }
+            }
+        }
+
+        if ( ! in_array('neutre', $contextes_choisis, true))
+        {
+            foreach ($types_choisis as $i => $type)
+            {
+                if ($type !== 'valence_coeur' && $i !== $indice_force_ion)
+                {
+                    $contextes_choisis[$i] = 'neutre';
+                    break;
+                }
+            }
+        }
+    }
+
+    $questions = array();
+
+    foreach ($types_choisis as $i => $type)
+    {
+        $questions[] = cases_construire_question($type, $contextes_choisis[$i], $config_neutre, $config_ion, $z, $ion);
+    }
+
+    return array(
+        'element'   => array('z' => $z, 'symbole' => $symboles[$z], 'nom' => $noms[$z]),
+        'cases'     => cases_rendre_diagramme($config_neutre),
+        'ion'       => $ion,
+        'questions' => $questions,
+    );
+}
+
+/* ----------------------------------------------------------------------------
+ *
+ * cases_construire_question()
+ *
+ * ----------------------------------------------------------------------------
+ *
+ * Construit une question d'un type donne, dans un contexte donne ('neutre'
+ * ou 'ion'). Isolee de cases_generer_question() pour rester testable de
+ * facon deterministe.
+ *
+ * ---------------------------------------------------------------------------- */
+function cases_construire_question(string $type, string $contexte, array $config_neutre, ?array $config_ion, int $z, ?array $ion): array
+{
+    $config          = ($contexte === 'ion') ? $config_ion : $config_neutre;
+    $contexte_libelle = ($contexte === 'ion') ? ("l'ion " . $ion['symbole']) : "l'atome neutre";
+
+    switch ($type)
+    {
+        case 'valence_coeur':
+            $compte = cases_valence_coeur($config_neutre, $z);
+            $demander_valence = (random_int(0, 1) === 0);
+
+            if ($demander_valence)
+            {
+                return array(
+                    'enonce'      => "Combien d'électrons de valence l'atome neutre possède-t-il ?",
+                    'contexte'    => $contexte_libelle,
+                    'valeur'      => $compte['valence'],
+                    'explication' => "L'atome neutre possède {$compte['valence']} électron(s) de valence et {$compte['coeur']} électron(s) de cœur.",
+                );
+            }
+
+            return array(
+                'enonce'      => "Combien d'électrons de cœur l'atome neutre possède-t-il ?",
+                'contexte'    => $contexte_libelle,
+                'valeur'      => $compte['coeur'],
+                'explication' => "L'atome neutre possède {$compte['coeur']} électron(s) de cœur et {$compte['valence']} électron(s) de valence.",
+            );
+
+        case 'ml':
+            $ml     = random_int(-2, 2);
+            $valeur = cases_compter_ml($config, $ml);
+
+            return array(
+                'enonce'      => "Combien d'électrons ont mₗ = $ml ?",
+                'contexte'    => $contexte_libelle,
+                'valeur'      => $valeur,
+                'explication' => "Pour $contexte_libelle, $valeur électron(s) occupent une case mₗ = $ml (toutes sous-couches confondues).",
+            );
+
+        case 'l':
+            $l      = random_int(0, 2);
+            $lettre = cases_lettre_l($l);
+            $valeur = cases_compter_l($config, $l);
+
+            return array(
+                'enonce'      => "Combien d'électrons ont l = $l ?",
+                'contexte'    => $contexte_libelle,
+                'valeur'      => $valeur,
+                'explication' => "Pour $contexte_libelle, $valeur électron(s) se trouvent dans une orbitale $lettre (l = $l).",
+            );
+
+        case 'orbitales':
+            $valeur = cases_orbitales_occupees($config);
+
+            return array(
+                'enonce'      => "Combien d'orbitales sont occupées ?",
+                'contexte'    => $contexte_libelle,
+                'valeur'      => $valeur,
+                'explication' => "Pour $contexte_libelle, $valeur orbitale(s) contiennent au moins un électron.",
+            );
+
+        case 'non_apparies':
+            $valeur = cases_non_apparies($config);
+            $terme  = (random_int(0, 1) === 0) ? 'non-appariés' : 'célibataires';
+
+            return array(
+                'enonce'      => "Combien d'électrons sont $terme ?",
+                'contexte'    => $contexte_libelle,
+                'valeur'      => $valeur,
+                'explication' => "Pour $contexte_libelle, $valeur électron(s) occupent seuls leur case quantique.",
+            );
+
+        case 'ml_max':
+        default:
+            $valeur = cases_ml_plus_haute_energie($config);
+
+            return array(
+                'enonce'      => "Quel est le nombre quantique mₗ de l'électron de plus haute énergie ?",
+                'contexte'    => $contexte_libelle,
+                'valeur'      => $valeur,
+                'explication' => "Pour $contexte_libelle, la sous-couche de plus haute énergie occupée place son dernier électron dans la case mₗ = $valeur.",
+            );
+    }
+}
+
+/* ----------------------------------------------------------------------------
+ *
  * quiz_liste_disponibles()
  *
  * ----------------------------------------------------------------------------
@@ -797,6 +1478,11 @@ function quiz_liste_disponibles(): array
 			'cours'		  => 'SN1',
             'titre'       => 'Nombre d\'états quantiques',
             'description' => 'Déterminez le nombre d\'états quantiques correspondant à une combinaison de nombres quantiques (n, l, mₗ, ms).',
+        ),
+		'cases' => array(
+			'cours'		  => 'SN1',
+            'titre'       => 'Cases quantiques',
+            'description' => "À partir des cases quantiques d'un élément (Z = 1 à 38), répondez à 5 questions sur l'atome neutre et sur un de ses ions.",
         ),
     );
 }

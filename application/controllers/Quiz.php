@@ -47,6 +47,13 @@ Class Quiz extends MY_Controller
         $this->_display_view('eq');
     }
 
+    public function cases()
+    {
+        $this->data['quiz'] = $this->quizzes['cases'];
+
+        $this->_display_view('cases');
+    }
+
     /* -------------------------------------------------------------------
      *
      * (AJAX) Lot de nombres pour un quiz donne
@@ -89,6 +96,13 @@ Class Quiz extends MY_Controller
                 for ($i = 0; $i < $taille_lot; $i++)
                 {
                     $lot[] = etats_generer_question();
+                }
+                break;
+
+            case 'cases' :
+                for ($i = 0; $i < $taille_lot; $i++)
+                {
+                    $lot[] = cases_generer_question();
                 }
                 break;
         }
