@@ -183,7 +183,10 @@ $(document).ready(function()
 
         if ( ! correct)
         {
-            var reponses = courant.valeurs.join(' ou ');
+            var valeurs  = courant.valeurs;
+            var reponses = valeurs.length > 1
+                ? valeurs.slice(0, -1).join(', ') + ' ou ' + valeurs[valeurs.length - 1]
+                : String(valeurs[0]);
             titre += ' — réponse' + (courant.valeurs.length > 1 ? 's' : '') + ' attendue' + (courant.valeurs.length > 1 ? 's' : '') + ' : ' + reponses;
         }
 
