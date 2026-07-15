@@ -61,6 +61,13 @@ Class Quiz extends MY_Controller
         $this->_display_view('nomen');
     }
 
+    public function fonctions()
+    {
+        $this->data['quiz'] = $this->quizzes['fonctions'];
+
+        $this->_display_view('fonctions');
+    }
+
     /* -------------------------------------------------------------------
      *
      * (AJAX) Lot de nombres pour un quiz donne
@@ -117,6 +124,13 @@ Class Quiz extends MY_Controller
                 for ($i = 0; $i < $taille_lot; $i++)
                 {
                     $lot[] = nomen_generer_manche();
+                }
+                break;
+
+            case 'fonctions' :
+                for ($i = 0; $i < $taille_lot; $i++)
+                {
+                    $lot[] = fonctions_generer_manche();
                 }
                 break;
         }

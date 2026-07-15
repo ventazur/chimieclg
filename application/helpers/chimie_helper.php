@@ -1517,6 +1517,82 @@ function nomen_generer_manche(): array
 
 /* ----------------------------------------------------------------------------
  *
+ * fonctions_banque() / fonctions_generer_manche()
+ *
+ * ----------------------------------------------------------------------------
+ *
+ * Banque de fonctions chimiques organiques (un representant canonique par
+ * fonction), utilisee par le quiz d'appariement 'fonctions'. Le cycle
+ * aromatique (fonctions 'aromatique' et 'phenol') est abrege 'Ph' (phenyle),
+ * comme en notation semi-developpee usuelle.
+ *
+ * ---------------------------------------------------------------------------- */
+function fonctions_banque(): array
+{
+    return array(
+        array('cle' => 'alcool',      'struct' => 'CH<sub>3</sub>–CH<sub>2</sub>–OH',                        'nom' => 'alcool'),
+        array('cle' => 'ester',       'struct' => 'CH<sub>3</sub>–COO–CH<sub>3</sub>',                        'nom' => 'ester'),
+        array('cle' => 'ether',       'struct' => 'CH<sub>3</sub>–O–CH<sub>3</sub>',                          'nom' => 'éther'),
+        array('cle' => 'acide',       'struct' => 'CH<sub>3</sub>–COOH',                                      'nom' => 'acide carboxylique'),
+        array('cle' => 'amine',       'struct' => 'CH<sub>3</sub>–CH<sub>2</sub>–NH<sub>2</sub>',              'nom' => 'amine'),
+        array('cle' => 'amide',       'struct' => 'CH<sub>3</sub>–CO–NH<sub>2</sub>',                         'nom' => 'amide'),
+        array('cle' => 'phenol',      'struct' => 'Ph–OH',                                                    'nom' => 'phénol'),
+        array('cle' => 'aldehyde',    'struct' => 'CH<sub>3</sub>–CHO',                                       'nom' => 'aldéhyde'),
+        array('cle' => 'thiol',       'struct' => 'CH<sub>3</sub>–CH<sub>2</sub>–SH',                         'nom' => 'thiol'),
+        array('cle' => 'alcyne',      'struct' => 'CH≡CH',                                                    'nom' => 'alcyne'),
+        array('cle' => 'alcene',      'struct' => 'CH<sub>2</sub>=CH<sub>2</sub>',                            'nom' => 'alcène'),
+        array('cle' => 'aromatique',  'struct' => 'ArH',                                                     'nom' => 'aromatique'),
+        array('cle' => 'halogenure',  'struct' => 'CH<sub>3</sub>–CH<sub>2</sub>–Cl',                         'nom' => 'halogénure'),
+        array('cle' => 'cetone',      'struct' => 'CH<sub>3</sub>–CO–CH<sub>3</sub>',                        'nom' => 'cétone'),
+        array('cle' => 'nitrile',     'struct' => 'CH<sub>3</sub>–C≡N',                                       'nom' => 'nitrile'),
+    );
+}
+
+function fonctions_generer_manche(): array
+{
+    $conflits = array(
+        'phenol'     => array('aromatique', 'alcool'),
+        'aromatique' => array('phenol'),
+        'alcool'     => array('phenol'),
+    );
+
+    $banque = fonctions_banque();
+    shuffle($banque);
+
+    $retenues = array();
+    $cles     = array();
+
+    foreach ($banque as $entree)
+    {
+        if (count($retenues) >= 5) break;
+
+        $en_conflit = false;
+
+        if ( ! empty($conflits[$entree['cle']]))
+        {
+            foreach ($conflits[$entree['cle']] as $autre)
+            {
+                if (in_array($autre, $cles, true))
+                {
+                    $en_conflit = true;
+                    break;
+                }
+            }
+        }
+
+        if ($en_conflit) continue;
+
+        $retenues[] = array('struct' => $entree['struct'], 'nom' => $entree['nom']);
+        $cles[]     = $entree['cle'];
+    }
+
+    return array(
+        'paires' => $retenues,
+    );
+}
+
+/* ----------------------------------------------------------------------------
+ *
  * quiz_liste_disponibles()
  *
  * ----------------------------------------------------------------------------
@@ -1553,6 +1629,11 @@ function quiz_liste_disponibles(): array
 			'cours'		  => 'SN1',
             'titre'       => 'Nom des ions et molécules',
             'description' => "Associez les formules des acides, molécules et ions polyatomiques à leur nom.",
+        ),
+		'fonctions' => array(
+			'cours'		  => 'SNU',
+            'titre'       => 'Fonctions organiques',
+            'description' => "Associez la structure d'une molécule à la fonction chimique qu'elle contient.",
         ),
     );
 }
