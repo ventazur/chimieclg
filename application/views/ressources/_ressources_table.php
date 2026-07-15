@@ -28,13 +28,15 @@
 
 						<? if ( ! empty($r['url'])) : ?>
 
-							<? $href = (strpos($r['url'], '://') !== false) ? $r['url'] : base_url() . $r['url']; ?>
+							<? $est_absolu = (strpos($r['url'], '://') !== false); ?>
+							<? $href       = $est_absolu ? $r['url'] : base_url() . $r['url']; ?>
+							<? $est_local  = ( ! $est_absolu) || (strpos($r['url'], parse_url(base_url(), PHP_URL_HOST)) !== false) || preg_match('/chimieclg/', $r['url']); ?>
 
 							<a href="<?= $href; ?>" target="_blank">
 								<?= $r['nom']; ?>
 							</a>
 
-							<? $icone = ( ! preg_match('/chimieclg/', $r['url']) ? 'bi-box-arrow-up-right' : NULL); ?>
+							<? $icone = ($est_local ? NULL : 'bi-box-arrow-up-right'); ?>
 
 						<? elseif ( ! empty($r['fichier'])) : ?>
 
