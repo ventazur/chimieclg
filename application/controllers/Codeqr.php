@@ -139,76 +139,97 @@ class Codeqr extends MY_Controller
 			'imageBase64'         => false
 		]);
 
+		$qrcode = new \chillerlan\QRCode\QRCode($options);
+
+		// Rayon (en modules) de la zone circulaire reservee au logo
+		$rayonModules = 6.5;
+
 		if ($logo)
 		{
-			$options->quietzoneSize = 3;
-			$options->addLogoSpace = TRUE;
-			$options->logoSpaceWidth = 12;
-			$options->logoSpaceHeight = 10;
-		}
+			foreach (\chillerlan\QRCode\Common\Mode::INTERFACES as $dataInterface)
+			{
+				if ($dataInterface::validateString($data))
+				{
+					$qrcode->addSegment(new $dataInterface($data));
+					break;
+				}
+			}
 
-		$qrcode = new \chillerlan\QRCode\QRCode($options);
-		
-		$qrImage = $qrcode->render($data);
+			$matrix = $qrcode->getQRMatrix();
+
+			// Nettoyer uniquement les modules (blocs) entiers dont le centre
+			// se trouve dans le cercle, pour un contour "en escalier" propre
+			// plutot que de couper des blocs a mi-chemin.
+			$taille = $matrix->getSize();
+			$centreModule = $taille / 2;
+
+			for ($y = 0; $y < $taille; $y++)
+			{
+				for ($x = 0; $x < $taille; $x++)
+				{
+					$dx = ($x + 0.5) - $centreModule;
+					$dy = ($y + 0.5) - $centreModule;
+
+					if (sqrt($dx * $dx + $dy * $dy) <= $rayonModules)
+					{
+						$matrix->set($x, $y, false, QRMatrix::M_LOGO);
+					}
+				}
+			}
+
+			$qrImage = $qrcode->renderMatrix($matrix);
+		}
+		else
+		{
+			$qrImage = $qrcode->render($data);
+		}
 
 		// Transformation en ressource GD
 		$qrResource = imagecreatefromstring($qrImage);
-		
-		if ( ! $qrResource) 
+
+		if ( ! $qrResource)
 		{
 			die("Erreur : La bibliothèque n'a pas généré un format d'image valide.");
 		}
 
 		$logoPath = FCPATH . 'assets/img/logoCLG_2025.png';
 
-		if ($logo && file_exists($logoPath)) 
+		if ($logo && file_exists($logoPath))
 		{
 			$logoResource = imagecreatefrompng($logoPath);
 
 			imagealphablending($qrResource, true);
 			imagesavealpha($qrResource, true);
 
-			// Taille maximale autorisée (définie par l'espace reserve)
-			$maxW = $options->logoSpaceWidth * $options->scale;
-			$maxH = $options->logoSpaceHeight * $options->scale;
+			$centerX = (int) (imagesx($qrResource) / 2);
+			$centerY = (int) (imagesy($qrResource) / 2);
+
+			$diametre = $rayonModules * 2 * $options->scale;
 
 			// Dimensions réelles du logo source
 			$origW = imagesx($logoResource);
 			$origH = imagesy($logoResource);
 
-			// Calcul du ratio pour ne pas deformer
-			$ratio = min($maxW / $origW, $maxH / $origH);
-			
+			// Calcul du ratio pour inscrire le logo dans le cercle
+			$padding = 4;
+			$maxLogo = $diametre - $padding * 2;
+			$ratio   = min($maxLogo / $origW, $maxLogo / $origH);
+
 			// Nouvelles dimensions proportionnelles
 			$targetW = (int)($origW * $ratio);
 			$targetH = (int)($origH * $ratio);
 
 			// Centrage
-			$destX = (imagesx($qrResource) - $targetW) / 2;
-			$destY = (imagesy($qrResource) - $targetH) / 2;
-
-			// Dessiner le cadre noir
-			$black = imagecolorallocate($qrResource, 0, 0, 0);
-			
-			$spaceX = 10;
-			$spaceY = 25;	
-					
-			imagerectangle(
-				$qrResource, 
-				(int) ($destX + $spaceX), 
-				(int) ($destY - $spaceY), 
-				(int) ($destX + $targetW - $spaceX),
-				(int) ($destY + $targetH + $spaceY), 
-				$black
-			);
+			$destX = $centerX - $targetW / 2;
+			$destY = $centerY - $targetH / 2;
 
 			// Fusion haute qualite
 			imagecopyresampled(
-				$qrResource, $logoResource, 
-				(int) $destX, (int) $destY, 0, 0, 
+				$qrResource, $logoResource,
+				(int) $destX, (int) $destY, 0, 0,
 				$targetW, $targetH, $origW, $origH
 			);
-			
+
 		}
 
 		ob_start();
