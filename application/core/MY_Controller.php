@@ -18,6 +18,9 @@ class MY_Controller extends CI_Controller
 
 		$this->is_DEV = $this->config->item('is_DEV');
 
+		$this->load->driver('cache', array('adapter' => 'file'));
+		$this->load->library('user_agent');
+
 		//
 		// Le site n'a pas de systeme de compte personnel.
 		//
@@ -34,6 +37,17 @@ class MY_Controller extends CI_Controller
 		// Verifier par la session
 
 		if ( ! $this->est_humain && isset($_SESSION['est_humain']) && $_SESSION['est_humain'] == TRUE)
+		{
+			$this->est_humain = TRUE;
+		}
+
+		// Laisser passer les robots legitimes verifies (Googlebot, OpenAI, Anthropic/Claude)
+
+		if ( ! $this->est_humain &&
+			 ! $this->input->is_ajax_request() &&
+			 (   $this->Usager_model->verify_googlebot()
+			  || $this->Usager_model->verify_openai_bot()
+			  || $this->Usager_model->verify_claude_bot() ))
 		{
 			$this->est_humain = TRUE;
 		}
