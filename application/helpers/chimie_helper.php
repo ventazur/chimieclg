@@ -783,15 +783,18 @@ function etats_ajouter_spin(array $base, bool $ms_inclus): array
 function quiz_liste_disponibles(): array
 {
     return array(
-        'cs' => array(
+		'cs' => array(
+			'cours'		  => 'SN1',
             'titre'       => 'Chiffres significatifs',
             'description' => "Déterminez le nombre de chiffres significatifs d'un nombre.",
         ),
-        'orbitales' => array(
+		'orbitales' => array(
+			'cours'		  => 'SN1',
             'titre'       => 'Nombre d\'orbitales',
             'description' => 'Déterminez le nombre d\'orbitales correspondant à une combinaison de nombres quantiques (n, l, mₗ).',
         ),
-        'eq' => array(
+		'eq' => array(
+			'cours'		  => 'SN1',
             'titre'       => 'Nombre d\'états quantiques',
             'description' => 'Déterminez le nombre d\'états quantiques correspondant à une combinaison de nombres quantiques (n, l, mₗ, ms).',
         ),
