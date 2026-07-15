@@ -13,7 +13,6 @@ Class Ressources extends MY_Controller
         parent::__construct();
 
         $this->load->model('Ressource_model');
-        $this->load->helper('chimie');
     }
 
 	public function _remap()
@@ -32,8 +31,6 @@ Class Ressources extends MY_Controller
 		$data = $this->Ressource_model->extraire_ressources_ordre($req_cat);
 
 		$this->data = array_merge($data, $this->data);
-
-		$this->data['quizzes'] = quiz_liste_disponibles();
 
         $this->_display_view();
 	}

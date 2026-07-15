@@ -775,9 +775,8 @@ function etats_ajouter_spin(array $base, bool $ms_inclus): array
  *
  * ----------------------------------------------------------------------------
  *
- * Manifeste des quiz disponibles, partage entre le controleur Quiz et
- * d'autres pages (ex. Ressources) qui veulent lister les quiz. Pour ajouter
- * un quiz, ajouter une entree ici ainsi que la methode et la vue du
+ * Manifeste des quiz disponibles, utilise par le controleur Quiz. Pour
+ * ajouter un quiz, ajouter une entree ici ainsi que la methode et la vue du
  * controleur Quiz correspondantes.
  *
  * ---------------------------------------------------------------------------- */
