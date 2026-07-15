@@ -193,7 +193,6 @@ $(document).ready(function ()
 
         modeCalme = $('#parametres-mode-calme').is(':checked');
         docCookies.setItem('mode_calme', modeCalme ? '1' : '0', CONFIG.cookieExpire);
-        rafraichirLabelTemps();
 
         police = $('#parametres-police').val();
         docCookies.setItem('police', police, CONFIG.cookieExpire);
