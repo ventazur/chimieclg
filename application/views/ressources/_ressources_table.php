@@ -28,7 +28,9 @@
 
 						<? if ( ! empty($r['url'])) : ?>
 
-							<a href="<?= $r['url']; ?>" target="_blank">
+							<? $href = (strpos($r['url'], '://') !== false) ? $r['url'] : base_url() . $r['url']; ?>
+
+							<a href="<?= $href; ?>" target="_blank">
 								<?= $r['nom']; ?>
 							</a>
 
