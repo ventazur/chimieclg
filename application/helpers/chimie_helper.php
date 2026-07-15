@@ -1452,6 +1452,71 @@ function cases_construire_question(string $type, string $contexte, array $config
 
 /* ----------------------------------------------------------------------------
  *
+ * nomen_banque_paires() / nomen_generer_manche()
+ *
+ * ----------------------------------------------------------------------------
+ *
+ * Banque de formules (acides, molecules, ions polyatomiques) associees a
+ * leur nom, utilisee par le quiz d'appariement 'nomen'.
+ *
+ * ---------------------------------------------------------------------------- */
+function nomen_banque_paires(): array
+{
+    return array(
+        array('struct' => 'HCl',                                              'nom' => 'acide chlorhydrique'),
+        array('struct' => 'HBr',                                              'nom' => 'acide bromhydrique'),
+        array('struct' => 'HI',                                               'nom' => 'acide iodhydrique'),
+        array('struct' => 'HF',                                               'nom' => 'acide fluorhydrique'),
+        array('struct' => 'HNO<sub>3</sub>',                                  'nom' => 'acide nitrique'),
+        array('struct' => 'H<sub>2</sub>SO<sub>4</sub>',                      'nom' => 'acide sulfurique'),
+        array('struct' => 'H<sub>2</sub>CO<sub>3</sub>',                      'nom' => 'acide carbonique'),
+        array('struct' => 'H<sub>3</sub>PO<sub>4</sub>',                      'nom' => 'acide phosphorique'),
+        array('struct' => 'HClO<sub>4</sub>',                                 'nom' => 'acide perchlorique'),
+        array('struct' => 'HClO<sub>3</sub>',                                 'nom' => 'acide chlorique'),
+        array('struct' => 'HCOOH',                                            'nom' => 'acide formique (méthanoïque)'),
+        array('struct' => 'CH<sub>3</sub>COOH',                               'nom' => 'acide acétique (éthanoïque)'),
+        array('struct' => 'HCN',                                              'nom' => 'acide cyanhydrique'),
+        array('struct' => 'NH<sub>3</sub>',                                   'nom' => 'ammoniac'),
+        array('struct' => 'NaOH',                                             'nom' => 'hydroxyde de sodium'),
+        array('struct' => 'KOH',                                              'nom' => 'hydroxyde de potassium'),
+        array('struct' => 'NH<sub>4</sub><sup>+</sup>',                       'nom' => 'ion ammonium'),
+        array('struct' => 'H<sub>3</sub>O<sup>+</sup>',                       'nom' => 'ion hydronium'),
+        array('struct' => 'OH<sup>-</sup>',                                   'nom' => 'ion hydroxyde'),
+        array('struct' => 'NO<sub>3</sub><sup>-</sup>',                       'nom' => 'ion nitrate'),
+        array('struct' => 'NO<sub>2</sub><sup>-</sup>',                       'nom' => 'ion nitrite'),
+        array('struct' => 'PO<sub>4</sub><sup>3-</sup>',                      'nom' => 'ion phosphate'),
+        array('struct' => 'H<sub>2</sub>PO<sub>4</sub><sup>-</sup>',          'nom' => 'ion dihydrogénophosphate'),
+        array('struct' => 'CO<sub>3</sub><sup>2-</sup>',                      'nom' => 'ion carbonate'),
+        array('struct' => 'HCO<sub>3</sub><sup>-</sup>',                      'nom' => 'ion hydrogénocarbonate'),
+        array('struct' => 'SO<sub>3</sub><sup>2-</sup>',                      'nom' => 'ion sulfite'),
+        array('struct' => 'HSO<sub>4</sub><sup>-</sup>',                      'nom' => 'ion hydrogénosulfate'),
+        array('struct' => 'CH<sub>3</sub>COO<sup>-</sup>',                    'nom' => 'ion acétate'),
+        array('struct' => 'C<sub>2</sub>O<sub>4</sub><sup>2-</sup>',          'nom' => 'ion oxalate'),
+        array('struct' => 'CN<sup>-</sup>',                                   'nom' => 'ion cyanure'),
+        array('struct' => 'SCN<sup>-</sup>',                                  'nom' => 'ion thiocyanate'),
+        array('struct' => 'ClO<sup>-</sup>',                                  'nom' => 'ion hypochlorite'),
+        array('struct' => 'ClO<sub>2</sub><sup>-</sup>',                      'nom' => 'ion chlorite'),
+        array('struct' => 'ClO<sub>3</sub><sup>-</sup>',                      'nom' => 'ion chlorate'),
+        array('struct' => 'ClO<sub>4</sub><sup>-</sup>',                      'nom' => 'ion perchlorate'),
+        array('struct' => 'CrO<sub>4</sub><sup>2-</sup>',                     'nom' => 'ion chromate'),
+        array('struct' => 'Cr<sub>2</sub>O<sub>7</sub><sup>2-</sup>',         'nom' => 'ion dichromate'),
+        array('struct' => 'MnO<sub>4</sub><sup>-</sup>',                      'nom' => 'ion permanganate'),
+    );
+}
+
+function nomen_generer_manche(): array
+{
+    $banque = nomen_banque_paires();
+
+    shuffle($banque);
+
+    return array(
+        'paires' => array_slice($banque, 0, 5),
+    );
+}
+
+/* ----------------------------------------------------------------------------
+ *
  * quiz_liste_disponibles()
  *
  * ----------------------------------------------------------------------------
@@ -1483,6 +1548,11 @@ function quiz_liste_disponibles(): array
 			'cours'		  => 'SN1',
             'titre'       => 'Cases quantiques',
             'description' => "À partir des cases quantiques d'un élément (Z = 1 à 38), répondez à 5 questions sur l'atome neutre et sur un de ses ions.",
+        ),
+		'nomen' => array(
+			'cours'		  => 'SN1',
+            'titre'       => 'Nom des ions et molécules',
+            'description' => "Associez les formules des acides, molécules et ions polyatomiques à leur nom.",
         ),
     );
 }
