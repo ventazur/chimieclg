@@ -1972,7 +1972,7 @@ function quiz_liste_disponibles(): array
         ),
 		'fonctions' => array(
 			'cours'		  => 'SNU',
-            'titre'       => 'Fonctions organiques',
+            'titre'       => 'Fonctions chimiques',
             'description' => "Associez la structure d'une molécule à la fonction chimique qu'elle contient.",
         ),
 		'conversions' => array(
