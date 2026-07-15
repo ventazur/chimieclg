@@ -439,6 +439,186 @@ function cs_generer_nombre(): array
 
 /* ----------------------------------------------------------------------------
  *
+ * orbitales_generer_question()
+ *
+ * ----------------------------------------------------------------------------
+ *
+ * Genere une question aleatoire pour le quiz du nombre d'orbitales a partir
+ * d'une combinaison partielle de nombres quantiques (n, l, ml). Cinq types de
+ * question, tires avec la meme probabilite :
+ *
+ *   - n seul       : combien d'orbitales dans la couche n            -> n^2
+ *   - n et l       : combien d'orbitales dans la sous-couche (n, l)  -> 2l+1
+ *   - l seul       : combien d'orbitales partagent ce l (tout n)     -> 2l+1
+ *   - n et ml      : combien de l valides pour ce (n, ml)            -> n-|ml|
+ *   - n, l et ml   : cette combinaison designe-t-elle une orbitale ? -> 0 ou 1
+ *
+ * Les types n+l, n+ml et n+l+ml peuvent produire un piege (combinaison
+ * invalide selon les regles l < n et |ml| <= l), avec une probabilite
+ * d'environ 5%. Dans ce cas la reponse attendue est 0.
+ *
+ * Retourne :
+ *
+ * [
+ *   'affichage'   => array,   // sous-ensemble ordonne de ['n', 'l', 'ml']
+ *   'valeur'      => int,     // reponse attendue, >= 0
+ *   'explication' => string   // affichee seulement si la reponse est fausse
+ * ]
+ *
+ * ---------------------------------------------------------------------------- */
+function orbitales_generer_question(): array
+{
+    $generateurs = array(
+        'orbitales_generer_n',
+        'orbitales_generer_n_l',
+        'orbitales_generer_l',
+        'orbitales_generer_n_ml',
+        'orbitales_generer_n_l_ml'
+    );
+
+    $fonction = $generateurs[random_int(0, count($generateurs) - 1)];
+
+    return $fonction();
+}
+
+/* ----------------------------------------------------------------------------
+ *
+ * orbitales_piege()
+ *
+ * ----------------------------------------------------------------------------
+ *
+ * TRUE environ 1 fois sur 20 (5%). Utilise par les generateurs qui peuvent
+ * produire une combinaison invalide (piege, reponse attendue 0).
+ *
+ * ---------------------------------------------------------------------------- */
+function orbitales_piege(): bool
+{
+    return random_int(1, 100) <= 5;
+}
+
+function orbitales_generer_n(): array
+{
+    $n      = random_int(1, 7);
+    $valeur = $n * $n;
+
+    return array(
+        'affichage'   => array('n' => $n),
+        'valeur'      => $valeur,
+        'explication' => "Dans la couche n = $n, l va de 0 a n-1 et chaque sous-couche l contient 2l+1 orbitales. Au total : n² = $valeur orbitales."
+    );
+}
+
+function orbitales_generer_n_l(): array
+{
+    $n = random_int(1, 7);
+
+    if (orbitales_piege())
+    {
+        $l      = $n + random_int(0, 2);
+        $valeur = 0;
+
+        $explication = "l doit toujours etre strictement inferieur a n. Ici n = $n, donc l = $l est impossible : 0 orbitale.";
+    }
+    else
+    {
+        $l      = random_int(0, $n - 1);
+        $valeur = 2 * $l + 1;
+
+        $explication = "Pour l = $l, ml va de -l a +l, ce qui donne 2l+1 = $valeur orbitales.";
+    }
+
+    return array(
+        'affichage'   => array('n' => $n, 'l' => $l),
+        'valeur'      => $valeur,
+        'explication' => $explication
+    );
+}
+
+function orbitales_generer_l(): array
+{
+    $l      = random_int(0, 6);
+    $valeur = 2 * $l + 1;
+
+    return array(
+        'affichage'   => array('l' => $l),
+        'valeur'      => $valeur,
+        'explication' => "Pour l = $l, ml peut prendre 2l+1 = $valeur valeurs differentes (de -l a +l). Ces $valeur orbitales existent quel que soit n, tant que n > l."
+    );
+}
+
+function orbitales_generer_n_ml(): array
+{
+    $n = random_int(1, 7);
+
+    if (orbitales_piege())
+    {
+        $abs_ml = $n + random_int(0, 2);
+        $ml     = (random_int(0, 1) === 0) ? $abs_ml : -$abs_ml;
+        $valeur = 0;
+
+        $l_max = $n - 1;
+        $explication = "Pour n = $n, l va au maximum jusqu'a $l_max, donc |ml| ne peut jamais atteindre $abs_ml : 0 orbitale.";
+    }
+    else
+    {
+        $abs_ml = random_int(0, $n - 1);
+        $ml     = ($abs_ml === 0) ? 0 : (random_int(0, 1) === 0 ? $abs_ml : -$abs_ml);
+        $valeur = $n - $abs_ml;
+
+        $l_max = $n - 1;
+        $explication = "l doit etre au moins |ml| = $abs_ml et au plus n-1 = $l_max, ce qui laisse $valeur valeur(s) de l possibles, donc $valeur orbitales.";
+    }
+
+    return array(
+        'affichage'   => array('n' => $n, 'ml' => $ml),
+        'valeur'      => $valeur,
+        'explication' => $explication
+    );
+}
+
+function orbitales_generer_n_l_ml(): array
+{
+    $n = random_int(1, 7);
+
+    if (orbitales_piege())
+    {
+        if (random_int(0, 1) === 0)
+        {
+            $l  = $n + random_int(0, 2);
+            $ml = random_int(-$l, $l);
+
+            $raison = "l = $l n'est pas valide pour n = $n (l doit etre strictement inferieur a n)";
+        }
+        else
+        {
+            $l      = random_int(0, max(0, $n - 1));
+            $abs_ml = $l + random_int(1, 2);
+            $ml     = (random_int(0, 1) === 0) ? $abs_ml : -$abs_ml;
+
+            $raison = "ml = $ml n'est pas valide pour l = $l (|ml| doit etre inferieur ou egal a l)";
+        }
+
+        $valeur      = 0;
+        $explication = "$raison, donc cette combinaison ne correspond a aucune orbitale.";
+    }
+    else
+    {
+        $l      = random_int(0, $n - 1);
+        $ml     = random_int(-$l, $l);
+        $valeur = 1;
+
+        $explication = 'Cette combinaison (n, l, ml) designe une orbitale unique et bien precise : 1 orbitale.';
+    }
+
+    return array(
+        'affichage'   => array('n' => $n, 'l' => $l, 'ml' => $ml),
+        'valeur'      => $valeur,
+        'explication' => $explication
+    );
+}
+
+/* ----------------------------------------------------------------------------
+ *
  * quiz_liste_disponibles()
  *
  * ----------------------------------------------------------------------------
@@ -455,6 +635,10 @@ function quiz_liste_disponibles(): array
         'cs' => array(
             'titre'       => 'Chiffres significatifs',
             'description' => "Déterminez le nombre de chiffres significatifs d'un nombre.",
+        ),
+        'orbitales' => array(
+            'titre'       => 'Nombre d\'orbitales',
+            'description' => 'Déterminez le nombre d\'orbitales correspondant à une combinaison de nombres quantiques (n, l, mₗ).',
         ),
     );
 }
