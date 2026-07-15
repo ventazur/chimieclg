@@ -86,7 +86,7 @@
 	}
 
 	#quiz-orb-reponse {
-		margin-top: 8px;
+		margin-top: 32px;
 	}
 
 	#quiz-orb-input {
@@ -230,7 +230,7 @@
 			</div>
 
 			<div class="text-center mt-4">
-				<button type="button" id="quiz-orb-envoyer" class="btn btn-primary" disabled>Envoyer</button>
+				<button type="button" id="quiz-orb-envoyer" class="btn btn-primary mt-2" disabled>Envoyer</button>
 			</div>
 
 			<div id="quiz-orb-resultat" class="d-none mt-5">

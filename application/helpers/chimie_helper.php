@@ -498,7 +498,7 @@ function orbitales_piege(): bool
 
 function orbitales_generer_n(): array
 {
-    $n      = random_int(1, 7);
+    $n      = random_int(1, 9);
     $valeur = $n * $n;
 
     return array(
@@ -510,7 +510,7 @@ function orbitales_generer_n(): array
 
 function orbitales_generer_n_l(): array
 {
-    $n = random_int(1, 7);
+    $n = random_int(1, 9);
 
     if (orbitales_piege())
     {
@@ -536,7 +536,7 @@ function orbitales_generer_n_l(): array
 
 function orbitales_generer_l(): array
 {
-    $l      = random_int(0, 6);
+    $l      = random_int(0, 8);
     $valeur = 2 * $l + 1;
 
     return array(
@@ -548,7 +548,7 @@ function orbitales_generer_l(): array
 
 function orbitales_generer_n_ml(): array
 {
-    $n = random_int(1, 7);
+    $n = random_int(1, 9);
 
     if (orbitales_piege())
     {
@@ -578,7 +578,7 @@ function orbitales_generer_n_ml(): array
 
 function orbitales_generer_n_l_ml(): array
 {
-    $n = random_int(1, 7);
+    $n = random_int(1, 9);
 
     if (orbitales_piege())
     {
