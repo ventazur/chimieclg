@@ -40,6 +40,13 @@ Class Quiz extends MY_Controller
         $this->_display_view('orbitales');
     }
 
+    public function eq()
+    {
+        $this->data['quiz'] = $this->quizzes['eq'];
+
+        $this->_display_view('eq');
+    }
+
     /* -------------------------------------------------------------------
      *
      * (AJAX) Lot de nombres pour un quiz donne
@@ -75,6 +82,13 @@ Class Quiz extends MY_Controller
                 for ($i = 0; $i < $taille_lot; $i++)
                 {
                     $lot[] = orbitales_generer_question();
+                }
+                break;
+
+            case 'eq' :
+                for ($i = 0; $i < $taille_lot; $i++)
+                {
+                    $lot[] = etats_generer_question();
                 }
                 break;
         }

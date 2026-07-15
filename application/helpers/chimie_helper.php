@@ -707,6 +707,70 @@ function orbitales_generer_n_inf_ml(): array
 
 /* ----------------------------------------------------------------------------
  *
+ * etats_generer_question()
+ *
+ * ----------------------------------------------------------------------------
+ *
+ * Genere une question pour le quiz du nombre d'etats quantiques. Reutilise
+ * orbitales_generer_question() tel quel (memes 8 types de combinaisons),
+ * puis ajoute environ une fois sur deux le nombre quantique de spin ms
+ * (+1/2 ou -1/2). Si ms n'est pas fixe, chaque orbitale compte pour 2 etats
+ * (un par spin) ; si ms est fixe, le compte d'etats est le meme que le
+ * compte d'orbitales.
+ *
+ * ---------------------------------------------------------------------------- */
+function etats_generer_question(): array
+{
+    $base      = orbitales_generer_question();
+    $ms_inclus = (random_int(0, 1) === 0);
+
+    return etats_ajouter_spin($base, $ms_inclus);
+}
+
+/* ----------------------------------------------------------------------------
+ *
+ * etats_ajouter_spin()
+ *
+ * ----------------------------------------------------------------------------
+ *
+ * Applique la regle du spin a un resultat de orbitales_generer_question().
+ * Isolee de l'aleatoire pour rester testable de facon deterministe.
+ *
+ * ---------------------------------------------------------------------------- */
+function etats_ajouter_spin(array $base, bool $ms_inclus): array
+{
+    $affichage = $base['affichage'];
+
+    if ($ms_inclus)
+    {
+        $ms = (random_int(0, 1) === 0) ? '+1/2' : '-1/2';
+        $affichage['ms'] = $ms;
+    }
+
+    $valeur = $ms_inclus ? $base['valeur'] : $base['valeur'] * 2;
+
+    if ($base['valeur'] === 0)
+    {
+        $explication = $base['explication'];
+    }
+    elseif ($ms_inclus)
+    {
+        $explication = $base['explication'] . " Puisque ms = $ms est fixé, chaque orbitale ne compte que pour un seul état quantique : $valeur état(s) au total.";
+    }
+    else
+    {
+        $explication = $base['explication'] . " Chaque orbitale contient 2 états quantiques (ms = +1/2 et ms = -1/2), donc $valeur états au total.";
+    }
+
+    return array(
+        'affichage'   => $affichage,
+        'valeur'      => $valeur,
+        'explication' => $explication
+    );
+}
+
+/* ----------------------------------------------------------------------------
+ *
  * quiz_liste_disponibles()
  *
  * ----------------------------------------------------------------------------
@@ -727,6 +791,10 @@ function quiz_liste_disponibles(): array
         'orbitales' => array(
             'titre'       => 'Nombre d\'orbitales',
             'description' => 'Déterminez le nombre d\'orbitales correspondant à une combinaison de nombres quantiques (n, l, mₗ).',
+        ),
+        'eq' => array(
+            'titre'       => 'Nombre d\'états quantiques',
+            'description' => 'Déterminez le nombre d\'états quantiques correspondant à une combinaison de nombres quantiques (n, l, mₗ, ms).',
         ),
     );
 }
