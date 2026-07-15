@@ -1593,6 +1593,346 @@ function fonctions_generer_manche(): array
 
 /* ----------------------------------------------------------------------------
  *
+ * conversions_table_prefixes()
+ *
+ * ----------------------------------------------------------------------------
+ *
+ * Table des prefixes SI utilisee par les generateurs du quiz de conversion,
+ * avec leur puissance de 10.
+ *
+ * ---------------------------------------------------------------------------- */
+function conversions_table_prefixes(): array
+{
+    return array(
+        'T'  => 12,
+        'G'  => 9,
+        'M'  => 6,
+        'k'  => 3,
+        'h'  => 2,
+        'da' => 1,
+        ''   => 0,
+        'd'  => -1,
+        'c'  => -2,
+        'm'  => -3,
+        'µ'  => -6,
+        'n'  => -9,
+        'p'  => -12,
+    );
+}
+
+/* ----------------------------------------------------------------------------
+ *
+ * conversions_generer_chiffres_significatifs()
+ *
+ * ----------------------------------------------------------------------------
+ *
+ * Genere 2 ou 3 chiffres significatifs, sans zero terminal ambigu (le premier
+ * et le dernier chiffre sont non nuls).
+ *
+ * Retourne [ $s, $mantisse_affichage, $mantisse_valeur, $n ].
+ *
+ * ---------------------------------------------------------------------------- */
+function conversions_generer_chiffres_significatifs(): array
+{
+    $n = random_int(2, 3);
+    $s = (string) random_int(1, 9);
+
+    for ($i = 0; $i < $n - 2; $i++)
+    {
+        $s .= (string) random_int(0, 9);
+    }
+
+    $s .= (string) random_int(1, 9);
+
+    $mantisse_affichage = substr($s, 0, 1) . ',' . substr($s, 1);
+    $mantisse_valeur    = (float) (substr($s, 0, 1) . '.' . substr($s, 1));
+
+    return array($s, $mantisse_affichage, $mantisse_valeur, $n);
+}
+
+/* ----------------------------------------------------------------------------
+ *
+ * conversions_formater_nombre()
+ *
+ * ----------------------------------------------------------------------------
+ *
+ * Formate les chiffres significatifs $s (longueur $n) en un nombre affiche
+ * sans notation scientifique, decale de $k crans (k <= 0 pour ne jamais
+ * ajouter de zero terminal a un entier, ce qui rendrait le nombre de CS
+ * ambigu).
+ *
+ * ---------------------------------------------------------------------------- */
+function conversions_formater_nombre(string $s, int $n, int $k): string
+{
+    if ($k >= 0)
+    {
+        return $s . str_repeat('0', $k);
+    }
+
+    $decalage = -$k;
+
+    if ($decalage < $n)
+    {
+        $partie_entiere  = substr($s, 0, $n - $decalage);
+        $partie_decimale = substr($s, $n - $decalage);
+    }
+    else
+    {
+        $partie_entiere  = '0';
+        $partie_decimale = str_repeat('0', $decalage - $n) . $s;
+    }
+
+    return $partie_entiere . ',' . $partie_decimale;
+}
+
+/* ----------------------------------------------------------------------------
+ *
+ * conversions_generer_question_lineaire()
+ *
+ * ----------------------------------------------------------------------------
+ *
+ * Genere une conversion d'unite entre prefixes SI (T, G, M, k, h, da, [aucun],
+ * d, c, m, µ, n, p) sur une unite de base (s, g, m, L). La valeur de depart
+ * est affichee sans notation scientifique ; l'etudiant doit fournir la
+ * reponse en notation scientifique normalisee (1 <= mantisse < 10), sous
+ * forme de deux valeurs : la mantisse et l'exposant.
+ *
+ * Comme un changement de prefixe ne fait que decaler la puissance de 10, les
+ * chiffres significatifs (2 ou 3, jamais de zero terminal ambigu) sont
+ * conserves tels quels dans la mantisse de la reponse ; seul l'exposant
+ * change.
+ *
+ * Retourne :
+ *
+ * [
+ *   'nombre'             => string,  // valeur affichee (virgule), ex. "0,0134"
+ *   'source'             => string,  // unite de depart, ex. "nm"
+ *   'cible'               => string,  // unite demandee, ex. "km"
+ *   'mantisse_valeur'    => float,   // ex. 1.34
+ *   'mantisse_affichage' => string,  // ex. "1,34"
+ *   'exposant'           => int,     // ex. -14
+ *   'explication'        => string
+ * ]
+ *
+ * ---------------------------------------------------------------------------- */
+function conversions_generer_question_lineaire(): array
+{
+    $prefixes = conversions_table_prefixes();
+    $bases    = array('s', 'g', 'm', 'L');
+
+    list($s, $mantisse_affichage, $mantisse_valeur, $n) = conversions_generer_chiffres_significatifs();
+
+    $k              = random_int(-5, 0);
+    $e_disp         = $k + ($n - 1);
+    $nombre_affiche = conversions_formater_nombre($s, $n, $k);
+
+    //
+    // Unite de depart (toujours prefixee) et unite demandee (n'importe
+    // quel prefixe, incluant l'unite de base, mais different de la source).
+    //
+
+    $base = $bases[array_rand($bases)];
+
+    $prefixes_source_possibles = array_values(array_filter(array_keys($prefixes), function($p) { return $p !== ''; }));
+    $prefixe_source            = $prefixes_source_possibles[array_rand($prefixes_source_possibles)];
+
+    $prefixes_cible_possibles = array_values(array_filter(array_keys($prefixes), function($p) use ($prefixe_source) { return $p !== $prefixe_source; }));
+    $prefixe_cible            = $prefixes_cible_possibles[array_rand($prefixes_cible_possibles)];
+
+    $unite_source = $prefixe_source . $base;
+    $unite_cible  = $prefixe_cible . $base;
+
+    $puissance_source = $prefixes[$prefixe_source];
+    $puissance_cible   = $prefixes[$prefixe_cible];
+
+    $exposant = $e_disp + $puissance_source - $puissance_cible;
+    $delta     = $puissance_source - $puissance_cible;
+
+    $explication = $nombre_affiche . ' ' . $unite_source . ' = ' . $mantisse_affichage
+        . ' × 10<sup>' . $e_disp . '</sup> ' . $unite_source . '. Passage de ' . $unite_source
+        . ' à ' . $unite_cible . ' : l\'exposant se décale de ' . ($delta >= 0 ? '+' : '') . $delta
+        . ' (10<sup>' . $puissance_source . '</sup> ' . $base . ' pour ' . $unite_source . ', 10<sup>'
+        . $puissance_cible . '</sup> ' . $base . ' pour ' . $unite_cible . '). Donc '
+        . $mantisse_affichage . ' × 10<sup>' . $exposant . '</sup> ' . $unite_cible . '.';
+
+    return array(
+        'nombre'             => $nombre_affiche,
+        'source'             => $unite_source,
+        'cible'              => $unite_cible,
+        'mantisse_valeur'    => $mantisse_valeur,
+        'mantisse_affichage' => $mantisse_affichage,
+        'exposant'           => $exposant,
+        'explication'        => $explication,
+        'indice'             => '',
+    );
+}
+
+/* ----------------------------------------------------------------------------
+ *
+ * conversions_generer_question_aire()
+ *
+ * ----------------------------------------------------------------------------
+ *
+ * Genere une conversion d'unite de surface (m² avec prefixe SI). Un
+ * changement de prefixe lineaire de delta decale l'exposant d'une aire de
+ * 2 * delta (le facteur d'echelle est mis au carre).
+ *
+ * ---------------------------------------------------------------------------- */
+function conversions_generer_question_aire(): array
+{
+    $prefixes = conversions_table_prefixes();
+
+    list($s, $mantisse_affichage, $mantisse_valeur, $n) = conversions_generer_chiffres_significatifs();
+
+    $k              = random_int(-5, 0);
+    $e_disp         = $k + ($n - 1);
+    $nombre_affiche = conversions_formater_nombre($s, $n, $k);
+
+    $prefixes_source_possibles = array_values(array_filter(array_keys($prefixes), function($p) { return $p !== ''; }));
+    $prefixe_source            = $prefixes_source_possibles[array_rand($prefixes_source_possibles)];
+
+    $prefixes_cible_possibles = array_values(array_filter(array_keys($prefixes), function($p) use ($prefixe_source) { return $p !== $prefixe_source; }));
+    $prefixe_cible            = $prefixes_cible_possibles[array_rand($prefixes_cible_possibles)];
+
+    $unite_source = $prefixe_source . 'm²';
+    $unite_cible  = $prefixe_cible . 'm²';
+
+    $puissance_source = $prefixes[$prefixe_source];
+    $puissance_cible   = $prefixes[$prefixe_cible];
+
+    $delta_lineaire = $puissance_source - $puissance_cible;
+    $delta          = 2 * $delta_lineaire;
+    $exposant       = $e_disp + $delta;
+
+    $explication = $nombre_affiche . ' ' . $unite_source . ' = ' . $mantisse_affichage
+        . ' × 10<sup>' . $e_disp . '</sup> ' . $unite_source . '. Passage de ' . $prefixe_source . 'm à '
+        . $prefixe_cible . 'm : l\'exposant linéaire se décale de ' . ($delta_lineaire >= 0 ? '+' : '') . $delta_lineaire
+        . ', donc ×2 pour une aire (m²) : ' . ($delta >= 0 ? '+' : '') . $delta . '. Donc '
+        . $mantisse_affichage . ' × 10<sup>' . $exposant . '</sup> ' . $unite_cible . '.';
+
+    return array(
+        'nombre'             => $nombre_affiche,
+        'source'             => $unite_source,
+        'cible'              => $unite_cible,
+        'mantisse_valeur'    => $mantisse_valeur,
+        'mantisse_affichage' => $mantisse_affichage,
+        'exposant'           => $exposant,
+        'explication'        => $explication,
+        'indice'             => '',
+    );
+}
+
+/* ----------------------------------------------------------------------------
+ *
+ * conversions_generer_question_cube()
+ *
+ * ----------------------------------------------------------------------------
+ *
+ * Genere une conversion d'unite de volume : cube de m (avec prefixe SI) et/ou
+ * litre (avec prefixe SI), les deux familles etant reliees par
+ * 1 L = 1 dm³ = 10⁻³ m³ (donc aussi 1 cm³ = 1 mL). Un changement de prefixe
+ * lineaire de delta decale l'exposant d'un volume en m³ de 3 * delta (le
+ * facteur d'echelle est mis au cube) ; un prefixe de litre decale l'exposant
+ * de son propre delta, avec un decalage fixe de -3 pour l'ancrer au m³.
+ *
+ * ---------------------------------------------------------------------------- */
+function conversions_generer_question_cube(): array
+{
+    $prefixes = conversions_table_prefixes();
+
+    list($s, $mantisse_affichage, $mantisse_valeur, $n) = conversions_generer_chiffres_significatifs();
+
+    $k              = random_int(-5, 0);
+    $e_disp         = $k + ($n - 1);
+    $nombre_affiche = conversions_formater_nombre($s, $n, $k);
+
+    //
+    // Univers des unites de volume : cube de m (prefixe quelconque) ou
+    // litres (prefixe quelconque), ramenees a une reference commune : la
+    // puissance de 10 par rapport au m³.
+    //
+
+    $univers = array();
+
+    foreach ($prefixes as $prefixe => $puissance)
+    {
+        $univers[] = array('unite' => $prefixe . 'm³', 'prefixe' => $prefixe, 'puissance_m3' => 3 * $puissance);
+        $univers[] = array('unite' => $prefixe . 'L',  'prefixe' => $prefixe, 'puissance_m3' => $puissance - 3);
+    }
+
+    //
+    // La source est toujours prefixee (jamais "m³" ou "L" tout court).
+    //
+
+    $univers_source = array_values(array_filter($univers, function($u) { return $u['prefixe'] !== ''; }));
+    $source         = $univers_source[array_rand($univers_source)];
+
+    $univers_cible = array_values(array_filter($univers, function($u) use ($source) { return $u['unite'] !== $source['unite']; }));
+    $cible         = $univers_cible[array_rand($univers_cible)];
+
+    $unite_source = $source['unite'];
+    $unite_cible  = $cible['unite'];
+
+    $delta    = $source['puissance_m3'] - $cible['puissance_m3'];
+    $exposant = $e_disp + $delta;
+
+    //
+    // Quand la conversion croise les familles m³ / L, un indice est propose
+    // AVANT que l'etudiant ne reponde (affiche par la vue), en plus d'etre
+    // rappele dans l'explication en cas d'erreur.
+    //
+
+    $indice = '';
+
+    if (substr($unite_source, -1) !== substr($unite_cible, -1))
+    {
+        $indice = '1 cm³ = 1 mL';
+    }
+
+    $explication = $nombre_affiche . ' ' . $unite_source . ' = ' . $mantisse_affichage
+        . ' × 10<sup>' . $e_disp . '</sup> ' . $unite_source . '. En m³ : 1 ' . $unite_source . ' = 10<sup>'
+        . $source['puissance_m3'] . '</sup> m³, et 1 ' . $unite_cible . ' = 10<sup>' . $cible['puissance_m3']
+        . '</sup> m³.' . ($indice !== '' ? ' Indice : ' . $indice . '.' : '') . ' L\'exposant se décale donc de '
+        . ($delta >= 0 ? '+' : '') . $delta . '. Donc ' . $mantisse_affichage . ' × 10<sup>' . $exposant
+        . '</sup> ' . $unite_cible . '.';
+
+    return array(
+        'nombre'             => $nombre_affiche,
+        'source'             => $unite_source,
+        'cible'              => $unite_cible,
+        'mantisse_valeur'    => $mantisse_valeur,
+        'mantisse_affichage' => $mantisse_affichage,
+        'exposant'           => $exposant,
+        'explication'        => $explication,
+        'indice'             => $indice,
+    );
+}
+
+/* ----------------------------------------------------------------------------
+ *
+ * conversions_generer_question()
+ *
+ * ----------------------------------------------------------------------------
+ *
+ * Choisit au hasard entre une conversion lineaire (s, g, m, L), une
+ * conversion de surface (m²) ou une conversion de volume (m³ et/ou L).
+ *
+ * ---------------------------------------------------------------------------- */
+function conversions_generer_question(): array
+{
+    $generateurs = array(
+        'conversions_generer_question_lineaire',
+        'conversions_generer_question_aire',
+        'conversions_generer_question_cube',
+    );
+
+    $fn = $generateurs[array_rand($generateurs)];
+
+    return $fn();
+}
+
+/* ----------------------------------------------------------------------------
+ *
  * quiz_liste_disponibles()
  *
  * ----------------------------------------------------------------------------
@@ -1634,6 +1974,11 @@ function quiz_liste_disponibles(): array
 			'cours'		  => 'SNU',
             'titre'       => 'Fonctions organiques',
             'description' => "Associez la structure d'une molécule à la fonction chimique qu'elle contient.",
+        ),
+		'conversions' => array(
+			'cours'		  => 'SN1',
+            'titre'       => "Conversion d'unités",
+            'description' => "Convertissez la valeur suivante aux unités demandées, en notation scientifique.",
         ),
     );
 }
