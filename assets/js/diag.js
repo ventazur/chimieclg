@@ -5,21 +5,34 @@
  * ==================================================================== */
 $(document).ready(function()
 {
+	var scatterChart = null;
+
 	$('#generer-action').click(function()
 	{
 		var $form = $('#form-diagramme');
-		var params = [];
+		var params = {};
 
 		const champs_obligatoires = ['vadm', 'dvadm', 'vexp', 'dvexp', 'unites', 'decaxe'];
+		const champs_numeriques = ['vadm', 'dvadm', 'vexp', 'dvexp', 'decaxe'];
 		const champs = ['xmin', 'xmax'];
 
 		champs_obligatoires.forEach(function(champ) {
 			params[champ] = $('#' + champ).val();
 		});
-		
+
 		champs.forEach(function(champ) {
 			params[champ] = $('#' + champ).val();
 		});
+
+		var champ_invalide = champs_numeriques.find(function(champ) {
+			return params[champ] === '' || isNaN(params[champ]);
+		});
+
+		if (champ_invalide) {
+			$('#canvas-wrap').html('<i class="bi bi-exclamation-circle" style="color: crimson"></i> <span style="color: crimson">Veuillez remplir correctement tous les champs numériques.</span>');
+			$('#download-image-wrap').addClass('d-none');
+			return;
+		}
 
 		params.vadm_min = params.vadm - params.dvadm;
 		params.vadm_max = +params.vadm + +params.dvadm;
@@ -47,8 +60,6 @@ $(document).ready(function()
 		else
 			params.x_max_limite = +params.v_max + 2*(+params.d_max)
 
-		if (params.x_min_limite < 0) params.x_min_limite = 0;
-
 		var dataset_va = [
 			{x: params.vadm_min, y: 20},
 			{x: params.vadm, 	 y: 20},
@@ -73,7 +84,11 @@ $(document).ready(function()
 		var canvas = document.getElementById('myChart');
 		var ctx = canvas.getContext('2d');
 
-		var scatterChart = new Chart(ctx, {
+		if (scatterChart) {
+			scatterChart.destroy();
+		}
+
+		scatterChart = new Chart(ctx, {
 			type: 'scatter',
 			data: {
 				datasets: [
