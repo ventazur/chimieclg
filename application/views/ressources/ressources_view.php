@@ -32,8 +32,6 @@
 	table.ressources tbody td:hover {
 		background: #f8f9fa;
 	}
-
-
 </style>
 
 <?
@@ -73,6 +71,25 @@
     <div class="page-titre">Les ressources</div>
 
     <div class="col-12">
+
+		<p class="page-section mt-4">Quiz</p>
+
+		<? if ( ! empty($quizzes)) : ?>
+
+			<table class="table ressources">
+				<tbody>
+					<? foreach ($quizzes as $slug => $q) : ?>
+						<tr>
+							<td>
+								<i class="bi bi-chevron-right" style="color: #aaa; margin-right: 10px"></i>
+								<a href="<?= base_url() . 'quiz/' . $slug; ?>"><?= $q['titre']; ?></a>
+							</td>
+						</tr>
+					<? endforeach; ?>
+				</tbody>
+			</table>
+
+		<? endif; ?>
 
 		<? if (empty($cats)) : ?>
 
