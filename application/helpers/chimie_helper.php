@@ -504,7 +504,7 @@ function orbitales_generer_n(): array
     return array(
         'affichage'   => array('n' => $n),
         'valeur'      => $valeur,
-        'explication' => "Dans la couche n = $n, l va de 0 a n-1 et chaque sous-couche l contient 2l+1 orbitales. Au total : n² = $valeur orbitales."
+        'explication' => "Dans la couche n = $n, l va de 0 à n-1 et chaque sous-couche l contient 2l+1 orbitales. Au total : n² = $valeur orbitales."
     );
 }
 
@@ -517,14 +517,14 @@ function orbitales_generer_n_l(): array
         $l      = $n + random_int(0, 2);
         $valeur = 0;
 
-        $explication = "l doit toujours etre strictement inferieur a n. Ici n = $n, donc l = $l est impossible : 0 orbitale.";
+        $explication = "l doit toujours être strictement inférieur à n. Ici n = $n, donc l = $l est impossible : 0 orbitale.";
     }
     else
     {
         $l      = random_int(0, $n - 1);
         $valeur = 2 * $l + 1;
 
-        $explication = "Pour l = $l, ml va de -l a +l, ce qui donne 2l+1 = $valeur orbitales.";
+        $explication = "Pour l = $l, ml va de -l à +l, ce qui donne 2l+1 = $valeur orbitales.";
     }
 
     return array(
@@ -542,7 +542,7 @@ function orbitales_generer_l(): array
     return array(
         'affichage'   => array('l' => $l),
         'valeur'      => $valeur,
-        'explication' => "Pour l = $l, ml peut prendre 2l+1 = $valeur valeurs differentes (de -l a +l). Ces $valeur orbitales existent quel que soit n, tant que n > l."
+        'explication' => "Pour l = $l, ml peut prendre 2l+1 = $valeur valeurs différentes (de -l à +l). Ces $valeur orbitales existent quel que soit n, tant que n > l."
     );
 }
 
@@ -557,7 +557,7 @@ function orbitales_generer_n_ml(): array
         $valeur = 0;
 
         $l_max = $n - 1;
-        $explication = "Pour n = $n, l va au maximum jusqu'a $l_max, donc |ml| ne peut jamais atteindre $abs_ml : 0 orbitale.";
+        $explication = "Pour n = $n, l va au maximum jusqu'à $l_max, donc |ml| ne peut jamais atteindre $abs_ml : 0 orbitale.";
     }
     else
     {
@@ -566,7 +566,7 @@ function orbitales_generer_n_ml(): array
         $valeur = $n - $abs_ml;
 
         $l_max = $n - 1;
-        $explication = "l doit etre au moins |ml| = $abs_ml et au plus n-1 = $l_max, ce qui laisse $valeur valeur(s) de l possibles, donc $valeur orbitales.";
+        $explication = "l doit être au moins |ml| = $abs_ml et au plus n-1 = $l_max, ce qui laisse $valeur valeur(s) de l possibles, donc $valeur orbitales.";
     }
 
     return array(
@@ -587,7 +587,7 @@ function orbitales_generer_n_l_ml(): array
             $l  = $n + random_int(0, 2);
             $ml = random_int(-$l, $l);
 
-            $raison = "l = $l n'est pas valide pour n = $n (l doit etre strictement inferieur a n)";
+            $raison = "l = $l n'est pas valide pour n = $n (l doit être strictement inférieur à n)";
         }
         else
         {
@@ -595,11 +595,11 @@ function orbitales_generer_n_l_ml(): array
             $abs_ml = $l + random_int(1, 2);
             $ml     = (random_int(0, 1) === 0) ? $abs_ml : -$abs_ml;
 
-            $raison = "ml = $ml n'est pas valide pour l = $l (|ml| doit etre inferieur ou egal a l)";
+            $raison = "ml = $ml n'est pas valide pour l = $l (|ml| doit être inférieur ou égal à l)";
         }
 
         $valeur      = 0;
-        $explication = "$raison, donc cette combinaison ne correspond a aucune orbitale.";
+        $explication = "$raison, donc cette combinaison ne correspond à aucune orbitale.";
     }
     else
     {
@@ -607,7 +607,7 @@ function orbitales_generer_n_l_ml(): array
         $ml     = random_int(-$l, $l);
         $valeur = 1;
 
-        $explication = 'Cette combinaison (n, l, ml) designe une orbitale unique et bien precise : 1 orbitale.';
+        $explication = 'Cette combinaison (n, l, ml) désigne une orbitale unique et bien précise : 1 orbitale.';
     }
 
     return array(
