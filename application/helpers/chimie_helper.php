@@ -1978,7 +1978,7 @@ function quiz_liste_disponibles(): array
 		'conversions' => array(
 			'cours'		  => 'SN1',
             'titre'       => "Conversion d'unités",
-            'description' => "Convertissez la valeur suivante aux unités demandées, en notation scientifique.",
+            'description' => "Convertissez une valeur aux unités demandées, en notation scientifique.",
         ),
     );
 }
