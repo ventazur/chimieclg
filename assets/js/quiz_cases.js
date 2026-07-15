@@ -231,7 +231,7 @@ $(document).ready(function()
 
         $('#quiz-cases-envoyer').addClass('d-none');
 
-        var libelleReponses = (nbReussies === 1) ? 'bonne réponse' : 'bonnes réponses';
+        var libelleReponses = (nbReussies <= 1) ? 'bonne réponse' : 'bonnes réponses';
 
         $('#quiz-cases-resultat-global')
             .removeClass('d-none')
