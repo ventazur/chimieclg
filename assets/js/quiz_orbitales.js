@@ -17,7 +17,7 @@ $(document).ready(function()
 
     var SEUIL_RECHARGE = 5;
     var CLE_SCORE       = 'quiz_orbitales_score';
-    var ORDRE_CLES      = ['n', 'l', 'ml'];
+    var ORDRE_CLES      = ['n', 'n_max', 'l', 'ml'];
 
     function chargerScore()
     {
@@ -79,8 +79,15 @@ $(document).ready(function()
 
             if (Object.prototype.hasOwnProperty.call(affichage, cle))
             {
-                var etiquette = (cle === 'ml') ? 'mₗ' : cle;
-                html += '<span class="quiz-orb-valeur">' + etiquette + ' = ' + affichage[cle] + '</span>';
+                if (cle === 'n_max')
+                {
+                    html += '<span class="quiz-orb-valeur">n &lt; ' + affichage[cle] + '</span>';
+                }
+                else
+                {
+                    var etiquette = (cle === 'ml') ? 'mₗ' : cle;
+                    html += '<span class="quiz-orb-valeur">' + etiquette + ' = ' + affichage[cle] + '</span>';
+                }
             }
         }
 

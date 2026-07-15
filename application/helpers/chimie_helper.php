@@ -473,7 +473,10 @@ function orbitales_generer_question(): array
         'orbitales_generer_n_l',
         'orbitales_generer_l',
         'orbitales_generer_n_ml',
-        'orbitales_generer_n_l_ml'
+        'orbitales_generer_n_l_ml',
+        'orbitales_generer_n_inf',
+        'orbitales_generer_n_inf_l',
+        'orbitales_generer_n_inf_ml'
     );
 
     $fonction = $generateurs[random_int(0, count($generateurs) - 1)];
@@ -612,6 +615,91 @@ function orbitales_generer_n_l_ml(): array
 
     return array(
         'affichage'   => array('n' => $n, 'l' => $l, 'ml' => $ml),
+        'valeur'      => $valeur,
+        'explication' => $explication
+    );
+}
+
+function orbitales_generer_n_inf(): array
+{
+    $k = random_int(2, 9);
+    $m = $k - 1;
+
+    $valeur = intdiv($m * ($m + 1) * (2 * $m + 1), 6);
+
+    $termes = array();
+
+    for ($i = 1; $i <= $m; $i++)
+    {
+        $termes[] = $i * $i;
+    }
+
+    $explication = "n < $k signifie n = " . implode(', ', range(1, $m)) . ". Chaque n contribue n² orbitales : " . implode(' + ', $termes) . " = $valeur orbitales.";
+
+    return array(
+        'affichage'   => array('n_max' => $k),
+        'valeur'      => $valeur,
+        'explication' => $explication
+    );
+}
+
+function orbitales_generer_n_inf_l(): array
+{
+    $k = random_int(2, 9);
+    $m = $k - 1;
+
+    if (orbitales_piege())
+    {
+        $l      = $m + random_int(0, 2);
+        $valeur = 0;
+
+        $explication = "l = $l n'est valide pour aucun n < $k (il faudrait n ≥ l+1 = " . ($l + 1) . ", mais n < $k), donc 0 orbitale.";
+    }
+    else
+    {
+        $l      = random_int(0, max(0, $m - 1));
+        $nb     = $m - $l;
+        $valeur = $nb * (2 * $l + 1);
+
+        $premier_n = $l + 1;
+
+        $explication = "Pour l = $l, seuls les n tels que n > l et n < $k conviennent, soit n = $premier_n à $m ($nb valeur(s)). Chacun contribue 2l+1 = " . (2 * $l + 1) . " orbitales, donc $nb × " . (2 * $l + 1) . " = $valeur orbitales.";
+    }
+
+    return array(
+        'affichage'   => array('n_max' => $k, 'l' => $l),
+        'valeur'      => $valeur,
+        'explication' => $explication
+    );
+}
+
+function orbitales_generer_n_inf_ml(): array
+{
+    $k = random_int(2, 9);
+    $m = $k - 1;
+
+    if (orbitales_piege())
+    {
+        $abs_ml = $m + random_int(0, 2);
+        $ml     = (random_int(0, 1) === 0) ? $abs_ml : -$abs_ml;
+        $valeur = 0;
+
+        $explication = "Pour n < $k, n va au maximum jusqu'à $m, donc |ml| ne peut jamais atteindre $abs_ml pour aucun n de cette plage : 0 orbitale.";
+    }
+    else
+    {
+        $abs_ml = random_int(0, max(0, $m - 1));
+        $ml     = ($abs_ml === 0) ? 0 : (random_int(0, 1) === 0 ? $abs_ml : -$abs_ml);
+        $nb     = $m - $abs_ml;
+        $valeur = intdiv($nb * ($nb + 1), 2);
+
+        $premier_n = $abs_ml + 1;
+
+        $explication = "Pour ml = $ml, seuls les n tels que n > |ml| et n < $k conviennent, soit n = $premier_n à $m ($nb valeur(s)). Chaque n contribue (n-|ml|) orbitales, et leur somme donne $valeur orbitales.";
+    }
+
+    return array(
+        'affichage'   => array('n_max' => $k, 'ml' => $ml),
         'valeur'      => $valeur,
         'explication' => $explication
     );
