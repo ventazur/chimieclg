@@ -50,8 +50,8 @@
 				</a>
             </li>
             <li class="nav-item">
-				<a class="nav-link" href="<?= base_url() . 'assets/docs/Guide_de_redaction_A2021.pdf'; ?>">
-					Guide de réaction A2021
+				<a class="nav-link" href="<?= base_url() . 'quiz'; ?>">
+					Quiz
 				</a>
             </li>
         </ul>
