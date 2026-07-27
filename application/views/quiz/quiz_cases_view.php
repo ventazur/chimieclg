@@ -93,6 +93,29 @@
 		margin: 0 auto;
 	}
 
+	#quiz-cases-diagramme-afficher-wrap {
+		text-align: center;
+		padding: 28px 0 48px;
+	}
+
+	#quiz-cases-diagramme-afficher {
+		font-family: Montserrat, Lato, sans-serif;
+		font-weight: 600;
+		font-size: 0.82em;
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
+		background: none;
+		border: 1px solid #8a8d90;
+		border-radius: 999px;
+		color: #1c1c1c;
+		padding: 10px 26px;
+	}
+
+	#quiz-cases-diagramme-afficher:hover,
+	#quiz-cases-diagramme-afficher:focus {
+		border-color: #1c1c1c;
+	}
+
 	.quiz-cases-sous-couche {
 		display: flex;
 		flex-direction: column;
@@ -292,7 +315,11 @@
 
 				<div id="quiz-cases-element">&nbsp;</div>
 
-				<div id="quiz-cases-diagramme"></div>
+				<div id="quiz-cases-diagramme-afficher-wrap">
+					<button type="button" id="quiz-cases-diagramme-afficher" class="btn">Afficher les cases quantiques</button>
+				</div>
+
+				<div id="quiz-cases-diagramme" class="d-none"></div>
 
 				<div class="quiz-cases-filet"></div>
 			</div>

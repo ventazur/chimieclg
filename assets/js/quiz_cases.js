@@ -112,7 +112,8 @@ $(document).ready(function()
             html += '</div>';
         }
 
-        $('#quiz-cases-diagramme').html(html);
+        $('#quiz-cases-diagramme').html(html).addClass('d-none');
+        $('#quiz-cases-diagramme-afficher-wrap').removeClass('d-none');
     }
 
     function afficherQuestions(questions)
@@ -197,6 +198,9 @@ $(document).ready(function()
 
         repondu = true;
 
+        $('#quiz-cases-diagramme').removeClass('d-none');
+        $('#quiz-cases-diagramme-afficher-wrap').addClass('d-none');
+
         var nbReussies = 0;
 
         for (var i = 0; i < courant.questions.length; i++)
@@ -240,6 +244,12 @@ $(document).ready(function()
         $('#quiz-cases-suivant-wrap').removeClass('d-none');
         $('#quiz-cases-suivant').trigger('focus');
     }
+
+    $('#quiz-cases-diagramme-afficher').on('click', function()
+    {
+        $('#quiz-cases-diagramme').removeClass('d-none');
+        $('#quiz-cases-diagramme-afficher-wrap').addClass('d-none');
+    });
 
     $('#quiz-cases-envoyer').on('click', function()
     {
