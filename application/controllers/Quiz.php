@@ -75,6 +75,13 @@ Class Quiz extends MY_Controller
         $this->_display_view('conversions');
     }
 
+    public function cscalcul()
+    {
+        $this->data['quiz'] = $this->quizzes['cscalcul'];
+
+        $this->_display_view('cscalcul');
+    }
+
     /* -------------------------------------------------------------------
      *
      * (AJAX) Lot de nombres pour un quiz donne
@@ -145,6 +152,13 @@ Class Quiz extends MY_Controller
                 for ($i = 0; $i < $taille_lot; $i++)
                 {
                     $lot[] = conversions_generer_question();
+                }
+                break;
+
+            case 'cscalcul' :
+                for ($i = 0; $i < $taille_lot; $i++)
+                {
+                    $lot[] = cs_calcul_generer_equation();
                 }
                 break;
         }

@@ -1950,6 +1950,16 @@ function quiz_liste_disponibles(): array
             'titre'       => 'Chiffres significatifs',
             'description' => "Déterminez le nombre de chiffres significatifs d'un nombre.",
         ),
+		'cscalcul' => array(
+			'cours'		  => 'SN1',
+            'titre'       => 'Chiffres significatifs d\'un calcul',
+            'description' => "Déterminez le nombre de chiffres significatifs de la réponse d'un calcul combinant additions/soustractions et multiplications/divisions.",
+        ),
+		'conversions' => array(
+			'cours'		  => 'SN1',
+            'titre'       => "Conversion d'unités",
+            'description' => "Convertissez une valeur aux unités demandées, en notation scientifique.",
+        ),
 		'orbitales' => array(
 			'cours'		  => 'SN1',
             'titre'       => 'Nombre d\'orbitales',
@@ -1975,12 +1985,521 @@ function quiz_liste_disponibles(): array
             'titre'       => 'Fonctions chimiques',
             'description' => "Associez la structure d'une molécule à la fonction chimique qu'elle contient.",
         ),
-		'conversions' => array(
-			'cours'		  => 'SN1',
-            'titre'       => "Conversion d'unités",
-            'description' => "Convertissez une valeur aux unités demandées, en notation scientifique.",
-        ),
     );
+}
+
+/* ----------------------------------------------------------------------------
+ *
+ * CS AJUSTEMENT (adapte de kovao.dev/application/helpers/general_helper.php)
+ *
+ * ----------------------------------------------------------------------------
+ *
+ * Arrondit $nombre au nombre de chiffres significatifs $cs demande, en
+ * bcmath pour eviter les problemes de precision virgule flottante, et
+ * retourne le resultat formate (notation decimale ou scientifique selon le
+ * cas).
+ *
+ * ---------------------------------------------------------------------------- */
+function cs_ajustement($nombre, $cs)
+{
+    if ($cs == 0)
+    {
+        return $nombre;
+    }
+
+    $nombre_orig = $nombre;
+    $nombre      = str_replace(',', '.', (string) $nombre);
+
+    $negatif = FALSE;
+
+    if ($nombre !== '' && $nombre[0] === '-')
+    {
+        $negatif = TRUE;
+        $nombre  = substr($nombre, 1);
+    }
+
+    if ((float) $nombre == 0)
+    {
+        if ($cs == 1) return '0';
+
+        return '0.' . str_repeat('0', $cs - 1);
+    }
+
+    $ns_exposant = NULL;
+
+    $nombre_upper = strtoupper($nombre);
+
+    if (strpos($nombre_upper, 'E') !== FALSE)
+    {
+        $pos_e       = strpos($nombre_upper, 'E');
+        $ns_exposant = (int) substr($nombre, $pos_e + 1);
+        $nombre      = substr($nombre, 0, $pos_e);
+    }
+
+    $precision_travail = 50;
+
+    $bc_nombre = $nombre;
+
+    if ($ns_exposant !== NULL)
+    {
+        if ($ns_exposant >= 0)
+        {
+            $bc_nombre = bcmul($bc_nombre, bcpow('10', (string) $ns_exposant, 0), $precision_travail);
+        }
+        else
+        {
+            $bc_nombre = bcdiv($bc_nombre, bcpow('10', (string) (-$ns_exposant), 0), $precision_travail);
+        }
+    }
+
+    if (strpos($bc_nombre, '.') !== FALSE)
+    {
+        $bc_nombre = rtrim($bc_nombre, '0');
+        $bc_nombre = rtrim($bc_nombre, '.');
+    }
+
+    $exposant_1cs = (int) floor(log10((float) $bc_nombre));
+
+    $decimales_arrondi = $cs - 1 - $exposant_1cs;
+
+    if ($decimales_arrondi <= 0)
+    {
+        $diviseur   = bcpow('10', (string) (-$decimales_arrondi), 0);
+        $bc_arrondi = bcdiv($bc_nombre, $diviseur, $precision_travail);
+        $bc_arrondi = cs_arrondi_bcmath($bc_arrondi, 0);
+        $bc_arrondi = bcmul($bc_arrondi, $diviseur, 0);
+    }
+    else
+    {
+        $bc_arrondi = cs_arrondi_bcmath($bc_nombre, $decimales_arrondi);
+    }
+
+    if (strpos($bc_arrondi, '.') !== FALSE)
+    {
+        $bc_arrondi = rtrim($bc_arrondi, '0');
+        $bc_arrondi = rtrim($bc_arrondi, '.');
+    }
+
+    if ((float) $bc_arrondi === 0.0)
+    {
+        return '0';
+    }
+
+    $exposant_1cs = (int) floor(log10((float) $bc_arrondi));
+
+    $utiliser_ns = FALSE;
+
+    if ($ns_exposant !== NULL)
+    {
+        $utiliser_ns = TRUE;
+    }
+
+    if ( ! $utiliser_ns)
+    {
+        if (strpos($bc_arrondi, '.') === FALSE && strlen($bc_arrondi) > 1 && substr($bc_arrondi, -1) === '0')
+        {
+            $utiliser_ns = TRUE;
+        }
+    }
+
+    if ( ! $utiliser_ns && $exposant_1cs <= -5)
+    {
+        $utiliser_ns = TRUE;
+    }
+
+    if ($utiliser_ns)
+    {
+        $sortie = cs_construire_notation_scientifique($bc_arrondi, $cs, $exposant_1cs);
+    }
+    else
+    {
+        $sortie = cs_construire_notation_decimale($bc_arrondi, $cs, $exposant_1cs);
+    }
+
+    if ($negatif && (float) $sortie != 0)
+    {
+        return '-' . $sortie;
+    }
+
+    return $sortie;
+}
+
+// Arrondi scolaire (half-up) en arithmetique exacte, sans jamais passer par un float.
+function cs_arrondi_bcmath($nombre, $decimales)
+{
+    $nombre  = (string) $nombre;
+    $negatif = FALSE;
+
+    if ($nombre !== '' && $nombre[0] === '-')
+    {
+        $negatif = TRUE;
+        $nombre  = substr($nombre, 1);
+    }
+
+    if (strpos($nombre, '.') === FALSE)
+    {
+        $nombre .= '.';
+    }
+
+    list($entier, $frac) = explode('.', $nombre, 2);
+
+    $frac             = str_pad($frac, $decimales + 1, '0');
+    $chiffre_decision = (int) $frac[$decimales];
+    $frac_tronque     = substr($frac, 0, $decimales);
+
+    $resultat = ($decimales > 0) ? $entier . '.' . $frac_tronque : $entier;
+
+    if ($chiffre_decision >= 5)
+    {
+        $increment = ($decimales == 0) ? '1' : '0.' . str_repeat('0', $decimales - 1) . '1';
+        $resultat  = bcadd($resultat, $increment, $decimales);
+    }
+
+    $resultat = ltrim($resultat, '0') ?: '0';
+
+    if ($resultat !== '' && $resultat[0] === '.')
+    {
+        $resultat = '0' . $resultat;
+    }
+
+    if ($negatif)
+    {
+        $resultat = '-' . $resultat;
+    }
+
+    return $resultat;
+}
+
+// Formate la sortie en decimal avec exactement $cs CS (complete les zeros de fin).
+function cs_construire_notation_decimale($bc_arrondi, $cs, $exposant_1cs)
+{
+    $decimales_voulues = $cs - 1 - $exposant_1cs;
+
+    if ($decimales_voulues <= 0)
+    {
+        return $bc_arrondi;
+    }
+
+    if (strpos($bc_arrondi, '.') === FALSE)
+    {
+        $bc_arrondi .= '.';
+    }
+
+    list($entier, $frac) = explode('.', $bc_arrondi, 2);
+
+    $frac = str_pad($frac, $decimales_voulues, '0');
+
+    return $entier . '.' . $frac;
+}
+
+// Formate la mantisse et l'exposant d'une notation scientifique avec exactement $cs CS.
+function cs_construire_notation_scientifique($bc_arrondi, $cs, $exposant_1cs)
+{
+    if ($exposant_1cs >= 0)
+    {
+        $diviseur = bcpow('10', (string) $exposant_1cs, 0);
+        $mantisse = bcdiv($bc_arrondi, $diviseur, 30);
+    }
+    else
+    {
+        $multiplicateur = bcpow('10', (string) (-$exposant_1cs), 0);
+        $mantisse       = bcmul($bc_arrondi, $multiplicateur, 30);
+    }
+
+    if (strpos($mantisse, '.') !== FALSE)
+    {
+        $mantisse = rtrim($mantisse, '0');
+        $mantisse = rtrim($mantisse, '.');
+    }
+
+    $decimales_mantisse = $cs - 1;
+
+    if ($decimales_mantisse == 0)
+    {
+        $mantisse_formatee = (string) (int) round((float) $mantisse);
+    }
+    else
+    {
+        if (strpos($mantisse, '.') === FALSE)
+        {
+            $mantisse .= '.';
+        }
+
+        list($ent, $frac) = explode('.', $mantisse, 2);
+
+        $frac              = str_pad($frac, $decimales_mantisse, '0');
+        $mantisse_formatee = $ent . '.' . $frac;
+    }
+
+    if ($exposant_1cs == 0)
+    {
+        return $mantisse_formatee;
+    }
+
+    return $mantisse_formatee . 'E' . $exposant_1cs;
+}
+
+/* ----------------------------------------------------------------------------
+ *
+ * cs_calcul_generer_equation()
+ *
+ * ----------------------------------------------------------------------------
+ *
+ * Quiz "Chiffres significatifs d'un calcul" : genere une equation a 3
+ * operandes combinant obligatoirement une addition/soustraction et une
+ * multiplication/division (une des deux operations est prioritaire selon
+ * l'ordre choisi au hasard), et propage les CS selon la regle appropriee a
+ * chaque etape :
+ *
+ *   - multiplication / division : le CS du resultat = le CS minimal des
+ *     operandes
+ *   - addition / soustraction   : le resultat est limite au nombre de
+ *     decimales du terme le moins precis
+ *
+ * Retourne :
+ *
+ * [
+ *   'affichage'       => string,  // l'equation, ex. "(12,5 + 3,40) × 2,1"
+ *   'reponse_brute'   => string,  // resultat non arrondi, ex. "33,39"
+ *   'reponse_ajustee' => string,  // resultat arrondi au bon nombre de CS
+ *   'valeur'          => int,     // reponse attendue (nombre de CS)
+ *   'explication'     => string
+ * ]
+ *
+ * ---------------------------------------------------------------------------- */
+function cs_calcul_generer_equation(): array
+{
+    $a = cs_calcul_generer_operande();
+    $b = cs_calcul_generer_operande();
+    $c = cs_calcul_generer_operande();
+
+    $op_addsub = (random_int(0, 1) === 0) ? '+' : '-';
+    $op_muldiv = (random_int(0, 1) === 0) ? '*' : '/';
+
+    $addsub_en_premier = (random_int(0, 1) === 0);
+
+    if ($addsub_en_premier)
+    {
+        $inter = cs_calcul_combiner_addition($a, $b, $op_addsub);
+        $final = cs_calcul_combiner_multiplication($inter, $c, $op_muldiv);
+
+        $etapes = array(
+            array('type' => 'add', 'gauche' => $a, 'droite' => $b, 'op' => $op_addsub, 'resultat' => $inter),
+            array('type' => 'mul', 'gauche' => $inter, 'droite' => $c, 'op' => $op_muldiv, 'resultat' => $final),
+        );
+
+        $affichage = '(' . cs_calcul_afficher_noeud($a) . ' ' . cs_calcul_afficher_operateur($op_addsub) . ' ' . cs_calcul_afficher_noeud($b) . ') '
+            . cs_calcul_afficher_operateur($op_muldiv) . ' ' . cs_calcul_afficher_noeud($c);
+    }
+    else
+    {
+        $inter = cs_calcul_combiner_multiplication($a, $b, $op_muldiv);
+        $final = cs_calcul_combiner_addition($inter, $c, $op_addsub);
+
+        $etapes = array(
+            array('type' => 'mul', 'gauche' => $a, 'droite' => $b, 'op' => $op_muldiv, 'resultat' => $inter),
+            array('type' => 'add', 'gauche' => $inter, 'droite' => $c, 'op' => $op_addsub, 'resultat' => $final),
+        );
+
+        $affichage = cs_calcul_afficher_noeud($a) . ' ' . cs_calcul_afficher_operateur($op_muldiv) . ' ' . cs_calcul_afficher_noeud($b) . ' '
+            . cs_calcul_afficher_operateur($op_addsub) . ' ' . cs_calcul_afficher_noeud($c);
+    }
+
+    $reponse_ajustee = cs_ajustement($final['valeur'], $final['cs']);
+
+    $explication = cs_calcul_decrire_etape($etapes[0], 1) . ' ' . cs_calcul_decrire_etape($etapes[1], 2);
+
+    return array(
+        'affichage'       => $affichage,
+        'reponse_brute'   => cs_calcul_formater_brut($final['valeur']),
+        'reponse_ajustee' => cs_calcul_formater_ajustee($reponse_ajustee),
+        'valeur'          => $final['cs'],
+        'explication'     => $explication,
+    );
+}
+
+// Genere un operande decimal aleatoire (avec point decimal, jamais un entier
+// nu) pour eviter le cas ambigu des zeros de fin d'un entier.
+function cs_calcul_generer_operande(): array
+{
+    if (random_int(0, 1) === 0)
+    {
+        // Valeur >= 1, ex. "12.5", "3.40", "150.25".
+        $int_len = random_int(1, 2);
+        $dec_len = random_int(1, 2);
+
+        $int_part = (string) random_int(1, 9);
+
+        for ($i = 1; $i < $int_len; $i++)
+        {
+            $int_part .= (string) random_int(0, 9);
+        }
+
+        $dec_part = '';
+
+        for ($i = 0; $i < $dec_len; $i++)
+        {
+            $dec_part .= (string) random_int(0, 9);
+        }
+
+        $texte = $int_part . '.' . $dec_part;
+    }
+    else
+    {
+        // Valeur < 1, ex. "0.45", "0.032".
+        $zeros_de_tete = random_int(0, 2);
+        $sig_len       = random_int(1, 2);
+
+        $sig = (string) random_int(1, 9);
+
+        for ($i = 1; $i < $sig_len; $i++)
+        {
+            $sig .= (string) random_int(0, 9);
+        }
+
+        $texte = '0.' . str_repeat('0', $zeros_de_tete) . $sig;
+    }
+
+    return array(
+        'texte'  => $texte,
+        'valeur' => (float) $texte,
+        'cs'     => cs($texte),
+    );
+}
+
+// Position (exposant de base 10) du dernier chiffre significatif d'une
+// valeur, deduite de son CS.
+function cs_calcul_position_dernier_chiffre(float $valeur, int $cs): int
+{
+    if ($valeur == 0.0)
+    {
+        return -($cs - 1);
+    }
+
+    $exposant = (int) floor(log10(abs($valeur)));
+
+    return $exposant - ($cs - 1);
+}
+
+// Operation inverse : deduit le CS d'une valeur dont la position du dernier
+// chiffre significatif est deja connue.
+function cs_calcul_cs_depuis_position(float $valeur, int $position): int
+{
+    if ($valeur == 0.0)
+    {
+        return max(1, -$position + 1);
+    }
+
+    $exposant = (int) floor(log10(abs($valeur)));
+
+    return max(1, $exposant - $position + 1);
+}
+
+function cs_calcul_combiner_addition(array $gauche, array $droite, string $op): array
+{
+    $valeur = ($op === '+') ? ($gauche['valeur'] + $droite['valeur']) : ($gauche['valeur'] - $droite['valeur']);
+
+    $p_gauche   = cs_calcul_position_dernier_chiffre($gauche['valeur'], $gauche['cs']);
+    $p_droite   = cs_calcul_position_dernier_chiffre($droite['valeur'], $droite['cs']);
+    $p_resultat = max($p_gauche, $p_droite);
+
+    $cs = cs_calcul_cs_depuis_position($valeur, $p_resultat);
+
+    return array('valeur' => $valeur, 'cs' => $cs);
+}
+
+function cs_calcul_combiner_multiplication(array $gauche, array $droite, string $op): array
+{
+    $valeur = ($op === '*') ? ($gauche['valeur'] * $droite['valeur']) : ($gauche['valeur'] / $droite['valeur']);
+    $cs     = min($gauche['cs'], $droite['cs']);
+
+    return array('valeur' => $valeur, 'cs' => $cs);
+}
+
+// Affiche un operande litteral (son texte, virgule) ou un noeud intermediaire
+// (sa valeur calculee, arrondie pour l'affichage seulement).
+function cs_calcul_afficher_noeud(array $noeud): string
+{
+    if (array_key_exists('texte', $noeud))
+    {
+        return str_replace('.', ',', $noeud['texte']);
+    }
+
+    return cs_calcul_formater_brut($noeud['valeur']);
+}
+
+function cs_calcul_afficher_operateur(string $op): string
+{
+    switch ($op)
+    {
+        case '+' : return '+';
+        case '-' : return '−';
+        case '*' : return '×';
+        case '/' : return '÷';
+    }
+
+    return $op;
+}
+
+// Formate une valeur brute (non arrondie aux CS) pour affichage, virgule
+// decimale, sans zeros de fin parasites.
+function cs_calcul_formater_brut(float $valeur): string
+{
+    $texte = sprintf('%.6f', $valeur);
+
+    if (strpos($texte, '.') !== FALSE)
+    {
+        $texte = rtrim($texte, '0');
+        $texte = rtrim($texte, '.');
+    }
+
+    if ($texte === '' || $texte === '-')
+    {
+        $texte = '0';
+    }
+
+    return str_replace('.', ',', $texte);
+}
+
+// Formate la sortie de cs_ajustement() (point decimal, notation E possible)
+// pour affichage (virgule decimale, notation ×10^n avec <sup>).
+function cs_calcul_formater_ajustee(string $texte): string
+{
+    $pos_e = stripos($texte, 'E');
+
+    if ($pos_e === FALSE)
+    {
+        return str_replace('.', ',', $texte);
+    }
+
+    $mantisse = str_replace('.', ',', substr($texte, 0, $pos_e));
+    $exposant = substr($texte, $pos_e + 1);
+
+    return $mantisse . ' × 10<sup>' . $exposant . '</sup>';
+}
+
+function cs_calcul_decrire_etape(array $etape, int $numero): string
+{
+    $gauche        = $etape['gauche'];
+    $droite        = $etape['droite'];
+    $resultat      = $etape['resultat'];
+    $op_disp       = cs_calcul_afficher_operateur($etape['op']);
+    $gauche_disp   = cs_calcul_afficher_noeud($gauche);
+    $droite_disp   = cs_calcul_afficher_noeud($droite);
+    $resultat_brut = cs_calcul_formater_brut($resultat['valeur']);
+
+    if ($etape['type'] === 'add')
+    {
+        $p_gauche  = cs_calcul_position_dernier_chiffre($gauche['valeur'], $gauche['cs']);
+        $p_droite  = cs_calcul_position_dernier_chiffre($droite['valeur'], $droite['cs']);
+        $decimales = max(0, -max($p_gauche, $p_droite));
+
+        return "Étape {$numero} (addition/soustraction) : {$gauche_disp} {$op_disp} {$droite_disp} = {$resultat_brut}. "
+            . "Le résultat d'une addition ou d'une soustraction ne peut pas être plus précis que le terme le moins précis : on arrondit à {$decimales} décimale(s), ce qui donne {$resultat['cs']} chiffre(s) significatif(s).";
+    }
+
+    return "Étape {$numero} (multiplication/division) : {$gauche_disp} {$op_disp} {$droite_disp} = {$resultat_brut}. "
+        . "Le résultat d'une multiplication ou d'une division conserve le plus petit nombre de chiffres significatifs parmi les opérandes : min({$gauche['cs']}, {$droite['cs']}) = {$resultat['cs']} chiffre(s) significatif(s).";
 }
 
 /* End of file chimie_helper.php */
