@@ -1985,6 +1985,11 @@ function quiz_liste_disponibles(): array
             'titre'       => 'Fonctions chimiques',
             'description' => "Associez la structure d'une molécule à la fonction chimique qu'elle contient.",
         ),
+		'extremes' => array(
+			'cours'		  => 'SN1',
+            'titre'       => "Moyenne et incertitude par la méthode des extrêmes",
+            'description' => "À partir de 3 mesures avec leur incertitude, calculez la moyenne et l'incertitude par la méthode des extrêmes.",
+        ),
     );
 }
 
@@ -2500,6 +2505,204 @@ function cs_calcul_decrire_etape(array $etape, int $numero): string
 
     return "Étape {$numero} (multiplication/division) : {$gauche_disp} {$op_disp} {$droite_disp} = {$resultat_brut}. "
         . "Le résultat d'une multiplication ou d'une division conserve le plus petit nombre de chiffres significatifs parmi les opérandes : min({$gauche['cs']}, {$droite['cs']}) = {$resultat['cs']} chiffre(s) significatif(s).";
+}
+
+/* ----------------------------------------------------------------------------
+ *
+ * extremes_generer_question()
+ *
+ * ----------------------------------------------------------------------------
+ *
+ * Quiz "Moyenne et incertitude par la methode des extremes" : genere 3
+ * mesures (xi ± Δxi) d'une meme grandeur, groupees autour d'une valeur
+ * centrale commune, avec soit la meme precision (meme instrument) soit des
+ * precisions variables selon les mesures. L'incertitude de chaque mesure
+ * correspond a une amplitude entre 1 et 9 unites de son dernier chiffre
+ * (incertitude de lecture), tiree au hasard independamment pour chaque
+ * mesure.
+ *
+ * Methode des extremes :
+ *   max = le plus grand parmi (xi + Δxi)
+ *   min = le plus petit parmi (xi − Δxi)
+ *   moyenne     = (max + min) / 2
+ *   incertitude = (max − min) / 2, arrondie a 1 CS ; la moyenne est arrondie
+ *   a la meme decimale que l'incertitude.
+ *
+ * Tout le calcul se fait en arithmetique entiere/bcmath (aucun float) pour
+ * eviter les erreurs de precision.
+ *
+ * ---------------------------------------------------------------------------- */
+function extremes_generer_question(): array
+{
+    $unites = extremes_config_unites();
+    $unite  = array_rand($unites);
+    $cfg    = $unites[$unite];
+
+    $meme_instrument  = (random_int(0, 1) === 0);
+    $decimale_commune = $cfg['decimales'][array_rand($cfg['decimales'])];
+
+    // Valeur centrale commune, ancree a l'echelle la plus fine possible pour cette unite.
+    $decimale_ref = max($cfg['decimales']);
+    $echelle_ref  = (int) round(pow(10, $decimale_ref));
+    $central_int  = random_int((int) round($cfg['min'] * $echelle_ref), (int) round($cfg['max'] * $echelle_ref));
+
+    // Environ 25 % du temps, les 3 mesures partagent la meme incertitude
+    // (meme instrument pour la lecture) ; sinon chaque mesure a la sienne.
+    $incert_commun = (random_int(1, 4) === 1) ? random_int(1, 9) : NULL;
+
+    $mesures = array();
+
+    for ($i = 0; $i < 3; $i++)
+    {
+        $decimales = $meme_instrument ? $decimale_commune : $cfg['decimales'][array_rand($cfg['decimales'])];
+        $echelle   = (int) round(pow(10, $decimales));
+        $incert    = $incert_commun ?? random_int(1, 9);
+
+        $valeur_ramenee = (int) round($central_int / ($echelle_ref / $echelle));
+        $valeur_int     = max(1 + $incert, $valeur_ramenee + random_int(-2, 2));
+
+        $mesures[] = array(
+            'valeur_int' => $valeur_int,
+            'decimales'  => $decimales,
+            'echelle'    => $echelle,
+            'incert'     => $incert,
+        );
+    }
+
+    // Echelle commune (la plus fine des 3 mesures) pour comparer leurs bornes.
+    $decimale_commune_max = max(array_column($mesures, 'decimales'));
+    $echelle_commune      = (int) round(pow(10, $decimale_commune_max));
+
+    $bornes_sup = array();
+    $bornes_inf = array();
+
+    foreach ($mesures as $m)
+    {
+        $facteur = (int) round($echelle_commune / $m['echelle']);
+
+        $bornes_sup[] = ($m['valeur_int'] + $m['incert']) * $facteur;
+        $bornes_inf[] = ($m['valeur_int'] - $m['incert']) * $facteur;
+    }
+
+    $max_commun = max($bornes_sup);
+    $min_commun = min($bornes_inf);
+
+    $diviseur = (string) (2 * $echelle_commune);
+
+    $moyenne_bc     = bcdiv((string) ($max_commun + $min_commun), $diviseur, 20);
+    $incertitude_bc = bcdiv((string) ($max_commun - $min_commun), $diviseur, 20);
+
+    // Arrondi a 1 CS en notation decimale simple (jamais scientifique : cette
+    // ambiguite des zeros de fin n'est pas le propos de ce quiz, deja couvert
+    // par le quiz "cscalcul").
+    $incertitude_ajustee = extremes_ajustement_1cs($incertitude_bc);
+
+    // Position (puissance de 10) du chiffre significatif de l'incertitude : la
+    // moyenne doit etre arrondie a cette meme position, qu'elle soit une
+    // decimale (position < 0) ou une dizaine/centaine (position >= 0).
+    $position_incertitude = (int) floor(log10(abs((float) $incertitude_ajustee)));
+
+    if ($position_incertitude >= 0)
+    {
+        $echelle_position = bcpow('10', (string) $position_incertitude, 0);
+        $moyenne_ajustee  = bcmul(cs_arrondi_bcmath(bcdiv($moyenne_bc, $echelle_position, 20), 0), $echelle_position, 0);
+    }
+    else
+    {
+        $moyenne_ajustee = cs_arrondi_bcmath($moyenne_bc, -$position_incertitude);
+    }
+
+    $mesures_affichage = array();
+
+    foreach ($mesures as $m)
+    {
+        $mesures_affichage[] = array(
+            'valeur'      => extremes_formater_valeur($m['valeur_int'], $m['decimales']),
+            'incertitude' => extremes_formater_valeur($m['incert'], $m['decimales']),
+        );
+    }
+
+    $explication = extremes_decrire_calcul($mesures, $decimale_commune_max, $max_commun, $min_commun, $moyenne_ajustee, $incertitude_ajustee);
+
+    return array(
+        'unite'              => $unite,
+        'mesures'            => $mesures_affichage,
+        'moyenne'            => str_replace('.', ',', $moyenne_ajustee),
+        'incertitude'        => str_replace('.', ',', $incertitude_ajustee),
+        'moyenne_valeur'     => $moyenne_ajustee,
+        'incertitude_valeur' => $incertitude_ajustee,
+        'explication'        => $explication,
+    );
+}
+
+// Plages de generation et decimales possibles pour chaque grandeur du quiz "extremes".
+function extremes_config_unites(): array
+{
+    return array(
+        'g'  => array('min' => 1,   'max' => 200, 'decimales' => array(1, 2)),
+        'mL' => array('min' => 1,   'max' => 100, 'decimales' => array(1, 2)),
+        'cm' => array('min' => 1,   'max' => 50,  'decimales' => array(1, 2)),
+        'mg' => array('min' => 10,  'max' => 500, 'decimales' => array(0, 1)),
+        'L'  => array('min' => 0.1, 'max' => 5,   'decimales' => array(2, 3)),
+    );
+}
+
+// Arrondit une valeur bcmath (positive) a 1 chiffre significatif, toujours en
+// notation decimale simple (jamais scientifique), ex. "0.0347" -> "0.03",
+// "13.4" -> "10".
+function extremes_ajustement_1cs(string $bc_valeur): string
+{
+    $exposant = (int) floor(log10(abs((float) $bc_valeur)));
+
+    if ($exposant >= 0)
+    {
+        $echelle = bcpow('10', (string) $exposant, 0);
+
+        return bcmul(cs_arrondi_bcmath(bcdiv($bc_valeur, $echelle, 20), 0), $echelle, 0);
+    }
+
+    return cs_arrondi_bcmath($bc_valeur, -$exposant);
+}
+
+// Formate un entier a l'echelle 10^$decimales en texte decimal (virgule), ex. (125, 1) -> "12,5".
+function extremes_formater_valeur(int $valeur_int, int $decimales): string
+{
+    if ($decimales === 0)
+    {
+        return (string) $valeur_int;
+    }
+
+    $abs = str_pad((string) abs($valeur_int), $decimales + 1, '0', STR_PAD_LEFT);
+
+    $entier = substr($abs, 0, strlen($abs) - $decimales);
+    $frac   = substr($abs, -$decimales);
+
+    return ($valeur_int < 0 ? '-' : '') . $entier . ',' . $frac;
+}
+
+// Construit le texte d'explication (bornes de chaque mesure, max/min, moyenne, incertitude).
+function extremes_decrire_calcul(array $mesures, int $decimale_commune_max, int $max_commun, int $min_commun, string $moyenne_ajustee, string $incertitude_ajustee): string
+{
+    $bornes = array();
+
+    foreach ($mesures as $m)
+    {
+        $valeur_disp = extremes_formater_valeur($m['valeur_int'], $m['decimales']);
+        $sup_disp    = extremes_formater_valeur($m['valeur_int'] + $m['incert'], $m['decimales']);
+        $inf_disp    = extremes_formater_valeur($m['valeur_int'] - $m['incert'], $m['decimales']);
+
+        $bornes[] = "{$valeur_disp} → [{$inf_disp} ; {$sup_disp}]";
+    }
+
+    $max_disp       = extremes_formater_valeur($max_commun, $decimale_commune_max);
+    $min_disp       = extremes_formater_valeur($min_commun, $decimale_commune_max);
+    $moyenne_disp   = str_replace('.', ',', $moyenne_ajustee);
+    $incertitude_disp = str_replace('.', ',', $incertitude_ajustee);
+
+    return "Bornes de chaque mesure (valeur ± incertitude) : " . implode(' ; ', $bornes) . '. '
+        . "Maximum = {$max_disp}, minimum = {$min_disp}. "
+        . "Moyenne = (max + min) / 2 = {$moyenne_disp}. "
+        . "Incertitude = (max − min) / 2 = {$incertitude_disp}, arrondie à 1 chiffre significatif, et la moyenne est arrondie à la même décimale.";
 }
 
 /* End of file chimie_helper.php */
