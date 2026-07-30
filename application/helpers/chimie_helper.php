@@ -1949,51 +1949,61 @@ function quiz_liste_disponibles(): array
 			'cours'		  => 'SN1',
             'titre'       => 'Chiffres significatifs',
             'description' => "Déterminez le nombre de chiffres significatifs d'un nombre.",
+            'icone'       => 'rulers',
         ),
 		'cscalcul' => array(
 			'cours'		  => 'SN1',
             'titre'       => 'Chiffres significatifs d\'un calcul',
             'description' => "Déterminez le nombre de chiffres significatifs de la réponse d'un calcul combinant additions/soustractions et multiplications/divisions.",
+            'icone'       => 'calculator',
         ),
 		'conversions' => array(
 			'cours'		  => 'SN1',
             'titre'       => "Conversion d'unités",
             'description' => "Convertissez une valeur aux unités demandées, en notation scientifique.",
+            'icone'       => 'arrow-left-right',
         ),
 		'orbitales' => array(
 			'cours'		  => 'SN1',
             'titre'       => 'Nombre d\'orbitales',
             'description' => 'Déterminez le nombre d\'orbitales correspondant à une combinaison de nombres quantiques (n, l, mₗ).',
+            'icone'       => 'record-circle',
         ),
 		'eq' => array(
 			'cours'		  => 'SN1',
             'titre'       => 'Nombre d\'états quantiques',
             'description' => 'Déterminez le nombre d\'états quantiques correspondant à une combinaison de nombres quantiques (n, l, mₗ, ms).',
+            'icone'       => 'grid-3x3-gap',
         ),
 		'cases' => array(
 			'cours'		  => 'SN1',
             'titre'       => 'Cases quantiques',
             'description' => "À partir des cases quantiques d'un élément (Z = 1 à 38), répondez à 5 questions sur l'atome neutre et sur un de ses ions.",
+            'icone'       => 'grid-3x2-gap',
         ),
 		'nomen' => array(
 			'cours'		  => 'SN1',
             'titre'       => 'Nom des ions et molécules',
             'description' => "Associez les formules des acides, molécules et ions polyatomiques à leur nom.",
+            'icone'       => 'tags',
         ),
 		'fonctions' => array(
 			'cours'		  => 'SNU',
             'titre'       => 'Fonctions chimiques',
             'description' => "Associez la structure d'une molécule à la fonction chimique qu'elle contient.",
+            'icone'       => 'diagram-3',
         ),
 		'extremes' => array(
 			'cours'		  => 'SN1',
             'titre'       => "Moyenne et incertitude par la méthode des extrêmes",
             'description' => "À partir de 3 mesures avec leur incertitude, calculez la moyenne et l'incertitude par la méthode des extrêmes.",
+            'icone'       => 'graph-up',
         ),
 		'concentrations' => array(
 			'cours'		  => 'SN1',
             'titre'       => "Conversion d'unités de concentration",
             'description' => "Donnez votre réponse à la question suivante en notation scientifique.",
+            'icone'       => 'flask',
         ),
     );
 }

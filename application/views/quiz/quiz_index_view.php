@@ -30,6 +30,11 @@
 		font-weight: 600;
 		font-size: 1.2em;
 	}
+
+	.quiz-carte-titre .bi {
+		margin-right: 16px;
+		color: #a3222c;
+	}
 </style>
 
 <div id="quiz" class="page-contenu">
@@ -48,8 +53,7 @@
 			<? foreach ($quizzes as $slug => $q) : ?>
 
 				<a class="quiz-carte mb-3" href="<?= base_url() . 'quiz/' . $slug; ?>">
-					<div class="quiz-carte-titre"><?= $q['titre']; ?></div>
-					<div class="quiz-carte-description"><?= $q['description']; ?></div>
+					<div class="quiz-carte-titre"><i class="bi bi-<?= $q['icone']; ?>"></i><?= $q['titre']; ?></div>
 				</a>
 
 			<? endforeach; ?>
