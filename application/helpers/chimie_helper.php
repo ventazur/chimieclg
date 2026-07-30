@@ -1990,6 +1990,11 @@ function quiz_liste_disponibles(): array
             'titre'       => "Moyenne et incertitude par la méthode des extrêmes",
             'description' => "À partir de 3 mesures avec leur incertitude, calculez la moyenne et l'incertitude par la méthode des extrêmes.",
         ),
+		'concentrations' => array(
+			'cours'		  => 'SN1',
+            'titre'       => "Conversion d'unités de concentration",
+            'description' => "Donnez votre réponse à la question suivante en notation scientifique.",
+        ),
     );
 }
 
@@ -2703,6 +2708,636 @@ function extremes_decrire_calcul(array $mesures, int $decimale_commune_max, int 
         . "Maximum = {$max_disp}, minimum = {$min_disp}. "
         . "Moyenne = (max + min) / 2 = {$moyenne_disp}. "
         . "Incertitude = (max − min) / 2 = {$incertitude_disp}, arrondie à 1 chiffre significatif, et la moyenne est arrondie à la même décimale.";
+}
+
+/* ----------------------------------------------------------------------------
+ *
+ * QUIZ "CONCENTRATIONS" — conversion d'unites de concentration
+ *
+ * ----------------------------------------------------------------------------
+ *
+ * Unites couvertes : % m/m, % m/V, mol/L, mol/kg (regime "concentre"), et
+ * ppm, ppb, mol/L, mol/kg (regime "trace"). % V/V est exclu (necessiterait
+ * en plus la masse volumique du solute pur).
+ *
+ * Toutes les conversions passent par un pivot commun : la fraction massique
+ * de solute w = m_solute / m_solution (sans unite). Chaque unite se deduit
+ * de w (et, selon le cas, de la masse molaire M et/ou de la masse volumique
+ * d de la solution) par une formule fermee — voir concentrations_vers_fraction() et
+ * concentrations_depuis_fraction(). Ceci evite d'avoir a ecrire une formule
+ * de conversion par paire d'unites.
+ *
+ * Coherence des chiffres significatifs : toutes les donnees affichees dans
+ * l'enonce (valeur de depart, M, d) sont arrondies a $cs chiffres
+ * significatifs, PUIS le calcul de la reponse utilise ces valeurs arrondies
+ * (jamais les valeurs "vraies" internes) — comme pour le quiz "extremes", ce
+ * qui est donne est ce qui est utilise, afin que la comparaison stricte de
+ * la reponse (chaine de caracteres) soit sans ambiguite.
+ *
+ * ---------------------------------------------------------------------------- */
+
+// Reactifs de laboratoire (regime "concentre", w entre 0,5 % et 35 % sauf indication contraire).
+function concentrations_config_substances_concentre(): array
+{
+    return array(
+        'h2so4' => array(
+            'formule'   => 'H<sub>2</sub>SO<sub>4</sub>',
+            'M'         => 98.079,
+            'pente_d'   => 0.0086,
+            'contexte'  => "Un technicien prépare une solution d'acide sulfurique (H₂SO₄) pour un titrage.",
+        ),
+        'hcl' => array(
+            'formule'   => 'HCl',
+            'M'         => 36.458,
+            'pente_d'   => 0.0051,
+            'contexte'  => "Une solution d'acide chlorhydrique (HCl) est utilisée pour nettoyer une surface métallique.",
+        ),
+        'naoh' => array(
+            'formule'   => 'NaOH',
+            'M'         => 39.997,
+            'pente_d'   => 0.0106,
+            'contexte'  => "Une solution d'hydroxyde de sodium (NaOH) est préparée pour neutraliser un acide.",
+        ),
+        'nacl' => array(
+            'formule'   => 'NaCl',
+            'M'         => 58.443,
+            'pente_d'   => 0.0077,
+            'contexte'  => "Une saumure de chlorure de sodium (NaCl) est préparée pour la conservation d'aliments.",
+        ),
+        'glucose' => array(
+            'formule'   => 'C<sub>6</sub>H<sub>12</sub>O<sub>6</sub>',
+            'M'         => 180.156,
+            'pente_d'   => 0.0045,
+            'contexte'  => "Une solution de glucose (C₆H₁₂O₆) est préparée pour un soluté physiologique.",
+        ),
+        'kmno4' => array(
+            'formule'   => 'KMnO<sub>4</sub>',
+            'M'         => 158.034,
+            'pente_d'   => 0.0050,
+            'w_max'     => 0.06,
+            'contexte'  => "Une solution de permanganate de potassium (KMnO₄) est préparée pour un titrage rédox.",
+        ),
+        'cacl2' => array(
+            'formule'   => 'CaCl<sub>2</sub>',
+            'M'         => 110.983,
+            'pente_d'   => 0.0093,
+            'contexte'  => "Une solution de chlorure de calcium (CaCl₂) est utilisée comme agent déglaçant.",
+        ),
+        'nh3' => array(
+            'formule'   => 'NH<sub>3</sub>',
+            'M'         => 17.031,
+            'pente_d'   => -0.0036,
+            'contexte'  => "Une solution aqueuse d'ammoniac (NH₃) est préparée comme produit nettoyant.",
+        ),
+        'ch3cooh' => array(
+            'formule'   => 'CH<sub>3</sub>COOH',
+            'M'         => 60.052,
+            'pente_d'   => 0.0007,
+            'contexte'  => "Une solution d'acide acétique (CH₃COOH) est préparée pour un usage en laboratoire.",
+        ),
+        'kno3' => array(
+            'formule'   => 'KNO<sub>3</sub>',
+            'M'         => 101.103,
+            'pente_d'   => 0.0060,
+            'w_max'     => 0.25,
+            'contexte'  => "Une solution de nitrate de potassium (KNO₃) est préparée pour un engrais liquide.",
+        ),
+    );
+}
+
+// Contaminants et traces (regime "trace", w entre 0,1 ppm et 900 ppm ; masse volumique fixee a 1,00 g/mL).
+function concentrations_config_substances_trace(): array
+{
+    return array(
+        'pb' => array(
+            'formule'  => 'Pb<sup>2+</sup>',
+            'M'        => 207.2,
+            'contexte' => "Un échantillon d'eau prélevé près d'une ancienne usine contient du plomb (Pb²⁺) dissous.",
+        ),
+        'no3' => array(
+            'formule'  => 'NO<sub>3</sub><sup>−</sup>',
+            'M'        => 62.004,
+            'contexte' => "Un échantillon d'eau souterraine contient des ions nitrate (NO₃⁻) provenant de l'agriculture.",
+        ),
+        'f' => array(
+            'formule'  => 'F<sup>−</sup>',
+            'M'        => 18.998,
+            'contexte' => "Une municipalité ajoute des ions fluorure (F⁻) à son eau potable.",
+        ),
+        'nacl' => array(
+            'formule'  => 'NaCl',
+            'M'        => 58.443,
+            'contexte' => "Un échantillon d'eau de rivière contient du chlorure de sodium (NaCl) provenant du sel de déglaçage.",
+        ),
+        'cacl2' => array(
+            'formule'  => 'CaCl<sub>2</sub>',
+            'M'        => 110.983,
+            'contexte' => "Un échantillon d'eau de ruissellement contient du chlorure de calcium (CaCl₂) utilisé pour le déglaçage routier.",
+        ),
+    );
+}
+
+// Libelle d'affichage d'une unite de concentration.
+function concentrations_libelle_unite(string $unite): string
+{
+    $libelles = array(
+        'mm'    => '% m/m',
+        'mv'    => '% m/V',
+        'molL'  => 'mol/L',
+        'molkg' => 'mol/kg',
+        'ppm'   => 'ppm',
+        'ppb'   => 'ppb',
+    );
+
+    return $libelles[$unite];
+}
+
+// Nom complet de la grandeur associee a une unite de concentration (article inclus), pour nommer
+// explicitement dans l'enonce ce qui est donne et ce qui est demande — plutot que de laisser
+// l'etudiant deviner (ex. mol/kg = LA MOLALITE, exprimee par kg de solvant).
+function concentrations_nom_unite(string $unite): string
+{
+    $noms = array(
+        'mm'    => 'le pourcentage massique',
+        'mv'    => 'le pourcentage masse/volume',
+        'molL'  => 'la concentration molaire volumique',
+        'molkg' => 'la molalité',
+        'ppm'   => 'la concentration en ppm',
+        'ppb'   => 'la concentration en ppb',
+    );
+
+    return $noms[$unite];
+}
+
+// Donnees necessaires (masse molaire M et/ou masse volumique d) pour convertir vers/depuis cette unite.
+function concentrations_donnees_requises(string $unite): array
+{
+    switch ($unite)
+    {
+        case 'mm'  :
+        case 'ppm' :
+        case 'ppb' :
+            return array('M' => FALSE, 'd' => FALSE);
+
+        case 'mv' :
+            return array('M' => FALSE, 'd' => TRUE);
+
+        case 'molL' :
+            return array('M' => TRUE, 'd' => TRUE);
+
+        case 'molkg' :
+            return array('M' => TRUE, 'd' => FALSE);
+    }
+}
+
+/* ----------------------------------------------------------------------------
+ *
+ * concentrations_vers_fraction() / concentrations_depuis_fraction()
+ *
+ * ----------------------------------------------------------------------------
+ *
+ * Convertit entre une unite de concentration et la fraction massique de
+ * solute w = m_solute / m_solution (pivot commun a toutes les unites).
+ *
+ * Relations (ρ [masse volumique] en g/mL, MM [masse molaire] en g/mol) :
+ *   % m/m = w × 100
+ *   ppm   = w × 10⁶
+ *   ppb   = w × 10⁹
+ *   % m/V = w × 100 × ρ                      (pour 1 L de solution : m_solute = w × 1000ρ g)
+ *   mol/L = w × 1000 × ρ / MM                (n dans 1 L de solution)
+ *   mol/kg (molalite, par kg de SOLVANT) = 1000w / ((1 − w) × MM)
+ *
+ * ---------------------------------------------------------------------------- */
+function concentrations_vers_fraction(string $unite, float $valeur, ?float $M, ?float $d): float
+{
+    switch ($unite)
+    {
+        case 'mm'    : return $valeur / 100;
+        case 'ppm'   : return $valeur / 1e6;
+        case 'ppb'   : return $valeur / 1e9;
+        case 'mv'    : return $valeur / (100 * $d);
+        case 'molL'  : return ($valeur * $M) / (1000 * $d);
+        case 'molkg' : return ($valeur * $M) / (1000 + $valeur * $M);
+    }
+}
+
+function concentrations_depuis_fraction(string $unite, float $w, ?float $M, ?float $d): float
+{
+    switch ($unite)
+    {
+        case 'mm'    : return $w * 100;
+        case 'ppm'   : return $w * 1e6;
+        case 'ppb'   : return $w * 1e9;
+        case 'mv'    : return $w * 100 * $d;
+        case 'molL'  : return ($w * 1000 * $d) / $M;
+        case 'molkg' : return (1000 * $w) / ((1 - $w) * $M);
+    }
+}
+
+/* ----------------------------------------------------------------------------
+ *
+ * concentrations_notation_scientifique()
+ *
+ * ----------------------------------------------------------------------------
+ *
+ * Arrondit $valeur (positive) a $cs chiffres significatifs, en notation
+ * scientifique normalisee (1 <= mantisse < 10). Le formatage initial en
+ * %.15e evite le bruit de precision flottante avant l'arrondi bcmath
+ * (demi-haut) fait par cs_arrondi_bcmath().
+ *
+ * Retourne [ mantisse_valeur (string, point decimal, $cs chiffres),
+ *            mantisse_affichage (string, virgule decimale),
+ *            exposant (int) ].
+ *
+ * ---------------------------------------------------------------------------- */
+function concentrations_notation_scientifique(float $valeur, int $cs): array
+{
+    $str = sprintf('%.15e', $valeur);
+
+    list($mantisse_brute, $exposant_str) = explode('e', $str);
+
+    $exposant = (int) $exposant_str;
+
+    $mantisse = cs_arrondi_bcmath($mantisse_brute, $cs - 1);
+
+    // Debordement d'arrondi (ex. 9,996 -> 10,00) : decaler d'une puissance de 10.
+    if ((float) $mantisse >= 10)
+    {
+        $exposant++;
+        $mantisse = bcdiv($mantisse, '10', $cs - 1);
+    }
+
+    return array($mantisse, str_replace('.', ',', $mantisse), $exposant);
+}
+
+// Arrondit $valeur (positive) a $cs chiffres significatifs, toujours en notation decimale simple
+// (jamais scientifique), ex. (0.0000453, 3) -> "0,0000453", (128.4, 3) -> "128".
+function concentrations_arrondir_decimal(float $valeur, int $cs): string
+{
+    list($mantisse, , $exposant) = concentrations_notation_scientifique($valeur, $cs);
+
+    $chiffres  = str_replace('.', '', $mantisse);
+    $point_pos = 1 + $exposant;
+
+    if ($point_pos <= 0)
+    {
+        $resultat = '0.' . str_repeat('0', -$point_pos) . $chiffres;
+    }
+    elseif ($point_pos >= strlen($chiffres))
+    {
+        $resultat = $chiffres . str_repeat('0', $point_pos - strlen($chiffres));
+    }
+    else
+    {
+        $resultat = substr($chiffres, 0, $point_pos) . '.' . substr($chiffres, $point_pos);
+    }
+
+    return str_replace('.', ',', $resultat);
+}
+
+// Formate $valeur en notation scientifique lisible (virgule), pour l'explication uniquement.
+function concentrations_format_scientifique_lisible(float $valeur, int $chiffres = 3): string
+{
+    list(, $mantisse_affichage, $exposant) = concentrations_notation_scientifique($valeur, $chiffres);
+
+    return $mantisse_affichage . ' × 10<sup>' . $exposant . '</sup>';
+}
+
+// Affiche $valeur (positive) a $cs CS : en decimal simple si la magnitude reste lisible
+// (entre 10⁻³ et 10⁴), sinon en notation scientifique (HTML, avec <sup>) pour eviter une
+// suite illisible de zeros (ex. une trace en mol/L peut descendre a 5 × 10⁻⁷).
+function concentrations_afficher_valeur(float $valeur, int $cs): string
+{
+    list(, $mantisse_affichage, $exposant) = concentrations_notation_scientifique($valeur, $cs);
+
+    // point_pos > cs signifie que l'affichage decimal exigerait de completer par des zeros de
+    // fin apres le dernier chiffre significatif (ex. "25000" pour 2,50 × 10⁴ a 3 CS) — un entier
+    // ainsi termine est ambigu quant a son nombre de CS. On force alors la notation scientifique,
+    // seule forme non ambigue pour ce genre de valeur.
+    $point_pos = 1 + $exposant;
+
+    if ($point_pos > $cs || $exposant < -3 || $exposant > 4)
+    {
+        return $mantisse_affichage . ' × 10<sup>' . $exposant . '</sup>';
+    }
+
+    return concentrations_arrondir_decimal($valeur, $cs);
+}
+
+/* ----------------------------------------------------------------------------
+ *
+ * concentrations_generer_question()
+ *
+ * ----------------------------------------------------------------------------
+ *
+ * Genere une question de conversion de concentration : choisit un regime
+ * (concentre ou trace), une substance, un nombre de chiffres significatifs
+ * (3 ou 4), puis deux unites distinctes du regime (source et cible). Calcule
+ * les donnees necessaires (M, d) arrondies a $cs CS, la valeur de depart
+ * arrondie a $cs CS, puis la reponse (en notation scientifique a $cs CS) a
+ * partir de CES valeurs arrondies (jamais des valeurs internes exactes).
+ *
+ * ---------------------------------------------------------------------------- */
+function concentrations_generer_question(): array
+{
+    $regime = (random_int(0, 1) === 0) ? 'concentre' : 'trace';
+
+    if ($regime === 'concentre')
+    {
+        $substances    = concentrations_config_substances_concentre();
+        $unites_dispo  = array('mm', 'mv', 'molL', 'molkg');
+        $w_min_global  = 0.005;
+        $w_max_global  = 0.35;
+    }
+    else
+    {
+        $substances    = concentrations_config_substances_trace();
+        $unites_dispo  = array('ppm', 'ppb', 'molL', 'molkg');
+        $w_min_global  = 1e-7;
+        $w_max_global  = 9e-4;
+    }
+
+    $cle_substance = array_rand($substances);
+    $substance     = $substances[$cle_substance];
+
+    $w_min = $substance['w_min'] ?? $w_min_global;
+    $w_max = $substance['w_max'] ?? $w_max_global;
+
+    $cs = (random_int(0, 1) === 0) ? 3 : 4;
+
+    shuffle($unites_dispo);
+    $unite_source = $unites_dispo[0];
+    $unite_cible  = $unites_dispo[1];
+
+    $besoin_source = concentrations_donnees_requises($unite_source);
+    $besoin_cible  = concentrations_donnees_requises($unite_cible);
+    $besoin_M      = $besoin_source['M'] || $besoin_cible['M'];
+    $besoin_d      = $besoin_source['d'] || $besoin_cible['d'];
+
+    // Echantillonnage log-uniforme de w (valeur interne "vraie", sert uniquement a generer un
+    // depart plausible ; le calcul officiel se fera ensuite sur les valeurs arrondies affichees).
+    $t      = random_int(0, 1000000) / 1000000;
+    $w_true = $w_min * pow($w_max / $w_min, $t);
+
+    $M_vraie = $substance['M'];
+
+    if ($regime === 'trace')
+    {
+        $d_vraie = 1.00;
+    }
+    else
+    {
+        $bruit   = 1 + (random_int(-50, 50) / 10000);
+        $d_vraie = max(0.5, (1.00 + $substance['pente_d'] * ($w_true * 100)) * $bruit);
+    }
+
+    $M_affiche_str   = NULL;
+    $M_affiche_val   = NULL;
+    $d_affiche_str   = NULL;
+    $d_affiche_val   = NULL;
+    $donnees         = array();
+
+    if ($besoin_M)
+    {
+        $M_affiche_str = concentrations_afficher_valeur($M_vraie, $cs);
+        $M_affiche_val = (float) str_replace(',', '.', concentrations_arrondir_decimal($M_vraie, $cs));
+        $donnees[]     = array('label' => 'Masse molaire (MM)', 'valeur' => $M_affiche_str . ' g/mol');
+    }
+
+    if ($besoin_d)
+    {
+        $d_affiche_str = concentrations_afficher_valeur($d_vraie, $cs);
+        $d_affiche_val = (float) str_replace(',', '.', concentrations_arrondir_decimal($d_vraie, $cs));
+        $donnees[]     = array('label' => 'Masse volumique de la solution (ρ)', 'valeur' => $d_affiche_str . ' g/mL');
+    }
+
+    // Valeur de depart : calculee a partir de w_true (juste pour obtenir un nombre plausible),
+    // puis arrondie a $cs CS — c'est cette valeur arrondie qui devient la donnee officielle.
+    $valeur_source_vraie  = concentrations_depuis_fraction($unite_source, $w_true, $M_vraie, $d_vraie);
+    $valeur_source_val    = (float) str_replace(',', '.', concentrations_arrondir_decimal($valeur_source_vraie, $cs));
+    $valeur_source_affiche = concentrations_afficher_valeur($valeur_source_vraie, $cs);
+
+    // Calcul officiel : uniquement a partir des valeurs arrondies affichees (source, M, d).
+    $w_travail        = concentrations_vers_fraction($unite_source, $valeur_source_val, $M_affiche_val, $d_affiche_val);
+    $valeur_cible_vraie = concentrations_depuis_fraction($unite_cible, $w_travail, $M_affiche_val, $d_affiche_val);
+
+    list($mantisse_valeur, $mantisse_affichage, $exposant) = concentrations_notation_scientifique($valeur_cible_vraie, $cs);
+
+    $explication = concentrations_decrire_calcul(
+        $unite_source, $valeur_source_affiche, $valeur_source_val, $unite_cible,
+        $M_affiche_str, $M_affiche_val, $d_affiche_str, $d_affiche_val,
+        $mantisse_affichage, $exposant, $cs
+    );
+
+    // Enonce : nomme explicitement la grandeur donnee et celle demandee (ex. "la molalité"),
+    // plutot que de laisser l'etudiant deviner a partir du seul symbole d'unite (mol/kg, etc.).
+    $enonce = $substance['contexte'] . ' Sachant que ' . concentrations_nom_unite($unite_source)
+        . ' de cette solution est de ' . $valeur_source_affiche . ' ' . concentrations_libelle_unite($unite_source)
+        . ', déterminez ' . concentrations_nom_unite($unite_cible) . ' (' . concentrations_libelle_unite($unite_cible)
+        . ') de cette solution.';
+
+    return array(
+        'enonce'             => $enonce,
+        'unite_cible'        => concentrations_libelle_unite($unite_cible),
+        'donnees'            => $donnees,
+        'mantisse_valeur'    => $mantisse_valeur,
+        'mantisse_affichage' => $mantisse_affichage,
+        'exposant'           => $exposant,
+        'explication'        => $explication,
+    );
+}
+
+// Definit, pour chaque unite de concentration, la structure de sa "chaine" en analyse
+// dimensionnelle : une quantite de solute (en g ou en mol) rapportee a une quantite de
+// reference fixe (masse de solution, volume de solution ou masse de SOLVANT). Toutes les
+// unites de concentration ne sont, au fond, que cette meme idee avec une base differente.
+function concentrations_chaine_config(string $unite): array
+{
+    $config = array(
+        'mm'    => array('type' => 'solution_g',  'base' => 100.0, 'solute_unite' => 'g',   'base_unite' => 'g'),
+        'mv'    => array('type' => 'solution_mL', 'base' => 100.0, 'solute_unite' => 'g',   'base_unite' => 'mL'),
+        'ppm'   => array('type' => 'solution_g',  'base' => 1e6,   'solute_unite' => 'g',   'base_unite' => 'g'),
+        'ppb'   => array('type' => 'solution_g',  'base' => 1e9,   'solute_unite' => 'g',   'base_unite' => 'g'),
+        'molL'  => array('type' => 'solution_mL', 'base' => 1000.0,'solute_unite' => 'mol', 'base_unite' => 'mL'),
+        'molkg' => array('type' => 'solvant_g',   'base' => 1000.0,'solute_unite' => 'mol', 'base_unite' => 'g'),
+    );
+
+    return $config[$unite];
+}
+
+// Formate une quantite intermediaire (calcul, pas donnee de l'enonce) a 3 CS, pour la lisibilite
+// des etapes de l'explication — n'affecte jamais la reponse officielle.
+function concentrations_format_intermediaire(float $valeur): string
+{
+    return concentrations_afficher_valeur($valeur, 10);
+}
+
+// Formate une base fixe de la chaine (100, 1000, 10⁶, 10⁹) de façon lisible.
+function concentrations_format_base(float $base): string
+{
+    if ($base >= 1e6)
+    {
+        return (round($base) === 1000000.0) ? '10⁶' : '10⁹';
+    }
+
+    return (string) round($base);
+}
+
+// Rend un facteur [numerateur, denominateur] en fraction HTML empilee (numerateur / trait /
+// denominateur), pour que les unites identiques au numerateur d'un facteur et au denominateur
+// du suivant s'annulent visuellement dans la chaine d'analyse dimensionnelle.
+function concentrations_html_fraction(array $facteur): string
+{
+    list($numerateur, $denominateur) = $facteur;
+
+    return '<span class="quiz-concentrations-fraction">'
+        . '<span class="quiz-concentrations-fraction-num">' . $numerateur . '</span>'
+        . '<span class="quiz-concentrations-fraction-den">' . $denominateur . '</span>'
+        . '</span>';
+}
+
+/* ----------------------------------------------------------------------------
+ *
+ * concentrations_decrire_calcul()
+ *
+ * ----------------------------------------------------------------------------
+ *
+ * Construit l'explication en ANALYSE DIMENSIONNELLE, sur UNE seule ligne de facteurs qui
+ * s'enchainent (methode des facteurs de conversion) : chaque facteur est ecrit "numérateur
+ * [unité] / dénominateur [unité]" de sorte que l'unité du dénominateur d'un facteur annule
+ * l'unité du numérateur du facteur precedent. Seul le bilan de masse solution = solvant +
+ * soluté (une addition, pas une conversion d'unite) est calcule a part, juste avant la ligne,
+ * puis reinjecte dans la chaine comme un facteur normal une fois connu.
+ *
+ * ---------------------------------------------------------------------------- */
+function concentrations_decrire_calcul(
+    string $unite_source, string $valeur_source_affiche, float $valeur_source_val, string $unite_cible,
+    ?string $M_str, ?float $M_val, ?string $d_str, ?float $d_val,
+    string $mantisse_affichage, int $exposant, int $cs
+): string
+{
+    $libelle_cible = concentrations_libelle_unite($unite_cible);
+
+    // Cas particulier ppm <-> ppb : les deux ne sont que des multiples l'un de l'autre (par
+    // 1000), sans aucune chimie (ni MM ni ρ) — passer par "g soluté / g solution" comme pour les
+    // autres paires n'apporte rien et complique la lecture. Facteur direct a la place.
+    if (($unite_source === 'ppm' && $unite_cible === 'ppb') || ($unite_source === 'ppb' && $unite_cible === 'ppm'))
+    {
+        $facteur = ($unite_cible === 'ppb') ? array('1000 ppb', '1 ppm') : array('1 ppm', '1000 ppb');
+
+        $chaine = concentrations_html_fraction(array("{$valeur_source_affiche} {$unite_source}", '1')) . ' × ' . concentrations_html_fraction($facteur);
+
+        return "<span class=\"quiz-concentrations-chaine\">{$chaine} = <strong>{$mantisse_affichage} × 10<sup>{$exposant}</sup> {$libelle_cible}</strong></span> (soit {$cs} chiffres significatifs, comme les données de l'énoncé).";
+    }
+
+    $src = concentrations_chaine_config($unite_source);
+    $dst = concentrations_chaine_config($unite_cible);
+
+    $etapes    = array();  // phrases preparatoires (bilan de masse uniquement)
+    $facteurs  = array();  // facteurs de la chaine, dans l'ordre, unites qui s'annulent
+
+    $unite_ref_solution = ($src['type'] === 'solvant_g') ? 'g solvant' : "{$src['base_unite']} solution";
+
+    $facteurs[] = array("{$valeur_source_affiche} {$src['solute_unite']} soluté", concentrations_format_base($src['base']) . " {$unite_ref_solution}");
+
+    // ---- Masse ET moles de solute, calculees numeriquement (necessaires au bilan de masse
+    // solution/solvant plus bas, meme quand la cible ne demande pas cette unite-la) — mais un
+    // facteur n'est ajoute a la CHAINE que si l'unite du solute change reellement entre la
+    // source et la cible (ex. mol/L -> mol/kg n'a besoin d'AUCUNE conversion de mole ici).
+
+    if ($src['solute_unite'] === 'g')
+    {
+        $m_solute_g         = $valeur_source_val;
+        $m_solute_g_affiche = $valeur_source_affiche;  // donnee telle quelle, pas recalculee
+        $n_solute_mol       = ($M_val !== NULL) ? ($m_solute_g / $M_val) : NULL;
+    }
+    else
+    {
+        $n_solute_mol       = $valeur_source_val;
+        $m_solute_g         = $n_solute_mol * $M_val;
+        $m_solute_g_affiche = concentrations_format_intermediaire($m_solute_g);
+    }
+
+    if ($src['solute_unite'] !== $dst['solute_unite'])
+    {
+        $facteurs[] = ($dst['solute_unite'] === 'mol')
+            ? array('1 mol soluté', "{$M_str} g soluté")
+            : array("{$M_str} g soluté", '1 mol soluté');
+    }
+
+    // ---- Masse de solution, masse de solvant et volume de solution (celles necessaires) ----
+
+    $m_solution_g = NULL;
+    $m_solvant_g  = NULL;
+    $V_solution_mL = NULL;
+
+    if ($src['type'] === 'solution_g')
+    {
+        $m_solution_g = $src['base'];
+    }
+    elseif ($src['type'] === 'solution_mL')
+    {
+        $V_solution_mL = $src['base'];
+
+        if ($dst['type'] !== 'solution_mL')
+        {
+            $m_solution_g = $V_solution_mL * $d_val;
+            $facteurs[] = array('1 mL solution', "{$d_str} g solution");
+        }
+    }
+    else // 'solvant_g'
+    {
+        $m_solvant_g = $src['base'];
+
+        if ($dst['type'] !== 'solvant_g')
+        {
+            $m_solution_g = $m_solvant_g + $m_solute_g;
+            $etapes[] = "Masse de solution : m = " . concentrations_format_intermediaire($m_solvant_g) . " g solvant + " . $m_solute_g_affiche . " g soluté = " . concentrations_format_intermediaire($m_solution_g) . " g.";
+            $facteurs[] = array(concentrations_format_base($m_solvant_g) . " g solvant", concentrations_format_intermediaire($m_solution_g) . " g solution");
+        }
+    }
+
+    if ($dst['type'] === 'solvant_g' && $m_solvant_g === NULL)
+    {
+        $m_solvant_g = $m_solution_g - $m_solute_g;
+        $etapes[] = "Masse de solvant : m = " . concentrations_format_intermediaire($m_solution_g) . " g solution − " . $m_solute_g_affiche . " g soluté = " . concentrations_format_intermediaire($m_solvant_g) . " g.";
+        $facteurs[] = array(concentrations_format_base($m_solution_g) . " g solution", concentrations_format_intermediaire($m_solvant_g) . " g solvant");
+    }
+
+    if ($dst['type'] === 'solution_mL' && $V_solution_mL === NULL)
+    {
+        $V_solution_mL = $m_solution_g / $d_val;
+        $facteurs[] = array("{$d_str} g solution", '1 mL solution');
+    }
+
+    // ---- Derniere etape : deux cas bien distincts ----
+    //
+    // mol/L et mol/kg terminent sur un VRAI changement d'unite (mL solution -> L solution,
+    // g solvant -> kg solvant) : un facteur de plus, avec les deux unites nommees.
+    //
+    // % m/m, % m/V, ppm et ppb ne changent pas d'unite PHYSIQUE (masse ou volume) a cette etape
+    // — la chaine est deja, a ce stade, une fraction pure "g soluté / g solution" (ou mL) — mais
+    // le symbole %, ppm ou ppb EST une unite (100 % = 1, comme 1000 g = 1 kg) : le facteur final
+    // s'ecrit donc lui aussi en fraction, avec ce symbole nomme au numerateur.
+
+    if ($unite_cible === 'molL')
+    {
+        $facteurs[] = array('1000 mL solution', '1 L solution');
+    }
+    elseif ($unite_cible === 'molkg')
+    {
+        $facteurs[] = array('1000 g solvant', '1 kg solvant');
+    }
+    else
+    {
+        $facteurs[] = array(concentrations_format_base($dst['base']) . ' ' . $libelle_cible, '1');
+    }
+
+    $chaine = implode(' × ', array_map('concentrations_html_fraction', $facteurs));
+
+    $etapes[] = "<span class=\"quiz-concentrations-chaine\">{$chaine} = <strong>{$mantisse_affichage} × 10<sup>{$exposant}</sup> {$libelle_cible}</strong></span> (soit {$cs} chiffres significatifs, comme les données de l'énoncé).";
+
+    return implode(' ', $etapes);
 }
 
 /* End of file chimie_helper.php */

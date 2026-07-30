@@ -89,6 +89,13 @@ Class Quiz extends MY_Controller
         $this->_display_view('extremes');
     }
 
+    public function concentrations()
+    {
+        $this->data['quiz'] = $this->quizzes['concentrations'];
+
+        $this->_display_view('concentrations');
+    }
+
     /* -------------------------------------------------------------------
      *
      * (AJAX) Lot de nombres pour un quiz donne
@@ -173,6 +180,13 @@ Class Quiz extends MY_Controller
                 for ($i = 0; $i < $taille_lot; $i++)
                 {
                     $lot[] = extremes_generer_question();
+                }
+                break;
+
+            case 'concentrations' :
+                for ($i = 0; $i < $taille_lot; $i++)
+                {
+                    $lot[] = concentrations_generer_question();
                 }
                 break;
         }
