@@ -1957,11 +1957,29 @@ function quiz_liste_disponibles(): array
             'description' => "Déterminez le nombre de chiffres significatifs de la réponse d'un calcul combinant additions/soustractions et multiplications/divisions.",
             'icone'       => 'calculator',
         ),
+		'extremes' => array(
+			'cours'		  => 'SN1',
+            'titre'       => "Moyenne et incertitude par la méthode des extrêmes",
+            'description' => "À partir de 3 mesures avec leur incertitude, calculez la moyenne et l'incertitude par la méthode des extrêmes.",
+            'icone'       => 'graph-up',
+        ),
 		'conversions' => array(
 			'cours'		  => 'SN1',
             'titre'       => "Conversion d'unités",
             'description' => "Convertissez une valeur aux unités demandées, en notation scientifique.",
             'icone'       => 'arrow-left-right',
+        ),
+		'concentrations' => array(
+			'cours'		  => 'SN1',
+            'titre'       => "Conversion d'unités de concentration",
+            'description' => "Donnez votre réponse à la question suivante en notation scientifique.",
+            'icone'       => 'flask',
+        ),
+		'moles' => array(
+			'cours'		  => 'SN1',
+            'titre'       => "Moles, molécules, atomes, protons, électrons",
+            'description' => "À partir d'une masse ou d'une quantité, calculez le nombre de moles, d'entités, d'atomes, de protons ou d'électrons — et inversement.",
+            'icone'       => 'diagram-2',
         ),
 		'orbitales' => array(
 			'cours'		  => 'SN1',
@@ -1992,18 +2010,6 @@ function quiz_liste_disponibles(): array
             'titre'       => 'Fonctions chimiques',
             'description' => "Associez la structure d'une molécule à la fonction chimique qu'elle contient.",
             'icone'       => 'diagram-3',
-        ),
-		'extremes' => array(
-			'cours'		  => 'SN1',
-            'titre'       => "Moyenne et incertitude par la méthode des extrêmes",
-            'description' => "À partir de 3 mesures avec leur incertitude, calculez la moyenne et l'incertitude par la méthode des extrêmes.",
-            'icone'       => 'graph-up',
-        ),
-		'concentrations' => array(
-			'cours'		  => 'SN1',
-            'titre'       => "Conversion d'unités de concentration",
-            'description' => "Donnez votre réponse à la question suivante en notation scientifique.",
-            'icone'       => 'flask',
         ),
     );
 }
@@ -3348,6 +3354,895 @@ function concentrations_decrire_calcul(
     $etapes[] = "<span class=\"quiz-concentrations-chaine\">{$chaine} = <strong>{$mantisse_affichage} × 10<sup>{$exposant}</sup> {$libelle_cible}</strong></span> (soit {$cs} chiffres significatifs, comme les données de l'énoncé).";
 
     return implode(' ', $etapes);
+}
+
+/* ----------------------------------------------------------------------------
+ *
+ * Quiz > Moles, molécules, atomes, protons, électrons
+ *
+ * ----------------------------------------------------------------------------
+ *
+ * Toutes les grandeurs (masse, moles, entités, atomes, protons, électrons) se
+ * convertissent via un pivot unique n = moles d'entités formulaires (comme
+ * concentrations_vers_fraction()/concentrations_depuis_fraction() pivotent sur
+ * la fraction massique). Substances neutres uniquement : protons = électrons.
+ *
+ * ---------------------------------------------------------------------------- */
+
+// Banque de substances. 'entite' vaut 'atome' (echantillon d'un element pur), 'molecule'
+// (compose covalent) ou 'unite' (compose ionique, unite formulaire). La masse molaire et le
+// nombre de protons totaux se deduisent toujours de 'composition', jamais saisis en double.
+function moles_config_substances(): array
+{
+    return array(
+        'fer' => array(
+            'formule'     => 'Fe',
+            'nom'         => 'fer',
+            'entite'      => 'atome',
+            'contexte'    => 'Un clou en fer',
+            'composition' => array(
+                array('symbole' => 'Fe', 'nom' => 'fer', 'z' => 26, 'a' => 55.845, 'indice' => 1),
+            ),
+        ),
+        'soufre' => array(
+            'formule'     => 'S',
+            'nom'         => 'soufre',
+            'entite'      => 'atome',
+            'contexte'    => "Un morceau de soufre",
+            'composition' => array(
+                array('symbole' => 'S', 'nom' => 'soufre', 'z' => 16, 'a' => 32.06, 'indice' => 1),
+            ),
+        ),
+        'carbone' => array(
+            'formule'     => 'C',
+            'nom'         => 'carbone',
+            'entite'      => 'atome',
+            'contexte'    => "Un morceau de charbon",
+            'composition' => array(
+                array('symbole' => 'C', 'nom' => 'carbone', 'z' => 6, 'a' => 12.011, 'indice' => 1),
+            ),
+        ),
+        'azote_atomique' => array(
+            'formule'     => 'N',
+            'nom'         => 'azote',
+            'entite'      => 'atome',
+            'contexte'    => "Un échantillon d'azote atomique",
+            'composition' => array(
+                array('symbole' => 'N', 'nom' => 'azote', 'z' => 7, 'a' => 14.007, 'indice' => 1),
+            ),
+        ),
+        'oxygene_atomique' => array(
+            'formule'     => 'O',
+            'nom'         => 'oxygène',
+            'entite'      => 'atome',
+            'contexte'    => "Un échantillon d'oxygène atomique",
+            'composition' => array(
+                array('symbole' => 'O', 'nom' => 'oxygène', 'z' => 8, 'a' => 15.999, 'indice' => 1),
+            ),
+        ),
+        'azote' => array(
+            'formule'     => 'N<sub>2</sub>',
+            'nom'         => 'azote',
+            'entite'      => 'molecule',
+            'contexte'    => "Une bonbonne sous pression d'azote",
+            'composition' => array(
+                array('symbole' => 'N', 'nom' => 'azote', 'z' => 7, 'a' => 14.007, 'indice' => 2),
+            ),
+        ),
+        'oxygene' => array(
+            'formule'     => 'O<sub>2</sub>',
+            'nom'         => 'oxygène',
+            'entite'      => 'molecule',
+            'contexte'    => "Une bonbonne sous pression d'oxygène",
+            'composition' => array(
+                array('symbole' => 'O', 'nom' => 'oxygène', 'z' => 8, 'a' => 15.999, 'indice' => 2),
+            ),
+        ),
+        'eau' => array(
+            'formule'     => 'H<sub>2</sub>O',
+            'nom'         => 'eau',
+            'entite'      => 'molecule',
+            'contexte'    => "Un échantillon d'eau",
+            'composition' => array(
+                array('symbole' => 'H', 'nom' => 'hydrogène', 'z' => 1, 'a' => 1.008,  'indice' => 2),
+                array('symbole' => 'O', 'nom' => 'oxygène',   'z' => 8, 'a' => 15.999, 'indice' => 1),
+            ),
+        ),
+        'co2' => array(
+            'formule'     => 'CO<sub>2</sub>',
+            'nom'         => 'dioxyde de carbone',
+            'entite'      => 'molecule',
+            'contexte'    => "Une bonbonne de dioxyde de carbone",
+            'composition' => array(
+                array('symbole' => 'C', 'nom' => 'carbone', 'z' => 6, 'a' => 12.011, 'indice' => 1),
+                array('symbole' => 'O', 'nom' => 'oxygène', 'z' => 8, 'a' => 15.999, 'indice' => 2),
+            ),
+        ),
+        'ammoniac' => array(
+            'formule'     => 'NH<sub>3</sub>',
+            'nom'         => 'ammoniac',
+            'entite'      => 'molecule',
+            'contexte'    => "Une solution aqueuse d'ammoniac",
+            'composition' => array(
+                array('symbole' => 'N', 'nom' => 'azote',     'z' => 7, 'a' => 14.007, 'indice' => 1),
+                array('symbole' => 'H', 'nom' => 'hydrogène', 'z' => 1, 'a' => 1.008,  'indice' => 3),
+            ),
+        ),
+        'glucose' => array(
+            'formule'     => 'C<sub>6</sub>H<sub>12</sub>O<sub>6</sub>',
+            'nom'         => 'glucose',
+            'entite'      => 'molecule',
+            'contexte'    => "Un soluté physiologique de glucose",
+            'composition' => array(
+                array('symbole' => 'C', 'nom' => 'carbone',   'z' => 6, 'a' => 12.011, 'indice' => 6),
+                array('symbole' => 'H', 'nom' => 'hydrogène', 'z' => 1, 'a' => 1.008,  'indice' => 12),
+                array('symbole' => 'O', 'nom' => 'oxygène',   'z' => 8, 'a' => 15.999, 'indice' => 6),
+            ),
+        ),
+        'aspirine' => array(
+            'formule'     => 'C<sub>9</sub>H<sub>8</sub>O<sub>4</sub>',
+            'nom'         => "acide acétylsalicylique",
+            'entite'      => 'molecule',
+            'contexte'    => "Un comprimé d'aspirine",
+            'composition' => array(
+                array('symbole' => 'C', 'nom' => 'carbone',   'z' => 6, 'a' => 12.011, 'indice' => 9),
+                array('symbole' => 'H', 'nom' => 'hydrogène', 'z' => 1, 'a' => 1.008,  'indice' => 8),
+                array('symbole' => 'O', 'nom' => 'oxygène',   'z' => 8, 'a' => 15.999, 'indice' => 4),
+            ),
+        ),
+        'nacl' => array(
+            'formule'     => 'NaCl',
+            'nom'         => 'chlorure de sodium',
+            'entite'      => 'unite',
+            'contexte'    => "Une saumure de chlorure de sodium",
+            'composition' => array(
+                array('symbole' => 'Na', 'nom' => 'sodium',   'z' => 11, 'a' => 22.990, 'indice' => 1),
+                array('symbole' => 'Cl', 'nom' => 'chlore',   'z' => 17, 'a' => 35.45,  'indice' => 1),
+            ),
+        ),
+        'cacl2' => array(
+            'formule'     => 'CaCl<sub>2</sub>',
+            'nom'         => 'chlorure de calcium',
+            'entite'      => 'unite',
+            'contexte'    => "Un agent déglaçant de chlorure de calcium",
+            'composition' => array(
+                array('symbole' => 'Ca', 'nom' => 'calcium', 'z' => 20, 'a' => 40.078, 'indice' => 1),
+                array('symbole' => 'Cl', 'nom' => 'chlore',  'z' => 17, 'a' => 35.45,  'indice' => 2),
+            ),
+        ),
+        'nh4no3' => array(
+            'formule'     => 'NH<sub>4</sub>NO<sub>3</sub>',
+            'nom'         => "nitrate d'ammonium",
+            'entite'      => 'unite',
+            'contexte'    => "Un engrais de nitrate d'ammonium",
+            'composition' => array(
+                array('symbole' => 'N', 'nom' => 'azote',     'z' => 7, 'a' => 14.007, 'indice' => 2),
+                array('symbole' => 'H', 'nom' => 'hydrogène', 'z' => 1, 'a' => 1.008,  'indice' => 4),
+                array('symbole' => 'O', 'nom' => 'oxygène',   'z' => 8, 'a' => 15.999, 'indice' => 3),
+            ),
+        ),
+        'al2so43' => array(
+            'formule'     => 'Al<sub>2</sub>(SO<sub>4</sub>)<sub>3</sub>',
+            'nom'         => "sulfate d'aluminium",
+            'entite'      => 'unite',
+            'contexte'    => "Un échantillon de sulfate d'aluminium",
+            'composition' => array(
+                array('symbole' => 'Al', 'nom' => 'aluminium', 'z' => 13, 'a' => 26.982, 'indice' => 2),
+                array('symbole' => 'S',  'nom' => 'soufre',    'z' => 16, 'a' => 32.06,  'indice' => 3),
+                array('symbole' => 'O',  'nom' => 'oxygène',   'z' => 8,  'a' => 15.999, 'indice' => 12),
+            ),
+        ),
+        'kmno4' => array(
+            'formule'     => 'KMnO<sub>4</sub>',
+            'nom'         => 'permanganate de potassium',
+            'entite'      => 'unite',
+            'contexte'    => "Une solution de permanganate de potassium",
+            'composition' => array(
+                array('symbole' => 'K',  'nom' => 'potassium', 'z' => 19, 'a' => 39.098, 'indice' => 1),
+                array('symbole' => 'Mn', 'nom' => 'manganèse', 'z' => 25, 'a' => 54.938, 'indice' => 1),
+                array('symbole' => 'O',  'nom' => 'oxygène',   'z' => 8,  'a' => 15.999, 'indice' => 4),
+            ),
+        ),
+
+        // Metaux purs (echantillons atomiques) — autres que le fer, pour varier les contextes.
+        'cuivre' => array(
+            'formule'     => 'Cu',
+            'nom'         => 'cuivre',
+            'entite'      => 'atome',
+            'contexte'    => 'Un fil de cuivre',
+            'composition' => array(
+                array('symbole' => 'Cu', 'nom' => 'cuivre', 'z' => 29, 'a' => 63.546, 'indice' => 1),
+            ),
+        ),
+        'zinc' => array(
+            'formule'     => 'Zn',
+            'nom'         => 'zinc',
+            'entite'      => 'atome',
+            'contexte'    => 'Le revêtement de zinc galvanisant une pièce de métal',
+            'composition' => array(
+                array('symbole' => 'Zn', 'nom' => 'zinc', 'z' => 30, 'a' => 65.38, 'indice' => 1),
+            ),
+        ),
+        'argent' => array(
+            'formule'     => 'Ag',
+            'nom'         => 'argent',
+            'entite'      => 'atome',
+            'contexte'    => 'Un bijou en argent',
+            'composition' => array(
+                array('symbole' => 'Ag', 'nom' => 'argent', 'z' => 47, 'a' => 107.868, 'indice' => 1),
+            ),
+        ),
+        'or' => array(
+            'formule'     => 'Au',
+            'nom'         => 'or',
+            'entite'      => 'atome',
+            'contexte'    => "Un lingot d'or",
+            'composition' => array(
+                array('symbole' => 'Au', 'nom' => 'or', 'z' => 79, 'a' => 196.967, 'indice' => 1),
+            ),
+        ),
+        'magnesium' => array(
+            'formule'     => 'Mg',
+            'nom'         => 'magnésium',
+            'entite'      => 'atome',
+            'contexte'    => 'Un ruban de magnésium',
+            'composition' => array(
+                array('symbole' => 'Mg', 'nom' => 'magnésium', 'z' => 12, 'a' => 24.305, 'indice' => 1),
+            ),
+        ),
+        'aluminium' => array(
+            'formule'     => 'Al',
+            'nom'         => 'aluminium',
+            'entite'      => 'atome',
+            'contexte'    => 'Une canette en aluminium',
+            'composition' => array(
+                array('symbole' => 'Al', 'nom' => 'aluminium', 'z' => 13, 'a' => 26.982, 'indice' => 1),
+            ),
+        ),
+        'plomb' => array(
+            'formule'     => 'Pb',
+            'nom'         => 'plomb',
+            'entite'      => 'atome',
+            'contexte'    => 'Une gaine de plomb',
+            'composition' => array(
+                array('symbole' => 'Pb', 'nom' => 'plomb', 'z' => 82, 'a' => 207.2, 'indice' => 1),
+            ),
+        ),
+        'nickel' => array(
+            'formule'     => 'Ni',
+            'nom'         => 'nickel',
+            'entite'      => 'atome',
+            'contexte'    => 'Une pièce de monnaie en nickel',
+            'composition' => array(
+                array('symbole' => 'Ni', 'nom' => 'nickel', 'z' => 28, 'a' => 58.693, 'indice' => 1),
+            ),
+        ),
+        'etain' => array(
+            'formule'     => 'Sn',
+            'nom'         => 'étain',
+            'entite'      => 'atome',
+            'contexte'    => "Un fil à souder en étain",
+            'composition' => array(
+                array('symbole' => 'Sn', 'nom' => 'étain', 'z' => 50, 'a' => 118.710, 'indice' => 1),
+            ),
+        ),
+        'titane' => array(
+            'formule'     => 'Ti',
+            'nom'         => 'titane',
+            'entite'      => 'atome',
+            'contexte'    => 'Une prothèse de hanche en titane',
+            'composition' => array(
+                array('symbole' => 'Ti', 'nom' => 'titane', 'z' => 22, 'a' => 47.867, 'indice' => 1),
+            ),
+        ),
+        'chrome' => array(
+            'formule'     => 'Cr',
+            'nom'         => 'chrome',
+            'entite'      => 'atome',
+            'contexte'    => "Le pare-chocs chromé d'une voiture",
+            'composition' => array(
+                array('symbole' => 'Cr', 'nom' => 'chrome', 'z' => 24, 'a' => 51.996, 'indice' => 1),
+            ),
+        ),
+
+        // Composes supplementaires, pour varier au-dela des acides/sels deja presents.
+        'hcl' => array(
+            'formule'     => 'HCl',
+            'nom'         => 'chlorure d\'hydrogène',
+            'entite'      => 'molecule',
+            'contexte'    => "Un nettoyant à base d'acide chlorhydrique",
+            'composition' => array(
+                array('symbole' => 'H',  'nom' => 'hydrogène', 'z' => 1,  'a' => 1.008,  'indice' => 1),
+                array('symbole' => 'Cl', 'nom' => 'chlore',    'z' => 17, 'a' => 35.45,  'indice' => 1),
+            ),
+        ),
+        'naoh' => array(
+            'formule'     => 'NaOH',
+            'nom'         => 'hydroxyde de sodium',
+            'entite'      => 'unite',
+            'contexte'    => "Un déboucheur à base d'hydroxyde de sodium",
+            'composition' => array(
+                array('symbole' => 'Na', 'nom' => 'sodium',    'z' => 11, 'a' => 22.990, 'indice' => 1),
+                array('symbole' => 'O',  'nom' => 'oxygène',   'z' => 8,  'a' => 15.999, 'indice' => 1),
+                array('symbole' => 'H',  'nom' => 'hydrogène', 'z' => 1,  'a' => 1.008,  'indice' => 1),
+            ),
+        ),
+        'h2so4' => array(
+            'formule'     => 'H<sub>2</sub>SO<sub>4</sub>',
+            'nom'         => 'acide sulfurique',
+            'entite'      => 'molecule',
+            'contexte'    => "L'électrolyte d'une batterie de voiture",
+            'composition' => array(
+                array('symbole' => 'H', 'nom' => 'hydrogène', 'z' => 1,  'a' => 1.008,  'indice' => 2),
+                array('symbole' => 'S', 'nom' => 'soufre',    'z' => 16, 'a' => 32.06,  'indice' => 1),
+                array('symbole' => 'O', 'nom' => 'oxygène',   'z' => 8,  'a' => 15.999, 'indice' => 4),
+            ),
+        ),
+        'methane' => array(
+            'formule'     => 'CH<sub>4</sub>',
+            'nom'         => 'méthane',
+            'entite'      => 'molecule',
+            'contexte'    => "Une cartouche de gaz méthane",
+            'composition' => array(
+                array('symbole' => 'C', 'nom' => 'carbone',   'z' => 6, 'a' => 12.011, 'indice' => 1),
+                array('symbole' => 'H', 'nom' => 'hydrogène', 'z' => 1, 'a' => 1.008,  'indice' => 4),
+            ),
+        ),
+        'ethanol' => array(
+            'formule'     => 'C<sub>2</sub>H<sub>6</sub>O',
+            'nom'         => 'éthanol',
+            'entite'      => 'molecule',
+            'contexte'    => "Une bouteille de désinfectant à base d'éthanol",
+            'composition' => array(
+                array('symbole' => 'C', 'nom' => 'carbone',   'z' => 6, 'a' => 12.011, 'indice' => 2),
+                array('symbole' => 'H', 'nom' => 'hydrogène', 'z' => 1, 'a' => 1.008,  'indice' => 6),
+                array('symbole' => 'O', 'nom' => 'oxygène',   'z' => 8, 'a' => 15.999, 'indice' => 1),
+            ),
+        ),
+        'mgo' => array(
+            'formule'     => 'MgO',
+            'nom'         => 'oxyde de magnésium',
+            'entite'      => 'unite',
+            'contexte'    => "Un comprimé antiacide d'oxyde de magnésium",
+            'composition' => array(
+                array('symbole' => 'Mg', 'nom' => 'magnésium', 'z' => 12, 'a' => 24.305, 'indice' => 1),
+                array('symbole' => 'O',  'nom' => 'oxygène',   'z' => 8,  'a' => 15.999, 'indice' => 1),
+            ),
+        ),
+        'fe2o3' => array(
+            'formule'     => 'Fe<sub>2</sub>O<sub>3</sub>',
+            'nom'         => 'oxyde de fer',
+            'entite'      => 'unite',
+            'contexte'    => "De la rouille sur une poutre métallique",
+            'composition' => array(
+                array('symbole' => 'Fe', 'nom' => 'fer',     'z' => 26, 'a' => 55.845, 'indice' => 2),
+                array('symbole' => 'O',  'nom' => 'oxygène', 'z' => 8,  'a' => 15.999, 'indice' => 3),
+            ),
+        ),
+        'caco3' => array(
+            'formule'     => 'CaCO<sub>3</sub>',
+            'nom'         => 'carbonate de calcium',
+            'entite'      => 'unite',
+            'contexte'    => "Une coquille d'huître",
+            'composition' => array(
+                array('symbole' => 'Ca', 'nom' => 'calcium', 'z' => 20, 'a' => 40.078, 'indice' => 1),
+                array('symbole' => 'C',  'nom' => 'carbone', 'z' => 6,  'a' => 12.011, 'indice' => 1),
+                array('symbole' => 'O',  'nom' => 'oxygène', 'z' => 8,  'a' => 15.999, 'indice' => 3),
+            ),
+        ),
+
+        // Autres medicaments, pour ne pas toujours retomber sur l'aspirine.
+        'paracetamol' => array(
+            'formule'     => 'C<sub>8</sub>H<sub>9</sub>NO<sub>2</sub>',
+            'nom'         => 'acétaminophène',
+            'entite'      => 'molecule',
+            'contexte'    => "Un comprimé d'acétaminophène",
+            'composition' => array(
+                array('symbole' => 'C', 'nom' => 'carbone',   'z' => 6, 'a' => 12.011, 'indice' => 8),
+                array('symbole' => 'H', 'nom' => 'hydrogène', 'z' => 1, 'a' => 1.008,  'indice' => 9),
+                array('symbole' => 'N', 'nom' => 'azote',     'z' => 7, 'a' => 14.007, 'indice' => 1),
+                array('symbole' => 'O', 'nom' => 'oxygène',   'z' => 8, 'a' => 15.999, 'indice' => 2),
+            ),
+        ),
+        'ibuprofene' => array(
+            'formule'     => 'C<sub>13</sub>H<sub>18</sub>O<sub>2</sub>',
+            'nom'         => 'ibuprofène',
+            'entite'      => 'molecule',
+            'contexte'    => "Un comprimé d'ibuprofène",
+            'composition' => array(
+                array('symbole' => 'C', 'nom' => 'carbone',   'z' => 6, 'a' => 12.011, 'indice' => 13),
+                array('symbole' => 'H', 'nom' => 'hydrogène', 'z' => 1, 'a' => 1.008,  'indice' => 18),
+                array('symbole' => 'O', 'nom' => 'oxygène',   'z' => 8, 'a' => 15.999, 'indice' => 2),
+            ),
+        ),
+        'cafeine' => array(
+            'formule'     => 'C<sub>8</sub>H<sub>10</sub>N<sub>4</sub>O<sub>2</sub>',
+            'nom'         => 'caféine',
+            'entite'      => 'molecule',
+            'contexte'    => "Une tasse de café (caféine)",
+            'composition' => array(
+                array('symbole' => 'C', 'nom' => 'carbone',   'z' => 6, 'a' => 12.011, 'indice' => 8),
+                array('symbole' => 'H', 'nom' => 'hydrogène', 'z' => 1, 'a' => 1.008,  'indice' => 10),
+                array('symbole' => 'N', 'nom' => 'azote',     'z' => 7, 'a' => 14.007, 'indice' => 4),
+                array('symbole' => 'O', 'nom' => 'oxygène',   'z' => 8, 'a' => 15.999, 'indice' => 2),
+            ),
+        ),
+        'naproxene' => array(
+            'formule'     => 'C<sub>14</sub>H<sub>14</sub>O<sub>3</sub>',
+            'nom'         => 'naproxène',
+            'entite'      => 'molecule',
+            'contexte'    => "Un comprimé de naproxène",
+            'composition' => array(
+                array('symbole' => 'C', 'nom' => 'carbone',   'z' => 6, 'a' => 12.011, 'indice' => 14),
+                array('symbole' => 'H', 'nom' => 'hydrogène', 'z' => 1, 'a' => 1.008,  'indice' => 14),
+                array('symbole' => 'O', 'nom' => 'oxygène',   'z' => 8, 'a' => 15.999, 'indice' => 3),
+            ),
+        ),
+        'cetirizine' => array(
+            'formule'     => 'C<sub>21</sub>H<sub>25</sub>ClN<sub>2</sub>O<sub>3</sub>',
+            'nom'         => 'cétirizine',
+            'entite'      => 'molecule',
+            'contexte'    => "Un comprimé antihistaminique de cétirizine",
+            'composition' => array(
+                array('symbole' => 'C',  'nom' => 'carbone',   'z' => 6,  'a' => 12.011, 'indice' => 21),
+                array('symbole' => 'H',  'nom' => 'hydrogène', 'z' => 1,  'a' => 1.008,  'indice' => 25),
+                array('symbole' => 'Cl', 'nom' => 'chlore',    'z' => 17, 'a' => 35.45,  'indice' => 1),
+                array('symbole' => 'N',  'nom' => 'azote',     'z' => 7,  'a' => 14.007, 'indice' => 2),
+                array('symbole' => 'O',  'nom' => 'oxygène',   'z' => 8,  'a' => 15.999, 'indice' => 3),
+            ),
+        ),
+    );
+}
+
+// Masse molaire exacte (somme indice x masse atomique), en g/mol.
+function moles_masse_molaire(array $sub): float
+{
+    $mm = 0.0;
+
+    foreach ($sub['composition'] as $element)
+    {
+        $mm += $element['indice'] * $element['a'];
+    }
+
+    return $mm;
+}
+
+// La masse molaire s'affiche toujours a 2 decimales (convention du tableau periodique), quel que
+// soit le nombre de chiffres significatifs ($cs) de la question — jamais en notation scientifique.
+function moles_formater_masse_molaire(float $mm): string
+{
+    return number_format($mm, 2, ',', '');
+}
+
+// Nombre total de protons (= electrons, substance neutre) par entite formulaire.
+function moles_z_total(array $sub): int
+{
+    $z = 0;
+
+    foreach ($sub['composition'] as $element)
+    {
+        $z += $element['indice'] * $element['z'];
+    }
+
+    return $z;
+}
+
+// Nombre total d'atomes (tous elements confondus) par entite formulaire.
+function moles_atomes_par_entite(array $sub): int
+{
+    $n = 0;
+
+    foreach ($sub['composition'] as $element)
+    {
+        $n += $element['indice'];
+    }
+
+    return $n;
+}
+
+// "de " ou "d'" selon que $mot commence par une voyelle ou un h muet (elision) — les seuls mots
+// de la banque commençant par h (hydrogène) sont a h muet, donc toujours elidables ici.
+function moles_prep_de(string $mot): string
+{
+    return (preg_match('/^[aeiouyhàâéèêëîïôùûAEIOUYHÀÂÉÈÊËÎÏÔÙÛ]/u', $mot)) ? "d'" : 'de ';
+}
+
+// Remplace l'espace precedant le dernier "?" par une espace insecable, pour que le point
+// d'interrogation ne se retrouve jamais seul sur une ligne au retour a la ligne.
+function moles_evite_point_interrogation_seul(string $phrase): string
+{
+    $pos = strrpos($phrase, ' ?');
+
+    if ($pos === FALSE)
+    {
+        return $phrase;
+    }
+
+    return substr($phrase, 0, $pos) . '&nbsp;?' . substr($phrase, $pos + 2);
+}
+
+// Designe l'entite formulaire de la substance (sans preposition), au singulier ou au pluriel —
+// "atomes de fer", "molécules de N2", "molécules de NaCl" (simplification : les composés
+// ioniques sont aussi appelés "molécules" ici, comme dans les énoncés d'introduction).
+function moles_nom_entite(array $sub, bool $pluriel): string
+{
+    return moles_nom_entite_simple($sub, $pluriel) . ' ' . moles_prep_de($sub['entite'] === 'atome' ? $sub['nom'] : $sub['formule']) . ($sub['entite'] === 'atome' ? $sub['nom'] : $sub['formule']);
+}
+
+// Le seul mot-comptage (atome/molécule/unité), sans le nom ni la formule — pour ne pas repeter
+// la formule quand elle vient d'etre nommee juste avant dans la phrase (ex. le contexte de
+// l'enonce, qui la donne deja entre parentheses). KMnO4 est un compose IONIQUE : ce n'est pas
+// une "molécule" (les composes ioniques n'ont pas de molecules, seulement des unites formulaires
+// dans un reseau cristallin) — d'ou la distinction 'unite' vs 'molecule'.
+function moles_nom_entite_simple(array $sub, bool $pluriel): string
+{
+    switch ($sub['entite'])
+    {
+        case 'atome' :
+            return $pluriel ? 'atomes' : 'un atome';
+
+        case 'molecule' :
+            return $pluriel ? 'molécules' : 'une molécule';
+
+        default : // 'unite'
+            return $pluriel ? 'unités' : 'une unité';
+    }
+}
+
+/* ----------------------------------------------------------------------------
+ *
+ * moles_vers_n() / moles_depuis_n()
+ *
+ * ----------------------------------------------------------------------------
+ *
+ * Convertit entre une grandeur donnee et n = moles d'entites formulaires (pivot
+ * commun a toutes les grandeurs "convertibles"). $Na et $MM doivent etre les
+ * valeurs ARRONDIES AFFICHEES (jamais les valeurs internes exactes), pour que
+ * la reponse officielle soit toujours retrouvable a partir de ce que voit
+ * l'etudiant.
+ *
+ * ---------------------------------------------------------------------------- */
+function moles_vers_n(string $grandeur, float $valeur, array $sub, ?array $element, float $Na, float $MM): float
+{
+    switch ($grandeur)
+    {
+        case 'masse'         : return $valeur / $MM;
+        case 'moles'         : return $valeur;
+        case 'entites'       : return $valeur / $Na;
+        case 'atomes_total'  : return $valeur / ($Na * moles_atomes_par_entite($sub));
+        case 'atomes_element': return $valeur / ($Na * $element['indice']);
+        case 'masse_element' : return $valeur / ($element['indice'] * $element['a']);
+        case 'protons'       :
+        case 'electrons'     : return $valeur / ($Na * moles_z_total($sub));
+        case 'moles_protons' : return $valeur / moles_z_total($sub);
+    }
+
+    return 0.0;
+}
+
+function moles_depuis_n(string $grandeur, float $n, array $sub, ?array $element, float $Na, float $MM): float
+{
+    switch ($grandeur)
+    {
+        case 'masse'         : return $n * $MM;
+        case 'moles'         : return $n;
+        case 'entites'       : return $n * $Na;
+        case 'atomes_total'  : return $n * $Na * moles_atomes_par_entite($sub);
+        case 'atomes_element': return $n * $Na * $element['indice'];
+        case 'masse_element' : return $n * $element['indice'] * $element['a'];
+        case 'protons'       :
+        case 'electrons'     : return $n * $Na * moles_z_total($sub);
+        case 'moles_protons' : return $n * moles_z_total($sub);
+    }
+
+    return 0.0;
+}
+
+// Unite/etiquette affichee apres la valeur, dans l'enonce et le bloc "Donnees".
+function moles_unite_pour_grandeur(string $grandeur, array $sub, ?array $element): string
+{
+    switch ($grandeur)
+    {
+        case 'masse'         : return 'g';
+        case 'moles'         : return 'mol';
+        case 'entites'       : return moles_nom_entite($sub, TRUE);
+        case 'atomes_total'  : return 'atomes';
+        case 'atomes_element': return 'atomes ' . moles_prep_de($element['nom']) . $element['nom'];
+        case 'masse_element' : return 'g ' . moles_prep_de($element['nom']) . $element['nom'];
+        case 'protons'        : return 'protons';
+        case 'electrons'      : return 'électrons';
+        case 'moles_protons'  : return 'mol de protons';
+        case 'masse_molaire'  : return 'g/mol';
+        case 'masse_une_entite': return 'g';
+    }
+
+    return '';
+}
+
+// Phrase decrivant la donnee de l'enonce (sans le sujet ni le point final).
+function moles_phrase_donnee(string $grandeur, array $sub, string $valeur_affiche, ?array $element): string
+{
+    switch ($grandeur)
+    {
+        case 'masse'         : return "a une masse de {$valeur_affiche} g";
+        case 'moles'         : return "correspond à {$valeur_affiche} mol";
+        case 'entites'       : return "contient {$valeur_affiche} " . moles_nom_entite_simple($sub, TRUE);
+        case 'atomes_total'  : return "contient {$valeur_affiche} atomes";
+        case 'atomes_element': return "contient {$valeur_affiche} atomes " . moles_prep_de($element['nom']) . $element['nom'];
+        case 'masse_element' : return "contient {$valeur_affiche} g " . moles_prep_de($element['nom']) . $element['nom'];
+        case 'protons'       : return "contient {$valeur_affiche} protons";
+        case 'electrons'     : return "contient {$valeur_affiche} électrons";
+        case 'moles_protons' : return "contient {$valeur_affiche} mol de protons";
+    }
+
+    return '';
+}
+
+// Question posee a l'etudiant (grandeur demandee).
+function moles_phrase_question(string $grandeur, array $sub, ?array $element): string
+{
+    switch ($grandeur)
+    {
+        case 'masse'          : return "Quelle est la masse de cet échantillon (en g) ?";
+        case 'moles'          : return "Combien y a-t-il de moles " . moles_prep_de($sub['formule']) . $sub['formule'] . ' ?';
+        case 'entites'        : return "Combien y a-t-il " . moles_prep_de(moles_nom_entite($sub, TRUE)) . moles_nom_entite($sub, TRUE) . ' ?';
+        case 'atomes_total'   : return "Combien y a-t-il d'atomes ?";
+        case 'atomes_element' : return "Combien y a-t-il d'atomes " . moles_prep_de($element['nom']) . $element['nom'] . ' ?';
+        case 'masse_element'  : return "Quelle est la masse " . moles_prep_de($element['nom']) . $element['nom'] . " (en g) ?";
+        case 'protons'        : return "Combien y a-t-il de protons ?";
+        case 'electrons'      : return "Combien y a-t-il d'électrons ?";
+        case 'moles_protons'  : return "Combien y a-t-il de moles de protons ?";
+        case 'masse_molaire'  : return "Quelle est la masse molaire " . moles_prep_de($sub['nom']) . $sub['nom'] . " (en g/mol) ?";
+        case 'masse_une_entite': return "Quelle est la masse " . moles_prep_de(moles_nom_entite($sub, FALSE)) . moles_nom_entite($sub, FALSE) . " (en g) ?";
+    }
+
+    return '';
+}
+
+// Copie de concentrations_html_fraction(), avec les classes CSS du quiz moles — la duplication
+// evite de coupler les deux quiz par un renommage transverse de classes.
+function moles_html_fraction(array $facteur): string
+{
+    list($numerateur, $denominateur) = $facteur;
+
+    return '<span class="quiz-moles-fraction">'
+        . '<span class="quiz-moles-fraction-num">' . $numerateur . '</span>'
+        . '<span class="quiz-moles-fraction-den">' . $denominateur . '</span>'
+        . '</span>';
+}
+
+// Facteur de conversion "1 mol [formule] / X [unite de $grandeur]" — c-a-d le facteur qui
+// convertit 1 unite de $grandeur EN mol. NULL si $grandeur est deja 'moles' (rien a convertir).
+function moles_facteur_definition(string $grandeur, array $sub, ?array $element, string $Na_str, string $MM_str): ?array
+{
+    $formule = $sub['formule'];
+
+    switch ($grandeur)
+    {
+        case 'moles' :
+            return NULL;
+
+        case 'masse' :
+            return array('1 mol ' . $formule, $MM_str . ' g ' . $formule);
+
+        case 'entites' :
+            return array('1 mol ' . $formule, $Na_str . ' ' . moles_nom_entite($sub, TRUE));
+
+        case 'atomes_total' :
+            return array('1 mol ' . $formule, $Na_str . ' × ' . moles_atomes_par_entite($sub) . ' atomes');
+
+        case 'atomes_element' :
+            return array('1 mol ' . $formule, $Na_str . ' × ' . $element['indice'] . ' atomes ' . $element['symbole']);
+
+        case 'masse_element' :
+            return array('1 mol ' . $formule, $element['indice'] . ' × ' . concentrations_afficher_valeur($element['a'], 4) . ' g ' . $element['symbole']);
+
+        case 'protons' :
+        case 'electrons' :
+            $libelle = ($grandeur === 'protons') ? 'protons' : 'électrons';
+            return array('1 mol ' . $formule, $Na_str . ' × ' . moles_z_total($sub) . ' ' . $libelle);
+
+        case 'moles_protons' :
+            return array('1 mol ' . $formule, moles_z_total($sub) . ' mol protons');
+    }
+
+    return NULL;
+}
+
+/* ----------------------------------------------------------------------------
+ *
+ * moles_generer_question()
+ *
+ * ----------------------------------------------------------------------------
+ *
+ * Genere une question : choisit une substance, un nombre de chiffres
+ * significatifs (3 ou 4), une grandeur donnee et une grandeur demandee
+ * distinctes parmi celles convertibles via le pivot n (+ deux grandeurs
+ * "demandables seulement", independantes de n : masse molaire, masse d'une
+ * entite). Echantillonne n dans une plage plausible, en deduit la valeur de
+ * depart arrondie a $cs CS, puis calcule la reponse UNIQUEMENT a partir des
+ * valeurs arrondies affichees (donnee, MM, N_A) — jamais des valeurs internes
+ * exactes.
+ *
+ * ---------------------------------------------------------------------------- */
+function moles_generer_question(): array
+{
+    $substances = moles_config_substances();
+    $cle        = array_rand($substances);
+    $sub        = $substances[$cle];
+
+    $cs = (random_int(0, 1) === 0) ? 3 : 4;
+
+    $MM_exacte = moles_masse_molaire($sub);
+    $Na_exacte = 6.02214076e23;
+
+    // Grandeurs convertibles via le pivot n, disponibles pour cette substance. 'atomes_total'
+    // n'est jamais une DONNEE : un nombre brut d'atomes (tous elements confondus) n'est pas une
+    // quantite qu'on mesure ou qu'on donne dans un enonce reel — seulement une chose qu'on
+    // calcule. Le proposer comme donnee de depart preterait a confusion avec un nombre d'entites
+    // (molecules/unites), qui LUI est une quantite de depart naturelle.
+    $convertibles_donnee = array('masse', 'moles', 'entites', 'protons', 'electrons', 'moles_protons');
+    $convertibles        = $convertibles_donnee;
+
+    if ($sub['entite'] !== 'atome')
+    {
+        $convertibles[] = 'atomes_total';
+    }
+
+    if (count($sub['composition']) > 1)
+    {
+        $convertibles_donnee[] = 'atomes_element';
+        $convertibles_donnee[] = 'masse_element';
+        $convertibles[]        = 'atomes_element';
+        $convertibles[]        = 'masse_element';
+    }
+
+    $grandeur_donnee = $convertibles_donnee[array_rand($convertibles_donnee)];
+
+    $demandables = array_values(array_diff($convertibles, array($grandeur_donnee)));
+
+    if (random_int(1, 100) <= 20) $demandables[] = 'masse_une_entite';
+    if (random_int(1, 100) <= 20) $demandables[] = 'masse_molaire';
+
+    $grandeur_demandee = $demandables[array_rand($demandables)];
+
+    $element = NULL;
+    if (in_array('atomes_element', array($grandeur_donnee, $grandeur_demandee), TRUE)
+        || in_array('masse_element', array($grandeur_donnee, $grandeur_demandee), TRUE))
+    {
+        $element = $sub['composition'][array_rand($sub['composition'])];
+    }
+
+    // Donnees affichees : masse molaire, toujours a 2 decimales (sauf si la question EST la masse
+    // molaire — donnee superflue alors remplacee par les masses atomiques des elements), et N_A
+    // arrondi a $cs CS.
+    $MM_affiche_str = moles_formater_masse_molaire($MM_exacte);
+    $MM_affiche_val = round($MM_exacte, 2);
+
+    // N_A s'affiche toujours a 4 CS (6,022 × 10²³), comme la masse molaire a 2 decimales : une
+    // constante fournie, independante du nombre de CS ($cs) de la question elle-meme.
+    list($Na_mantisse_valeur, $Na_mantisse_affiche, $Na_exposant) = concentrations_notation_scientifique($Na_exacte, 4);
+    $Na_affiche_str = $Na_mantisse_affiche . ' × 10<sup>' . $Na_exposant . '</sup>';
+    $Na_affiche_val = (float) $Na_mantisse_valeur * (10 ** $Na_exposant);
+
+    $donnees = array();
+
+    if ($grandeur_demandee === 'masse_molaire')
+    {
+        foreach ($sub['composition'] as $el)
+        {
+            $donnees[] = array('label' => 'Masse atomique (' . $el['symbole'] . ')', 'valeur' => concentrations_afficher_valeur($el['a'], 4) . ' g/mol');
+        }
+    }
+    else
+    {
+        $donnees[] = array('label' => 'Masse molaire (MM)', 'valeur' => $MM_affiche_str . ' g/mol');
+
+        if ($element !== NULL)
+        {
+            $donnees[] = array('label' => 'Masse atomique (' . $element['symbole'] . ')', 'valeur' => concentrations_afficher_valeur($element['a'], 4) . ' g/mol');
+        }
+    }
+
+    $donnees[] = array('label' => "Nombre d'Avogadro (N<sub>A</sub>)", 'valeur' => $Na_affiche_str . ' mol<sup>-1</sup>');
+
+    // Valeur de depart : n echantillonne log-uniformement (0,001 a 5 mol, plage plausible pour
+    // un echantillon de laboratoire), convertie EXACTEMENT vers la grandeur donnee, puis arrondie
+    // a $cs CS — c'est cette valeur arrondie qui devient la donnee officielle de l'enonce.
+    $t      = random_int(0, 1000000) / 1000000;
+    $n_true = 0.001 * pow(5 / 0.001, $t);
+
+    $valeur_donnee_vraie   = moles_depuis_n($grandeur_donnee, $n_true, $sub, $element, $Na_exacte, $MM_exacte);
+    $valeur_donnee_val     = (float) str_replace(',', '.', concentrations_arrondir_decimal($valeur_donnee_vraie, $cs));
+    $valeur_donnee_affiche = concentrations_afficher_valeur($valeur_donnee_vraie, $cs);
+
+    // Calcul officiel.
+    if ($grandeur_demandee === 'masse_molaire')
+    {
+        $valeur_demandee_vraie = $MM_exacte;
+    }
+    elseif ($grandeur_demandee === 'masse_une_entite')
+    {
+        $valeur_demandee_vraie = $MM_affiche_val / $Na_affiche_val;
+    }
+    else
+    {
+        $n_travail             = moles_vers_n($grandeur_donnee, $valeur_donnee_val, $sub, $element, $Na_affiche_val, $MM_affiche_val);
+        $valeur_demandee_vraie = moles_depuis_n($grandeur_demandee, $n_travail, $sub, $element, $Na_affiche_val, $MM_affiche_val);
+    }
+
+    list($mantisse_valeur, $mantisse_affichage, $exposant) = concentrations_notation_scientifique($valeur_demandee_vraie, $cs);
+
+    $unite_cible = moles_unite_pour_grandeur($grandeur_demandee, $sub, $element);
+
+    $explication = moles_decrire_calcul(
+        $grandeur_donnee, $valeur_donnee_affiche, $grandeur_demandee, $sub, $element,
+        $MM_affiche_str, $Na_affiche_str, $mantisse_affichage, $exposant, $unite_cible, $cs
+    );
+
+    $contexte_donnee = $sub['contexte'] . ' (' . $sub['formule'] . ') ' . moles_phrase_donnee($grandeur_donnee, $sub, $valeur_donnee_affiche, $element) . '.';
+    $question        = moles_evite_point_interrogation_seul(moles_phrase_question($grandeur_demandee, $sub, $element));
+
+    $enonce = $contexte_donnee . '<br><br>' . $question;
+
+    return array(
+        'enonce'             => $enonce,
+        'unite_cible'        => $unite_cible,
+        'donnees'            => $donnees,
+        'mantisse_valeur'    => $mantisse_valeur,
+        'mantisse_affichage' => $mantisse_affichage,
+        'exposant'           => $exposant,
+        'explication'        => $explication,
+    );
+}
+
+// Construit l'explication en analyse dimensionnelle (donnee -> mol -> demandee), ou un texte
+// dedie pour les deux grandeurs "demandables seulement" (masse molaire, masse d'une entite),
+// dont le calcul ne depend pas de la donnee de l'enonce.
+function moles_decrire_calcul(
+    string $grandeur_donnee, string $valeur_donnee_affiche, string $grandeur_demandee, array $sub, ?array $element,
+    string $MM_str, string $Na_str, string $mantisse_affichage, int $exposant, string $unite_cible, int $cs
+): string
+{
+    if ($grandeur_demandee === 'masse_molaire')
+    {
+        $termes = array();
+
+        foreach ($sub['composition'] as $el)
+        {
+            $termes[] = $el['indice'] . ' × ' . concentrations_afficher_valeur($el['a'], 4) . ' (' . $el['symbole'] . ')';
+        }
+
+        return "La masse molaire ne dépend pas de la quantité d'échantillon : MM = " . implode(' + ', $termes)
+            . " = <strong>{$mantisse_affichage} × 10<sup>{$exposant}</sup> g/mol</strong>.";
+    }
+
+    if ($grandeur_demandee === 'masse_une_entite')
+    {
+        return "La masse d'une entité ne dépend pas de la quantité d'échantillon : m = MM / N<sub>A</sub> = {$MM_str} g/mol / ({$Na_str} mol<sup>-1</sup>)"
+            . " = <strong>{$mantisse_affichage} × 10<sup>{$exposant}</sup> g</strong>.";
+    }
+
+    $unite_donnee = moles_unite_pour_grandeur($grandeur_donnee, $sub, $element);
+
+    $facteurs   = array();
+    $facteurs[] = array($valeur_donnee_affiche . ' ' . $unite_donnee, '1');
+
+    $def_donnee = moles_facteur_definition($grandeur_donnee, $sub, $element, $Na_str, $MM_str);
+    if ($def_donnee !== NULL)
+    {
+        $facteurs[] = $def_donnee;
+    }
+
+    $def_demandee = moles_facteur_definition($grandeur_demandee, $sub, $element, $Na_str, $MM_str);
+    if ($def_demandee !== NULL)
+    {
+        $facteurs[] = array($def_demandee[1], $def_demandee[0]);
+    }
+
+    $chaine = implode(' × ', array_map('moles_html_fraction', $facteurs));
+
+    return "<span class=\"quiz-moles-chaine\">{$chaine} = <strong>{$mantisse_affichage} × 10<sup>{$exposant}</sup> {$unite_cible}</strong></span> (soit {$cs} chiffres significatifs, comme les données de l'énoncé).";
 }
 
 /* End of file chimie_helper.php */
