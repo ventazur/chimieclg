@@ -17,8 +17,10 @@
 
         <div class="col-6" style="text-align: right;">
 			&copy; <?= date('Y'); ?>, Collège Lionel-Groulx. Tous droits réservés.
+			<br />
+			<a href="<?= base_url() . 'confidentialite'; ?>" style="text-decoration: none">Politique de confidentialité</a>
 			<br /><br />
-            Outils : 
+            Outils :
             <a href="<?= base_url() . 'horloge'; ?>" style="text-decoration: none">Horloge</a>,
 			<a href="<?= base_url() . 'codeqr'; ?>" style="text-decoration: none">CodeQR</a>
 
