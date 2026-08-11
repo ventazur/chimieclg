@@ -49,3 +49,14 @@ $config['database_parametres'] = array(
     'default'	   => ['dbname' => 'nom', 'username' => 'nom', 'password' => 'motdepasse'],
     'dev'		   => ['dbname' => 'nom', 'username' => 'nom', 'password' => 'motdepasse']
 );
+
+// ------------------------------------------------------------------
+//
+// Panneau d'administration (/admin)
+//
+// Mot de passe en clair, comparaison via hash_equals(). Tant que
+// cette cle est absente ou vide, /admin refuse toute connexion.
+//
+// ------------------------------------------------------------------
+
+$config['admin_password'] = 'change-moi';

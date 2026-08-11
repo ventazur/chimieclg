@@ -23,6 +23,13 @@ $config['ips_exclude_turnstile'] = array(
 	'204.19.10.193'
 );
 
+//
+// Motif d'identification des robots dans le user_agent, utilise pour
+// les exclure des statistiques de /admin/activite
+//
+
+$config['robots_user_agents'] = 'bot|crawl|spider|slurp|scan|curl|wget|python|java|go-http|http-client|headless|preview|fetch|monitor|semrush|ahrefs|facebookexternalhit|archive|feed|scrap|probe|nmap|masscan';
+
 /* ----------------------------------------------------------------------------
  *
  * Icones pour les fichiers

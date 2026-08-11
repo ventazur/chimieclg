@@ -159,6 +159,10 @@ a:hover {
 	padding-top: 10px;
 }
 
+#admin.page-contenu {
+	padding-top: 15px;
+}
+
 .page-contenu {
     background: #fff;
     padding-top: 30px;
