@@ -19,10 +19,6 @@ require(APPPATH . '../../config_secure.php');
  *
  * ---------------------------------------------------------------------------- */
 
-$config['ips_exclude_turnstile'] = array(
-	'204.19.10.193'
-);
-
 //
 // Motif d'identification des robots dans le user_agent, utilise pour
 // les exclure des statistiques de /admin/activite

@@ -60,3 +60,20 @@ $config['database_parametres'] = array(
 // ------------------------------------------------------------------
 
 $config['admin_password'] = 'change-moi';
+
+// ------------------------------------------------------------------
+//
+// IPs a exclure des statistiques de /admin/activite (ex. celles de
+// l'ecole ou du personnel, pour ne pas gonfler les chiffres)
+//
+// ------------------------------------------------------------------
+
+$config['ips_exclues_stats'] = array();
+
+// ------------------------------------------------------------------
+//
+// IPs a exclure du portail Turnstile.
+//
+// ------------------------------------------------------------------
+
+$config['ips_exclues_turnstile'] = array();
