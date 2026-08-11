@@ -59,7 +59,7 @@ class Admin_model extends CI_Model
     {
         // Pages vues + visiteurs distincts, robots exclus
 
-        $this->db->select('COUNT(*) AS pages_vues, COUNT(DISTINCT adresse_ip) AS visiteurs', FALSE);
+        $this->db->select("COUNT(*) AS pages_vues, COUNT(DISTINCT CONCAT(adresse_ip, '|', IFNULL(user_agent, ''))) AS visiteurs", FALSE);
         $this->db->from('activity_log');
 
         if ($jours > 0)
@@ -106,7 +106,7 @@ class Admin_model extends CI_Model
      *------------------------------------------------------------------------- */
     function visites_par_jour($jours = 90)
     {
-        $this->db->select("LEFT(date, 10) AS jour, COUNT(*) AS pages_vues, COUNT(DISTINCT adresse_ip) AS visiteurs", FALSE);
+        $this->db->select("LEFT(date, 10) AS jour, COUNT(*) AS pages_vues, COUNT(DISTINCT CONCAT(adresse_ip, '|', IFNULL(user_agent, ''))) AS visiteurs", FALSE);
         $this->db->from('activity_log');
 
         if ($jours > 0)
@@ -132,7 +132,7 @@ class Admin_model extends CI_Model
      *------------------------------------------------------------------------- */
     function pages_populaires($jours = 90, $limite = 50)
     {
-        $this->db->select('url, COUNT(*) AS hits, COUNT(DISTINCT adresse_ip) AS visiteurs', FALSE);
+        $this->db->select("url, COUNT(*) AS hits, COUNT(DISTINCT CONCAT(adresse_ip, '|', IFNULL(user_agent, ''))) AS visiteurs", FALSE);
         $this->db->from('activity_log');
 
         if ($jours > 0)
