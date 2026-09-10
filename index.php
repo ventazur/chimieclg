@@ -53,7 +53,23 @@
  *
  * NOTE: If you change these, also change the error_reporting() code below
  */
-	define('ENVIRONMENT', isset($_SERVER['CI_ENV']) ? $_SERVER['CI_ENV'] : 'development');
+	if (isset($_SERVER['CI_ENV']))
+	{
+		define('ENVIRONMENT', $_SERVER['CI_ENV']);
+	}
+	else
+	{
+		// Domaines considérés comme production; tout le reste (y compris CLI) est développement.
+		$domaines_production = array(
+			'chimie.clg.qc.ca',
+			'chimieclg.ca',
+			'www.chimieclg.ca',
+		);
+
+		$hote = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : '';
+
+		define('ENVIRONMENT', in_array($hote, $domaines_production, TRUE) ? 'production' : 'development');
+	}
 
 /*
  *---------------------------------------------------------------

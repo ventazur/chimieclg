@@ -24,33 +24,17 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 |
  */
 
-$domains = array(
-    0 => array('uri' => 'chimie.clg.qc.ca',    'prod' => TRUE),
-    1 => array('uri' => 'www.chimieclg.ca',    'prod' => TRUE),
-    2 => array('uri' => 'chimie.ventbleu.com', 'prod' => FALSE)
-);
+// L'environnement (production/développement) est déterminé une seule fois,
+// par domaine, dans index.php. On le réutilise ici plutôt que de dupliquer
+// la liste des domaines.
+$config['is_DEV'] = (ENVIRONMENT !== 'production');
+$config['base_url'] = '';
+$config['domain'] = '';
 
-$uris = array_column($domains, 'uri');
-
-$config['is_DEV'] = FALSE;
-
-if ( ! is_cli())
+if ( ! is_cli() && isset($_SERVER['HTTP_HOST']))
 {
-    foreach($domains as $d)
-    {
-        if ($_SERVER['HTTP_HOST'] == $d['uri'])
-        {
-            $config['is_DEV'] = ! $d['prod']; // contraire de prod
-            $config['domain'] = $d['uri'];
-
-            $config['base_url'] = 'https://' . $_SERVER['HTTP_HOST'] . '/';
-        }
-    }
-}
-else
-{
-    $config['base_url'] = '';
-    $config['domain'] = '';
+    $config['domain'] = $_SERVER['HTTP_HOST'];
+    $config['base_url'] = 'https://' . $_SERVER['HTTP_HOST'] . '/';
 }
 
 $config['ne_pas_logger_ips'] = array('127.0.0.1');
