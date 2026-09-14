@@ -70,17 +70,15 @@ class Usager_model extends CI_Model
 	{
 		$ip_client = $this->input->ip_address();
 
-		$data = array(
-			'adresse_ip' => $ip_client,
-			'date'       => date_humanize(date('U'), TRUE),
-			'epoch'      => date('U')
-		);
+		$ip_safe   = $this->db->escape($ip_client);
+		$date_safe = $this->db->escape(date_humanize(date('U'), TRUE));
+		$epoch_safe = $this->db->escape(date('U'));
 
-		$ip_safe = $this->db->escape($ip_client);
+		$sql = "INSERT INTO securite_connexion_ips (adresse_ip_bin, adresse_ip, date, epoch)
+				VALUES (INET6_ATON($ip_safe), $ip_safe, $date_safe, $epoch_safe)
+				ON DUPLICATE KEY UPDATE date = $date_safe, epoch = $epoch_safe";
 
-		$this->db->set('adresse_ip_bin', "INET6_ATON($ip_safe)", FALSE);
-
-		return $this->db->insert('securite_connexion_ips', $data);
+		return $this->db->query($sql);
 	}
 
     /* --------------------------------------------------------------------------------------------
