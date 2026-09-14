@@ -35,6 +35,26 @@ class Bot extends CI_Controller
     // ------------------------------------------------------------------------
 	public function verify_turnstile()
 	{
+		//
+		// si l'ip est deja autorisee (double soumission, onglets multiples, etc.),
+		// on ne repasse pas par Cloudflare et on ne re-insere pas l'ip
+		//
+
+		if ($this->Usager_model->verifier_ip_autorise())
+		{
+			$this->est_humain = TRUE;
+			$_SESSION['est_humain'] = TRUE;
+
+			if (isset($_SESSION['turnstile_redirect']) && ! empty($_SESSION['turnstile_redirect']))
+			{
+				redirect($_SESSION['turnstile_redirect']);
+				exit;
+			}
+
+			redirect(base_url());
+			exit;
+		}
+
 		$token = $this->input->post('cf-turnstile-response');
 
 		if ($this->config->item('is_DEV'))
