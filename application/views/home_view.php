@@ -52,7 +52,7 @@
                 <strong>C'est la période de choix de cours !</strong><br />
                 Pour ceux qui n'ont pas encore fait leur choix de cours, assurez-vous de consulter les cours 
                 de chimie offerts sous l'onglet
-                <strong><a href="https://chimie.clg.qc.ca/cours">Cours</a></strong>. 
+                <strong><a href="https://chimieclg.ca/cours">Cours</a></strong>. 
             </div>
 
         </div> <!-- .col-12 -->
