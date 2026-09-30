@@ -30,11 +30,11 @@ $(document).ready(function ()
     };
 
     var police = docCookies.getItem('police');
-    if (!POLICES[police]) police = 'fraunces';
+    if (!POLICES[police]) police = 'archivo';
 
     function appliquerPolice(nomPolice)
     {
-        var config = POLICES[nomPolice] || POLICES.fraunces;
+        var config = POLICES[nomPolice] || POLICES.archivo;
         var racine = document.documentElement.style;
         racine.setProperty('--font-digits', config.famille);
         racine.setProperty('--font-digits-weight', config.poidsHaut);

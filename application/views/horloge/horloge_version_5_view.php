@@ -89,9 +89,9 @@
         }
 
         #horloge-temps-minutes {
-            font-family: var(--font-digits, 'Fraunces', serif);
+            font-family: var(--font-digits, 'Archivo', sans-serif);
             font-optical-sizing: auto;
-            font-weight: var(--font-digits-weight, 340);
+            font-weight: var(--font-digits-weight, 600);
             font-size: 15vw;
             line-height: 1;
             letter-spacing: -0.01em;
@@ -143,8 +143,8 @@
         }
 
         #horloge-bas .valeur {
-            font-family: var(--font-digits, 'Fraunces', serif);
-            font-weight: var(--font-digits-weight-bas, 440);
+            font-family: var(--font-digits, 'Archivo', sans-serif);
+            font-weight: var(--font-digits-weight-bas, 500);
             font-size: 3vw;
             display: inline-flex;
             opacity: 0.9;
