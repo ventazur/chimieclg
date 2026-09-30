@@ -10,7 +10,8 @@ $(document).ready(function ()
         pingInterval: 30000,
         cookieExpire: 60 * 60 * 6,
         seuilJauneMs: 15 * 60 * 1000,
-        seuilRougeMs: 5 * 60 * 1000
+        seuilRougeMs: 5 * 60 * 1000,
+        dureeMaintienZeroMs: 10 * 60 * 1000
     };
 
     var decalageServeurLocal = 0;
@@ -121,7 +122,7 @@ $(document).ready(function ()
         dateLimite.setHours(parseInt(parts[0]), parseInt(parts[1]), 0, 0);
 
         var diffMs = dateLimite.getTime() - obtenirTempsServeurActuel();
-        if (diffMs < -60000) diffMs += 24 * 3600 * 1000;
+        if (diffMs < -CONFIG.dureeMaintienZeroMs) diffMs += 24 * 3600 * 1000;
         if (diffMs < 0) diffMs = 0;
 
         var totalSecondes = Math.round(diffMs / 1000);
